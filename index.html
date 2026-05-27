@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>재고 및 발주 통합 관리 시스템</title>
+    <style>
+        :root {
+            --primary: #0056b3;
+            --secondary: #6c757d;
+            --success: #198754;
+            --danger: #dc3545;
+            --bg-light: #f8f9fa;
+            --border: #dee2e6;
+        }
+
+        body { font-family: 'Malgun Gothic', sans-serif; margin: 0; padding: 0; background-color: #f4f6f9; color: #333; }
+        
+        /* 네비게이션 탭 (인쇄 시 숨김) */
+        .tab-nav { display: flex; background: #343a40; padding: 0 20px; }
+        .tab-btn { background: none; border: none; color: #aaa; padding: 15px 25px; cursor: pointer; font-size: 16px; font-weight: bold; transition: 0.3s; }
+        .tab-btn:hover { color: #fff; }
+        .tab-btn.active { color: #fff; border-bottom: 3px solid #0d6efd; background: #2b3035; }
+
+        .container { max-width: 1200px; margin: 20px auto; padding: 0 20px; }
+        .tab-content { display: none; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        .tab-content.active { display: block; }
+
+        h2 { margin-top: 0; border-bottom: 2px solid var(--border); padding-bottom: 10px; color: #2c3e50; }
+
+        /* 공통 스타일 */
+        button { padding: 8px 15px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; transition: 0.2s; font-size: 14px; }
+        button.primary { background: var(--primary); color: white; }
+        button.primary:hover { background: #004494; }
+        button.success { background: var(--success); color: white; }
+        button.success:hover { background: #146c43; }
+        button.danger { background: var(--danger); color: white; }
+        button.secondary { background: var(--secondary); color: white; }
+        input, select { padding: 8px; border: 1px solid var(--border); border-radius: 4px; font-size: 14px; }
+        input:focus, select:focus { outline: none; border-color: var(--primary); }
+        
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th, td { border: 1px solid var(--border); padding: 12px; text-align: center; vertical-align: middle; }
+        th { background-color: var(--bg-light); font-weight: bold; }
+        
+        /* [탭1] 상품 관리 관련 */
+        .form-section { background: var(--bg-light); padding: 15px; border-radius: 6px; margin-bottom: 20px; border: 1px solid var(--border); }
+        .form-row { display: flex; gap: 10px; margin-bottom: 10px; align-items: center; }
+        .vendor-row { display: flex; gap: 10px; align-items: center; background: #fff; padding: 10px; border: 1px dashed #ccc; margin-bottom: 5px; border-radius: 4px; }
+        
+        /* [탭2] 발주 신청 관련 */
+        .order-layout { display: flex; gap: 20px; align-items: flex-start; }
+        .order-list { flex: 1; border: 1px solid var(--border); border-radius: 6px; max-height: 600px; overflow-y: auto; }
+        .order-item { padding: 15px; border-bottom: 1px solid var(--border); cursor: pointer; transition: 0.2s; display: flex; justify-content: space-between; align-items: center;}
+        .order-item:hover, .order-item.active { background: #e9ecef; }
+        .order-item.low-stock { border-left: 4px solid var(--danger); }
+        .order-detail { flex: 1.5; background: var(--bg-light); padding: 20px; border-radius: 6px; border: 1px solid var(--border); position: sticky; top: 20px;}
+        
+        .vendor-calc-card { background: #fff; border: 1px solid var(--border); padding: 15px; margin-top: 10px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1);}
+        .calc-info { font-size: 14px; color: #555; }
+        .calc-total { font-size: 18px; font-weight: bold; color: var(--primary); }
+
+        /* [탭3] 입고 검수 관련 & 인쇄 전용 CSS */
+        @media print {
+            body { background: #fff; }
+            .tab-nav, .no-print { display: none !important; }
+            .container { margin: 0; padding: 0; max-width: 100%; }
+            .tab-content { display: none; box-shadow: none; border: none; padding: 0; }
+            #tab-inspect { display: block !important; } /* 인쇄 시 무조건 검수 탭만 표시 */
+            .hide-on-print { display: none !important; }
+            
+            table { width: 100%; border: 2px solid #000; }
+            th, td { border: 1px solid #000; padding: 15px; font-size: 14pt; color: #000; }
+            .check-box { width: 25px; height: 25px; border: 2px solid #000; display: inline-block; vertical-align: middle; }
+        }
+        .check-box { width: 20px; height: 20px; border: 2px solid #ccc; display: inline-block; vertical-align: middle; }
+    </style>
+</head>
+<body>
+
+    <!-- 탭 네비게이션 (인쇄 시 숨김) -->
+    <div class="tab-nav no-print">
+        <button class="tab-btn active" onclick="switchTab('tab-products')">📦 1. 상품 & 도매처 관리</button>
+        <button class="tab-btn" onclick="switchTab('tab-order')">🛒 2. 발주 신청</button>
+        <button class="tab-btn" onclick="switchTab('tab-inspect')">📋 3. 입고 검수 리스트</button>
+    </div>
+
+    <div class="container">
+        <!-- ==============================================
+             [탭 1] 상품 및 도매처 관리
+             ============================================== -->
+        <div id="tab-products" class="tab-content active">
+            <h2>상품 및 도매처 등록</h2>
+            
+            <div class="form-section">
+                <div class="form-row">
+                    <input type="text" id="prd-name" placeholder="상품명 (필수)" style="flex: 2;">
+                    <input type="text" id="prd-num" placeholder="상품번호" style="flex: 1;">
+                    <input type="number" id="prd-stock" placeholder="현재 재고 수량" style="flex: 1;">
+                </div>
+                
+                <hr style="border: 0; border-top: 1px dashed #ccc; margin: 15px 0;">
+                <div style="margin-bottom: 10px; font-weight: bold;">
+                    도매처 정보 등록 <span style="font-size: 12px; font-weight: normal; color: #666;">(선택 시 기본 배송비가 자동 입력됩니다)</span>
+                </div>
+                
+                <div id="vendor-container">
+                    <!-- 도매처 입력 행이 동적으로 추가됨 -->
+                </div>
+                
+                <div style="margin-top: 10px; display: flex; gap: 10px;">
+                    <button class="secondary" onclick="addVendorRow()">+ 도매처 추가</button>
+                    <button class="primary" onclick="saveProduct()" style="margin-left: auto;">💾 새 상품 저장</button>
+                </div>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--border); padding-bottom: 10px; margin-bottom: 15px;">
+                <h2 style="border: none; margin: 0; padding: 0;">등록된 상품 목록</h2>
+                <div style="display: flex; gap: 10px;">
+                    <button class="danger" onclick="deleteSelectedProducts()">☑ 선택 삭제</button>
+                    <button class="secondary" onclick="deleteAllProducts()">🗑️ 전체 삭제</button>
+                </div>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 5%;"><input type="checkbox" id="selectAllCheckbox" onclick="toggleSelectAllProducts(this)"></th>
+                        <th style="width: 20%;">상품명</th>
+                        <th style="width: 15%;">상품번호</th>
+                        <th style="width: 10%;">재고</th>
+                        <th style="width: 40%;">도매처 (단가 / 배송비)</th>
+                        <th style="width: 10%;">관리</th>
+                    </tr>
+                </thead>
+                <tbody id="prd-table-body">
+                    <!-- 리스트 렌더링 -->
+                </tbody>
+            </table>
+        </div>
+
+
+        <!-- ==============================================
+             [탭 2] 발주 신청 (계산 및 주문)
+             ============================================== -->
+        <div id="tab-order" class="tab-content">
+            <h2>발주 신청 <span style="font-size: 14px; font-weight: normal; color: #666;">(재고가 부족한 상품을 선택해 주문하세요)</span></h2>
+            
+            <div class="order-layout">
+                <!-- 상품 선택 리스트 -->
+                <div class="order-list" id="order-prd-list">
+                    <!-- 상품 목록 렌더링 -->
+                </div>
+                
+                <!-- 발주 계산 및 주문 패널 -->
+                <div class="order-detail" id="order-detail-panel" style="display: none;">
+                    <h3 id="ord-title" style="margin-top: 0; color: var(--primary);">상품을 선택하세요</h3>
+                    <div style="margin-bottom: 20px;">
+                        <label style="font-weight: bold;">발주 수량: </label>
+                        <input type="number" id="ord-qty" value="1" min="1" style="width: 100px; font-size: 16px; font-weight: bold;" oninput="calcOrderPrices()"> 개
+                    </div>
+                    
+                    <h4 style="margin-bottom: 10px;">도매처별 예상 비용 비교</h4>
+                    <div id="ord-vendors-calc">
+                        <!-- 도매처별 계산 결과 렌더링 -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- ==============================================
+             [탭 3] 입고 상품 검수 리스트 (인쇄 화면)
+             ============================================== -->
+        <div id="tab-inspect" class="tab-content">
+            <div class="no-print" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--border); padding-bottom: 10px; margin-bottom: 15px;">
+                <h2 style="border: none; margin: 0; padding: 0;">📦 입고 상품 검수 리스트</h2>
+                <div style="display: flex; gap: 10px;">
+                    <button class="primary" onclick="window.print()">🖨️ 인쇄하기</button>
+                    <button class="danger" onclick="clearInspectList()">🗑️ 리스트 전체 비우기</button>
+                </div>
+            </div>
+            <p class="no-print" style="font-size: 13px; color: #666;">
+                💡 발주 완료한 상품들이 표시됩니다. 물건이 도착하면 인쇄하여 수기 검수 후 우측의 <b>'입고 완료 처리'</b>를 누르면 재고에 추가됩니다.
+            </p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 8%;">확인</th>
+                        <th>상품명</th>
+                        <th class="hide-on-print" style="width: 12%;">상품번호</th>
+                        <th style="width: 10%;">주문수량</th>
+                        <th>주문 도매처</th>
+                        <th class="hide-on-print" style="width: 12%;">단가</th>
+                        <th class="hide-on-print" style="width: 15%;">총액 (배송비 포함)</th>
+                        <th class="hide-on-print" style="width: 12%;">관리</th>
+                    </tr>
+                </thead>
+                <tbody id="inspect-table-body">
+                    <!-- 발주 완료 리스트 렌더링 -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+
+    <script>
+        // ==========================================
+        // 1. 데이터 베이스 (Local Storage) 및 초기화
+        // ==========================================
+        const DB_PRODUCTS = 'inv_sys_products';
+        const DB_INSPECT = 'inv_sys_inspect';
+
+        let products = JSON.parse(localStorage.getItem(DB_PRODUCTS)) || [];
+        let inspectList = JSON.parse(localStorage.getItem(DB_INSPECT)) || [];
+
+        // 도매처별 기본 배송비 설정 딕셔너리
+        const VENDOR_DEFAULT_SHIPPING = {
+            'NCmall': 2800,
+            'NOPACK': 2970,
+            '혜림봉투': 2750,
+            '박스몰': 3190,
+            'PJPACK': 3000,
+            '도매매': 3000
+        };
+
+        let currentOrderProductId = null; // 현재 발주창에 선택된 상품 ID
+
+        window.onload = function() {
+            addVendorRow(); // 초기 도매처 빈 칸 1개 생성
+            renderProducts();
+            renderOrderProductList();
+            renderInspectList();
+        };
+
+        function saveData() {
+            localStorage.setItem(DB_PRODUCTS, JSON.stringify(products));
+            localStorage.setItem(DB_INSPECT, JSON.stringify(inspectList));
+        }
+
+        // 탭 전환 로직
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            
+            document.getElementById(tabId).classList.add('active');
+            document.querySelector(`[onclick="switchTab('${tabId}')"]`).classList.add('active');
+
+            if(tabId === 'tab-order') renderOrderProductList(); // 탭 이동시 리스트 갱신
+        }
+
+        // ==========================================
+        // 2. 상품 & 도매처 관리 기능
+        // ==========================================
+        
+        // 도매처 입력 행 추가
+        function addVendorRow() {
+            const container = document.getElementById('vendor-container');
+            const row = document.createElement('div');
+            row.className = 'vendor-row';
+            
+            // 도매처 옵션 생성
+            let options = '<option value="">도매처 선택</option>';
+            for(let v in VENDOR_DEFAULT_SHIPPING) {
+                options += `<option value="${v}">${v}</option>`;
+            }
+
+            row.innerHTML = `
+                <select class="v-name" onchange="autoFillShipping(this)" style="flex: 1;">${options}</select>
+                <input type="number" class="v-price" placeholder="상품 단가" style="flex: 1;">
+                <input type="number" class="v-ship" placeholder="배송비" style="flex: 1;">
+                <button class="danger" style="padding: 6px 10px;" onclick="this.parentElement.remove()">X</button>
+            `;
+            container.appendChild(row);
+        }
+
+        // 도매처 선택 시 배송비 자동 입력 (사용자가 덮어쓰기 가능)
+        function autoFillShipping(selectElement) {
+            const vendorName = selectElement.value;
+            const shipInput = selectElement.parentElement.querySelector('.v-ship');
+            if (vendorName && VENDOR_DEFAULT_SHIPPING[vendorName] !== undefined) {
+                shipInput.value = VENDOR_DEFAULT_SHIPPING[vendorName];
+            }
+        }
+
+        // 새 상품 저장
+        function saveProduct() {
+            const name = document.getElementById('prd-name').value;
+            const num = document.getElementById('prd-num').value;
+            const stock = parseInt(document.getElementById('prd-stock').value) || 0;
+
+            if(!name.trim()) { alert("상품명을 입력해주세요."); return; }
+
+            const vendorRows = document.querySelectorAll('.vendor-row');
+            let vendors = [];
+            
+            vendorRows.forEach(row => {
+                const vName = row.querySelector('.v-name').value;
+                const vPrice = parseInt(row.querySelector('.v-price').value) || 0;
+                const vShip = parseInt(row.querySelector('.v-ship').value) || 0;
+                if(vName) {
+                    vendors.push({ name: vName, price: vPrice, shipping: vShip });
+                }
+            });
+
+            if(vendors.length === 0) {
+                alert("최소 1개의 도매처를 선택하고 정보를 입력해주세요.");
+                return;
+            }
+
+            const newProduct = {
+                id: Date.now().toString(),
+                name: name,
+                itemNum: num,
+                stock: stock,
+                vendors: vendors
+            };
+
+            products.push(newProduct);
+            saveData();
+            
+            // 폼 초기화
+            document.getElementById('prd-name').value = '';
+            document.getElementById('prd-num').value = '';
+            document.getElementById('prd-stock').value = '';
+            document.getElementById('vendor-container').innerHTML = '';
+            addVendorRow();
+            
+            renderProducts();
+            alert("상품이 등록되었습니다.");
+        }
+
+        // 등록 상품 리스트 렌더링
+        function renderProducts() {
+            const tbody = document.getElementById('prd-table-body');
+            tbody.innerHTML = '';
+            
+            // 전체 선택 체크박스 초기화
+            const selectAllCb = document.getElementById('selectAllCheckbox');
+            if(selectAllCb) selectAllCb.checked = false;
+            
+            if(products.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="padding:30px; color:#666;">등록된 상품이 없습니다.</td></tr>';
+                return;
+            }
+            
+            products.forEach(p => {
+                let vendorDetails = p.vendors.map(v => 
+                    `<div style="margin-bottom:3px;">- ${v.name} (<span style="color:var(--primary); font-weight:bold;">${v.price.toLocaleString()}원</span> / 배송비 <span>${v.shipping.toLocaleString()}원</span>)</div>`
+                ).join('');
+                
+                tbody.innerHTML += `
+                    <tr>
+                        <td><input type="checkbox" class="product-checkbox" value="${p.id}"></td>
+                        <td style="font-weight:bold;">${p.name}</td>
+                        <td>${p.itemNum || '-'}</td>
+                        <td style="color:${p.stock <= 5 ? 'red' : 'black'}; font-weight:bold;">${p.stock.toLocaleString()} 개</td>
+                        <td style="font-size:13px; text-align:left; padding-left:15px;">${vendorDetails}</td>
+                        <td><button class="danger" onclick="deleteProduct('${p.id}')">삭제</button></td>
+                    </tr>
+                `;
+            });
+        }
+
+        function deleteProduct(id) {
+            if(confirm("이 상품을 삭제하시겠습니까?")) {
+                products = products.filter(p => p.id !== id);
+                saveData();
+                renderProducts();
+                renderOrderProductList();
+            }
+        }
+
+        // 전체 선택 토글
+        function toggleSelectAllProducts(source) {
+            const checkboxes = document.querySelectorAll('.product-checkbox');
+            checkboxes.forEach(cb => cb.checked = source.checked);
+        }
+
+        // 선택 삭제 기능
+        function deleteSelectedProducts() {
+            const checkboxes = document.querySelectorAll('.product-checkbox:checked');
+            if (checkboxes.length === 0) {
+                alert("삭제할 상품을 선택해주세요.");
+                return;
+            }
+            if (confirm(`선택한 ${checkboxes.length}개의 상품을 삭제하시겠습니까?`)) {
+                const idsToDelete = Array.from(checkboxes).map(cb => cb.value);
+                products = products.filter(p => !idsToDelete.includes(p.id));
+                saveData();
+                renderProducts();
+                renderOrderProductList();
+            }
+        }
+
+        // 전체 삭제 기능
+        function deleteAllProducts() {
+            if (products.length === 0) {
+                alert("등록된 상품이 없습니다.");
+                return;
+            }
+            if (confirm("등록된 모든 상품을 삭제하시겠습니까? (복구할 수 없습니다)")) {
+                products = [];
+                saveData();
+                renderProducts();
+                renderOrderProductList();
+            }
+        }
+
+        // ==========================================
+        // 3. 발주 신청 기능
+        // ==========================================
+        
+        // 발주 탭 좌측 상품 리스트 렌더링
+        function renderOrderProductList() {
+            const listDiv = document.getElementById('order-prd-list');
+            listDiv.innerHTML = '';
+            
+            if(products.length === 0) {
+                listDiv.innerHTML = '<div style="padding:20px; text-align:center; color:#777;">등록된 상품이 없습니다.</div>';
+                document.getElementById('order-detail-panel').style.display = 'none';
+                return;
+            }
+
+            // 재고가 적은 순으로 정렬하여 표시
+            let sortedProducts = [...products].sort((a, b) => a.stock - b.stock);
+
+            sortedProducts.forEach(p => {
+                const isLowStock = p.stock <= 5;
+                const lowStockLabel = isLowStock ? '<span style="color:red; font-size:12px; font-weight:bold;">[재고부족]</span>' : '';
+                
+                const item = document.createElement('div');
+                item.className = `order-item ${isLowStock ? 'low-stock' : ''}`;
+                item.innerHTML = `
+                    <div>
+                        <div style="font-weight:bold;">${p.name}</div>
+                        <div style="font-size:12px; color:#666;">상품번호: ${p.itemNum || '-'}</div>
+                    </div>
+                    <div style="text-align:right;">
+                        ${lowStockLabel}<br>
+                        현재 재고: <b>${p.stock.toLocaleString()}</b>개
+                    </div>
+                `;
+                item.onclick = () => selectOrderProduct(p.id, item);
+                listDiv.appendChild(item);
+            });
+        }
+
+        // 특정 상품 클릭 시 우측 발주 패널 열기
+        function selectOrderProduct(id, element) {
+            // 하이라이트 처리
+            document.querySelectorAll('.order-item').forEach(el => el.classList.remove('active'));
+            element.classList.add('active');
+
+            currentOrderProductId = id;
+            const p = products.find(x => x.id === id);
+            
+            document.getElementById('order-detail-panel').style.display = 'block';
+            document.getElementById('ord-title').innerHTML = `📦 ${p.name} 발주`;
+            document.getElementById('ord-qty').value = 1;
+            
+            calcOrderPrices(); // 즉시 계산 실행
+        }
+
+        // 수량 변경 시 도매처별 비용 실시간 계산 및 렌더링
+        function calcOrderPrices() {
+            if(!currentOrderProductId) return;
+            
+            const p = products.find(x => x.id === currentOrderProductId);
+            const qty = parseInt(document.getElementById('ord-qty').value) || 1;
+            const calcContainer = document.getElementById('ord-vendors-calc');
+            
+            calcContainer.innerHTML = '';
+
+            p.vendors.forEach(v => {
+                const totalItemPrice = v.price * qty;
+                const grandTotal = totalItemPrice + v.shipping;
+                
+                calcContainer.innerHTML += `
+                    <div class="vendor-calc-card">
+                        <div>
+                            <div style="font-weight:bold; font-size:16px;">${v.name}</div>
+                            <div class="calc-info">
+                                단가: ${v.price.toLocaleString()}원 × ${qty}개 = ${totalItemPrice.toLocaleString()}원<br>
+                                배송비: ${v.shipping.toLocaleString()}원
+                            </div>
+                        </div>
+                        <div style="text-align:right;">
+                            <div class="calc-total">총액 ${grandTotal.toLocaleString()}원</div>
+                            <button class="success" style="margin-top:5px;" onclick="placeOrder('${p.id}', '${v.name}', ${qty}, ${v.price}, ${v.shipping})">✓ 이 도매처로 주문</button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        // 주문 실행 (입고 리스트로 전송)
+        function placeOrder(prdId, vendorName, qty, price, shipping) {
+            const p = products.find(x => x.id === prdId);
+            
+            const newItem = {
+                id: Date.now().toString(),
+                productId: p.id,
+                name: p.name,
+                itemNum: p.itemNum,
+                vendorName: vendorName,
+                qty: qty,
+                price: price,
+                shipping: shipping,
+                orderDate: new Date().toLocaleDateString()
+            };
+
+            inspectList.push(newItem);
+            saveData();
+            
+            alert(`[${vendorName}]에 ${p.name} ${qty}개 발주 등록 완료!\n입고 검수 리스트에서 확인 가능합니다.`);
+            
+            // 검수 리스트 미리 갱신해두기
+            renderInspectList();
+        }
+
+        // ==========================================
+        // 4. 입고 검수 및 재고 반영 기능
+        // ==========================================
+        
+        function renderInspectList() {
+            const tbody = document.getElementById('inspect-table-body');
+            tbody.innerHTML = '';
+            
+            if(inspectList.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" style="padding:30px; color:#666;">현재 입고 대기 중인 발주 내역이 없습니다.</td></tr>';
+                return;
+            }
+
+            inspectList.forEach(item => {
+                const grandTotal = (item.price * item.qty) + item.shipping;
+                tbody.innerHTML += `
+                    <tr>
+                        <td><span class="check-box"></span></td>
+                        <td style="font-weight:bold; text-align:left; padding-left:15px;">
+                            ${item.name}<br>
+                            <span class="no-print" style="font-size:12px; color:#888; font-weight:normal;">발주일: ${item.orderDate}</span>
+                        </td>
+                        <td class="hide-on-print">${item.itemNum || '-'}</td>
+                        <td style="font-weight:bold; color:var(--primary); font-size:16px;">${item.qty} 개</td>
+                        <td>${item.vendorName}</td>
+                        <td class="hide-on-print">${item.price.toLocaleString()}원</td>
+                        <td class="hide-on-print" style="font-weight:bold;">${grandTotal.toLocaleString()}원</td>
+                        <td class="hide-on-print">
+                            <button class="primary" style="margin-bottom:5px; width:100%;" onclick="confirmReceive('${item.id}')">입고 완료</button>
+                            <button class="secondary" style="width:100%; padding:4px;" onclick="cancelOrder('${item.id}')">주문 취소</button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        // 입고(검수) 완료 처리 - 재고 증가 및 리스트에서 삭제
+        function confirmReceive(inspectId) {
+            const itemIndex = inspectList.findIndex(x => x.id === inspectId);
+            if(itemIndex === -1) return;
+            
+            const item = inspectList[itemIndex];
+            
+            if(confirm(`[${item.name}] ${item.qty}개가 실제로 입고되었습니까?\n확인 시 재고에 자동으로 추가됩니다.`)) {
+                // 상품 재고 찾아서 증가시키기
+                const prdIndex = products.findIndex(x => x.id === item.productId);
+                if(prdIndex !== -1) {
+                    products[prdIndex].stock += item.qty;
+                }
+                
+                // 검수 리스트에서 삭제
+                inspectList.splice(itemIndex, 1);
+                
+                saveData();
+                renderInspectList();
+                renderProducts(); // 탭1의 재고도 리렌더링
+                renderOrderProductList(); // 탭2 리스트도 리렌더링
+                
+                alert("재고 반영이 완료되었습니다.");
+            }
+        }
+
+        // 단순 주문 취소 (재고 증가 없이 리스트에서만 삭제)
+        function cancelOrder(inspectId) {
+            if(confirm("이 발주 내역을 취소하고 리스트에서 지우시겠습니까?")) {
+                inspectList = inspectList.filter(x => x.id !== inspectId);
+                saveData();
+                renderInspectList();
+            }
+        }
+
+        // 검수 리스트 전체 비우기
+        function clearInspectList() {
+            if(confirm("입고 대기 중인 모든 리스트를 삭제하시겠습니까?\n(이미 발주한 내역이 사라지며 복구할 수 없습니다)")) {
+                inspectList = [];
+                saveData();
+                renderInspectList();
+            }
+        }
+
+    </script>
+</body>
+</html>
