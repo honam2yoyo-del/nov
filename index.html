@@ -4,103 +4,215 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>재고 및 발주 통합 관리 시스템</title>
+    <!-- 고급스러운 폰트 (Pretendard) 적용 -->
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
     <style>
         :root {
-            --primary: #0056b3;
-            --secondary: #6c757d;
-            --success: #198754;
-            --danger: #dc3545;
-            --bg-light: #f8f9fa;
-            --border: #dee2e6;
+            /* 컬러 팔레트 - 세련된 Indigo & Slate 조합 */
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --secondary: #64748b;
+            --secondary-hover: #475569;
+            --success: #10b981;
+            --success-hover: #059669;
+            --danger: #ef4444;
+            --danger-hover: #dc2626;
+            
+            --bg-body: #f8fafc;
+            --bg-card: #ffffff;
+            --bg-hover: #f1f5f9;
+            --border-color: #e2e8f0;
+            
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            
+            /* 디자인 토큰 */
+            --radius-sm: 6px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            
+            --transition: all 0.2s ease-in-out;
         }
 
-        body { font-family: 'Malgun Gothic', sans-serif; margin: 0; padding: 0; background-color: #f4f6f9; color: #333; }
+        * { box-sizing: border-box; }
         
-        /* 로그인 스크린 스타일 */
-        #login-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background: #f4f6f9; }
-        .login-box { background: white; padding: 40px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); text-align: center; max-width: 400px; width: 90%; }
-        .google-btn { background: #4285F4; color: white; border: none; padding: 12px 20px; font-size: 16px; border-radius: 4px; cursor: pointer; font-weight: bold; transition: 0.2s; width: 100%; margin-top: 20px; }
-        .google-btn:hover { background: #3367D6; }
-        
-        /* 네비게이션 탭 (인쇄 시 숨김) */
-        .tab-nav { display: flex; background: #343a40; padding: 0 20px; }
-        .tab-btn { background: none; border: none; color: #aaa; padding: 15px 25px; cursor: pointer; font-size: 16px; font-weight: bold; transition: 0.3s; }
-        .tab-btn:hover { color: #fff; }
-        .tab-btn.active { color: #fff; border-bottom: 3px solid #0d6efd; background: #2b3035; }
+        body { 
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif; 
+            margin: 0; 
+            padding: 0; 
+            background-color: var(--bg-body); 
+            color: var(--text-main); 
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+        }
 
-        .container { max-width: 1200px; margin: 20px auto; padding: 0 20px; }
-        .tab-content { display: none; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        h2 { font-size: 1.25rem; font-weight: 700; margin-top: 0; margin-bottom: 1rem; color: var(--text-main); }
+        h3 { font-size: 1.125rem; font-weight: 600; margin-top: 0; color: var(--text-main); }
+        
+        /* 공통 카드 컴포넌트 */
+        .card {
+            background: var(--bg-card);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-color);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        /* 버튼 시스템 */
+        button { 
+            display: inline-flex; align-items: center; justify-content: center;
+            padding: 8px 16px; border: none; border-radius: var(--radius-sm); 
+            cursor: pointer; font-weight: 600; font-size: 0.875rem; 
+            transition: var(--transition);
+        }
+        button:active { transform: translateY(1px); }
+        button.primary { background: var(--primary); color: white; box-shadow: var(--shadow-sm); }
+        button.primary:hover { background: var(--primary-hover); box-shadow: var(--shadow-md); }
+        button.success { background: var(--success); color: white; }
+        button.success:hover { background: var(--success-hover); }
+        button.danger { background: var(--danger); color: white; }
+        button.danger:hover { background: var(--danger-hover); }
+        button.secondary { background: var(--secondary); color: white; }
+        button.secondary:hover { background: var(--secondary-hover); }
+        button.outline { background: transparent; border: 1px solid var(--border-color); color: var(--text-main); }
+        button.outline:hover { background: var(--bg-hover); }
+
+        /* 입력 폼 시스템 */
+        input, select { 
+            padding: 10px 14px; border: 1px solid var(--border-color); 
+            border-radius: var(--radius-sm); font-size: 0.875rem; 
+            transition: var(--transition); background: var(--bg-card);
+            color: var(--text-main);
+            font-family: inherit;
+        }
+        input:focus, select:focus { 
+            outline: none; border-color: var(--primary); 
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15); 
+        }
+
+        /* 로그인 스크린 */
+        #login-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background: var(--bg-body); }
+        .login-box { background: var(--bg-card); padding: 48px 40px; border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); text-align: center; max-width: 420px; width: 90%; border: 1px solid var(--border-color); }
+        .login-logo { font-size: 2.5rem; margin-bottom: 10px; display: block; }
+        .google-btn { background: #ffffff; color: #3c4043; border: 1px solid #dadce0; padding: 12px 24px; font-size: 1rem; border-radius: var(--radius-sm); font-weight: 600; width: 100%; margin-top: 30px; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: var(--shadow-sm); }
+        .google-btn:hover { background: #f8f9fa; border-color: #d2e3fc; box-shadow: var(--shadow-md); }
+        .google-icon { width: 18px; height: 18px; }
+
+        /* 헤더 & 탭 */
+        #app-header { background: #ffffff; border-bottom: 1px solid var(--border-color); padding: 12px 24px; display: flex; justify-content: space-between; align-items: center; box-shadow: var(--shadow-sm); position: sticky; top: 0; z-index: 10; }
+        .tab-nav { display: flex; background: var(--bg-card); padding: 0 24px; border-bottom: 1px solid var(--border-color); gap: 20px; }
+        .tab-btn { background: transparent; color: var(--text-muted); padding: 16px 4px; font-size: 0.95rem; font-weight: 600; border-radius: 0; border-bottom: 3px solid transparent; transition: var(--transition); }
+        .tab-btn:hover { color: var(--primary); }
+        .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
+
+        .container { max-width: 1280px; margin: 30px auto; padding: 0 24px; }
+        .tab-content { display: none; animation: fadeIn 0.3s ease-in-out; }
         .tab-content.active { display: block; }
 
-        h2 { margin-top: 0; border-bottom: 2px solid var(--border); padding-bottom: 10px; color: #2c3e50; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* 공통 스타일 */
-        button { padding: 8px 15px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; transition: 0.2s; font-size: 14px; }
-        button.primary { background: var(--primary); color: white; }
-        button.primary:hover { background: #004494; }
-        button.success { background: var(--success); color: white; }
-        button.success:hover { background: #146c43; }
-        button.danger { background: var(--danger); color: white; }
-        button.danger:hover { background: #c82333; }
-        button.secondary { background: var(--secondary); color: white; }
-        button.secondary:hover { background: #5a6268; }
-        input, select { padding: 8px; border: 1px solid var(--border); border-radius: 4px; font-size: 14px; }
-        input:focus, select:focus { outline: none; border-color: var(--primary); }
-        
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        th, td { border: 1px solid var(--border); padding: 12px; text-align: center; vertical-align: middle; }
-        th { background-color: var(--bg-light); font-weight: bold; }
-        
-        /* [탭1] 상품 관리 관련 */
-        .form-section { background: var(--bg-light); padding: 15px; border-radius: 6px; margin-bottom: 20px; border: 1px solid var(--border); }
-        .form-row { display: flex; gap: 10px; margin-bottom: 10px; align-items: center; }
-        .vendor-row { display: flex; gap: 10px; align-items: center; background: #fff; padding: 10px; border: 1px dashed #ccc; margin-bottom: 5px; border-radius: 4px; }
-        
-        /* [탭2] 발주 신청 관련 */
-        .order-layout { display: flex; gap: 20px; align-items: flex-start; }
-        .order-list { flex: 1; border: 1px solid var(--border); border-radius: 6px; max-height: 600px; overflow-y: auto; }
-        .order-item { padding: 15px; border-bottom: 1px solid var(--border); cursor: pointer; transition: 0.2s; display: flex; justify-content: space-between; align-items: center;}
-        .order-item:hover, .order-item.active { background: #e9ecef; }
-        .order-item.low-stock { border-left: 4px solid var(--danger); }
-        .order-detail { flex: 1.5; background: var(--bg-light); padding: 20px; border-radius: 6px; border: 1px solid var(--border); position: sticky; top: 20px;}
-        
-        .vendor-calc-card { background: #fff; border: 1px solid var(--border); padding: 15px; margin-top: 10px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1);}
-        .calc-info { font-size: 14px; color: #555; }
-        .calc-total { font-size: 18px; font-weight: bold; color: var(--primary); }
+        /* 테이블 (고급형) */
+        .table-wrapper { background: var(--bg-card); border-radius: var(--radius-md); border: 1px solid var(--border-color); overflow-x: auto; box-shadow: var(--shadow-sm); }
+        table { width: 100%; border-collapse: separate; border-spacing: 0; }
+        th, td { padding: 16px 20px; text-align: left; vertical-align: middle; border-bottom: 1px solid var(--border-color); font-size: 0.875rem; }
+        th { background-color: #f8fafc; font-weight: 600; color: var(--text-muted); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em; }
+        tbody tr { transition: var(--transition); }
+        tbody tr:hover { background-color: var(--bg-hover); }
+        tbody tr:last-child td { border-bottom: none; }
 
-        /* [탭3] 입고 검수 관련 & 인쇄 전용 CSS */
+        /* 특정 탭 레이아웃 */
+        .form-row { display: flex; gap: 12px; margin-bottom: 15px; align-items: center; }
+        .vendor-row { display: flex; gap: 12px; align-items: center; background: var(--bg-body); padding: 12px; border-radius: var(--radius-sm); margin-bottom: 8px; border: 1px solid var(--border-color); }
+        
+        .order-layout { display: flex; gap: 24px; align-items: flex-start; }
+        .order-list { flex: 1; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); max-height: 650px; overflow-y: auto; box-shadow: var(--shadow-sm); }
+        .order-item { padding: 16px 20px; border-bottom: 1px solid var(--border-color); cursor: pointer; transition: var(--transition); display: flex; justify-content: space-between; align-items: center;}
+        .order-item:hover { background: var(--bg-hover); }
+        .order-item.active { background: #eff6ff; border-left: 4px solid var(--primary); }
+        
+        .badge { padding: 4px 8px; border-radius: 999px; font-size: 0.7rem; font-weight: 700; background: #fee2e2; color: #b91c1c; }
+        
+        .order-detail { flex: 1.2; position: sticky; top: 80px;}
+        
+        .vendor-calc-card { background: var(--bg-body); border: 1px solid var(--border-color); padding: 16px; margin-top: 12px; border-radius: var(--radius-sm); display: flex; justify-content: space-between; align-items: center; transition: var(--transition); }
+        .vendor-calc-card:hover { border-color: var(--primary); box-shadow: var(--shadow-md); background: var(--bg-card); }
+        .calc-info { font-size: 0.875rem; color: var(--text-muted); margin-top: 4px; }
+        .calc-total { font-size: 1.125rem; font-weight: 700; color: var(--primary); }
+
+        /* 커스텀 토스트 알림 */
+        .toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
+        .toast { background: var(--text-main); color: white; padding: 14px 20px; border-radius: var(--radius-sm); font-size: 0.875rem; font-weight: 500; box-shadow: var(--shadow-lg); display: flex; align-items: center; gap: 10px; animation: slideInRight 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        .toast.error { background: var(--danger); }
+        .toast.success { background: var(--success); }
+        @keyframes slideInRight { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; transform: translateY(10px); } }
+
+        /* 커스텀 모달 (Confirm 대체) */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15, 23, 42, 0.5); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 10000; opacity: 0; transition: opacity 0.2s; pointer-events: none; }
+        .modal-overlay.active { opacity: 1; pointer-events: auto; }
+        .modal-box { background: var(--bg-card); padding: 32px; border-radius: var(--radius-lg); width: 90%; max-width: 400px; box-shadow: var(--shadow-lg); transform: scale(0.95); transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1); }
+        .modal-overlay.active .modal-box { transform: scale(1); }
+        .modal-msg { font-size: 1rem; color: var(--text-main); margin-bottom: 24px; font-weight: 500; line-height: 1.5; white-space: pre-wrap;}
+        .modal-actions { display: flex; justify-content: flex-end; gap: 12px; }
+
+        /* 인쇄 전용 CSS */
         @media print {
-            body { background: #fff; }
+            body { background: #fff; color: #000; }
             .tab-nav, .no-print, #app-header { display: none !important; }
             .container { margin: 0; padding: 0; max-width: 100%; }
-            .tab-content { display: none; box-shadow: none; border: none; padding: 0; }
-            #tab-inspect { display: block !important; } /* 인쇄 시 무조건 검수 탭만 표시 */
+            .tab-content { display: none; box-shadow: none; border: none; padding: 0; animation: none; }
+            #tab-inspect { display: block !important; }
             .hide-on-print { display: none !important; }
-            
-            table { width: 100%; border: 2px solid #000; }
-            th, td { border: 1px solid #000; padding: 15px; font-size: 14pt; color: #000; }
-            .check-box { width: 25px; height: 25px; border: 2px solid #000; display: inline-block; vertical-align: middle; }
+            .table-wrapper { border: none; box-shadow: none; }
+            table { width: 100%; border-collapse: collapse; }
+            th, td { border: 1px solid #000; padding: 12px; font-size: 12pt; color: #000; }
+            th { background-color: #fff !important; }
+            .check-box { width: 22px; height: 22px; border: 2px solid #000; display: inline-block; vertical-align: middle; border-radius: 4px; }
         }
-        .check-box { width: 20px; height: 20px; border: 2px solid #ccc; display: inline-block; vertical-align: middle; }
+        .check-box { width: 20px; height: 20px; border: 2px solid var(--border-color); display: inline-block; vertical-align: middle; border-radius: 4px; background: #fff; }
     </style>
 </head>
 <body>
 
+    <!-- 커스텀 UI 컨테이너 (Toast, Modal) -->
+    <div id="toast-container" class="toast-container"></div>
+    
+    <div id="confirm-modal" class="modal-overlay">
+        <div class="modal-box">
+            <div id="confirm-msg" class="modal-msg"></div>
+            <div class="modal-actions">
+                <button class="outline" onclick="closeConfirmModal()">취소</button>
+                <button class="primary" id="confirm-yes-btn">확인</button>
+            </div>
+        </div>
+    </div>
+
     <!-- 1. 로그인 스크린 -->
     <div id="login-screen">
         <div class="login-box">
-            <h2 style="margin-top: 0; color: #333;">🔒 재고 관리 시스템</h2>
-            <p style="color: #666; font-size: 14px;">허가된 사용자만 접근할 수 있습니다.</p>
+            <span class="login-logo">📦</span>
+            <h2 style="font-size: 1.5rem; margin-bottom: 8px;">재고 관리 시스템</h2>
+            <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 10px;">승인된 사용자만 접근할 수 있습니다.</p>
             
             <button class="google-btn" onclick="window.loginWithGoogle()">
-                G 구글 계정으로 로그인
+                <svg class="google-icon" viewBox="0 0 24 24">
+                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                </svg>
+                Google 계정으로 계속
             </button>
             
-            <div id="approval-msg" style="display: none; margin-top: 25px; padding: 15px; background: #fff3cd; color: #856404; border-radius: 4px; border: 1px solid #ffeeba;">
-                <b>⏳ 가입 승인 대기 중</b><br>
-                <span style="font-size: 13px;">Firebase 콘솔에서 이메일을 승인(true) 처리한 후 다시 로그인해주세요.</span>
+            <div id="approval-msg" style="display: none; margin-top: 30px; padding: 20px; background: #fffbeb; color: #92400e; border-radius: var(--radius-md); border: 1px solid #fde68a;">
+                <b style="font-size: 1.1rem; display: block; margin-bottom: 5px;">⏳ 승인 대기중</b>
+                <span style="font-size: 0.85rem; color: #b45309;">관리자의 가입 승인이 필요합니다.</span>
                 <br>
-                <button onclick="window.logout()" style="margin-top: 10px; font-size: 12px; padding: 5px 10px; background: #6c757d; color: white; border: none; border-radius: 3px;">로그아웃</button>
+                <button class="outline" onclick="window.logout()" style="margin-top: 15px; font-size: 0.8rem; background: #fff;">로그아웃</button>
             </div>
         </div>
     </div>
@@ -109,18 +221,22 @@
     <div id="main-app" style="display: none;">
         
         <!-- 상단 유저 정보 헤더 -->
-        <div id="app-header" style="background: #212529; color: white; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center;" class="no-print">
-            <div style="font-weight: bold; font-size: 14px;">
-                🟢 접속중: <span id="user-info" style="color: #0dcaf0;"></span>
+        <div id="app-header" class="no-print">
+            <div style="font-weight: 700; font-size: 1.1rem; display: flex; align-items: center; gap: 8px;">
+                <div style="width: 8px; height: 8px; background: var(--success); border-radius: 50%;"></div>
+                <span>WorkSpace</span>
             </div>
-            <button onclick="window.logout()" class="danger" style="padding: 6px 12px; font-size: 12px;">로그아웃</button>
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <span id="user-info" style="font-size: 0.85rem; color: var(--text-muted); font-weight: 500;"></span>
+                <button onclick="window.logout()" class="outline" style="padding: 6px 12px; font-size: 0.75rem;">로그아웃</button>
+            </div>
         </div>
 
-        <!-- 탭 네비게이션 (인쇄 시 숨김) -->
+        <!-- 탭 네비게이션 -->
         <div class="tab-nav no-print">
-            <button class="tab-btn active" onclick="switchTab('tab-products')">📦 1. 상품 & 도매처 관리</button>
-            <button class="tab-btn" onclick="switchTab('tab-order')">🛒 2. 발주 신청</button>
-            <button class="tab-btn" onclick="switchTab('tab-inspect')">📋 3. 입고 검수 리스트</button>
+            <button class="tab-btn active" onclick="switchTab('tab-products')">상품 & 도매처 관리</button>
+            <button class="tab-btn" onclick="switchTab('tab-order')">발주 신청</button>
+            <button class="tab-btn" onclick="switchTab('tab-inspect')">입고 검수 리스트</button>
         </div>
 
         <div class="container">
@@ -128,60 +244,65 @@
                  [탭 1] 상품 및 도매처 관리
                  ============================================== -->
             <div id="tab-products" class="tab-content active">
-                <h2>상품 및 도매처 등록</h2>
+                <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 15px;">
+                    <h2 style="margin: 0;">새 상품 등록</h2>
+                </div>
                 
-                <div class="form-section">
+                <div class="card form-section">
                     <div class="form-row">
                         <input type="text" id="prd-name" placeholder="상품명 (필수)" style="flex: 2;">
                         <input type="text" id="prd-num" placeholder="상품번호" style="flex: 1;">
                         <input type="number" id="prd-stock" placeholder="현재 재고 수량" style="flex: 1;">
                     </div>
                     
-                    <hr style="border: 0; border-top: 1px dashed #ccc; margin: 15px 0;">
-                    <div style="margin-bottom: 10px; font-weight: bold;">
-                        도매처 정보 등록 <span style="font-size: 12px; font-weight: normal; color: #666;">(선택 시 기본 배송비가 자동 입력됩니다)</span>
+                    <div style="margin: 20px 0 10px; font-weight: 600; font-size: 0.95rem; color: var(--text-main);">
+                        도매처 정보
+                        <span style="font-size: 0.8rem; font-weight: normal; color: var(--text-muted); margin-left: 8px;">* 도매처 선택 시 기본 배송비가 자동 입력됩니다.</span>
                     </div>
                     
-                    <div id="vendor-container">
-                        <!-- 도매처 입력 행이 동적으로 추가됨 -->
-                    </div>
+                    <div id="vendor-container"></div>
                     
-                    <div style="margin-top: 10px; display: flex; gap: 10px;">
-                        <button class="secondary" onclick="addVendorRow()">+ 도매처 추가</button>
-                        <button class="primary" onclick="saveProduct()" style="margin-left: auto;">💾 새 상품 저장</button>
+                    <div style="margin-top: 16px; display: flex; justify-content: space-between; align-items: center;">
+                        <button class="outline" onclick="addVendorRow()">+ 도매처 추가</button>
+                        <button class="primary" onclick="saveProduct()">저장하기</button>
                     </div>
                 </div>
 
-                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--border); padding-bottom: 10px; margin-bottom: 15px;">
-                    <h2 style="border: none; margin: 0; padding: 0;">등록된 상품 목록</h2>
-                    <div style="display: flex; gap: 10px;">
-                        <button class="danger" onclick="deleteSelectedProducts()">☑ 선택 삭제</button>
-                        <button class="secondary" onclick="deleteAllProducts()">🗑️ 전체 삭제</button>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin: 40px 0 15px;">
+                    <h2 style="margin: 0;">등록된 상품 목록</h2>
+                    <div style="display: flex; gap: 8px;">
+                        <button class="outline" style="color: var(--danger); border-color: #fca5a5;" onclick="deleteSelectedProducts()">선택 삭제</button>
+                        <button class="outline" style="color: var(--secondary);" onclick="deleteAllProducts()">전체 삭제</button>
                     </div>
                 </div>
-                <table>
-                    <thead>
-                        <tr>
-                            <th style="width: 5%;"><input type="checkbox" id="selectAllCheckbox" onclick="toggleSelectAllProducts(this)"></th>
-                            <th style="width: 20%;">상품명</th>
-                            <th style="width: 15%;">상품번호</th>
-                            <th style="width: 10%;">재고</th>
-                            <th style="width: 40%;">도매처 (단가 / 배송비)</th>
-                            <th style="width: 10%;">관리</th>
-                        </tr>
-                    </thead>
-                    <tbody id="prd-table-body">
-                        <!-- 리스트 렌더링 -->
-                    </tbody>
-                </table>
+                
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="width: 5%; text-align: center;"><input type="checkbox" id="selectAllCheckbox" onclick="toggleSelectAllProducts(this)"></th>
+                                <th style="width: 25%;">상품명</th>
+                                <th style="width: 15%;">상품번호</th>
+                                <th style="width: 10%;">재고</th>
+                                <th style="width: 35%;">도매처 (단가 / 배송비)</th>
+                                <th style="width: 10%; text-align: center;">관리</th>
+                            </tr>
+                        </thead>
+                        <tbody id="prd-table-body">
+                            <!-- 리스트 렌더링 -->
+                        </tbody>
+                    </table>
+                </div>
             </div>
-
 
             <!-- ==============================================
                  [탭 2] 발주 신청 (계산 및 주문)
                  ============================================== -->
             <div id="tab-order" class="tab-content">
-                <h2>발주 신청 <span style="font-size: 14px; font-weight: normal; color: #666;">(재고가 부족한 상품을 선택해 주문하세요)</span></h2>
+                <div style="margin-bottom: 20px;">
+                    <h2 style="margin: 0;">스마트 발주 신청</h2>
+                    <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 5px;">재고가 부족한 상품을 선택해 실시간 견적을 비교하고 주문하세요.</p>
+                </div>
                 
                 <div class="order-layout">
                     <!-- 상품 선택 리스트 -->
@@ -190,54 +311,60 @@
                     </div>
                     
                     <!-- 발주 계산 및 주문 패널 -->
-                    <div class="order-detail" id="order-detail-panel" style="display: none;">
-                        <h3 id="ord-title" style="margin-top: 0; color: var(--primary);">상품을 선택하세요</h3>
-                        <div style="margin-bottom: 20px;">
-                            <label style="font-weight: bold;">발주 수량: </label>
-                            <input type="number" id="ord-qty" value="1" min="1" style="width: 100px; font-size: 16px; font-weight: bold;" oninput="calcOrderPrices()"> 개
+                    <div class="card order-detail" id="order-detail-panel" style="display: none; margin-bottom: 0;">
+                        <div style="border-bottom: 1px solid var(--border-color); padding-bottom: 16px; margin-bottom: 16px;">
+                            <span style="font-size: 0.8rem; font-weight: 700; color: var(--primary); text-transform: uppercase; letter-spacing: 0.05em;">Selected Product</span>
+                            <h3 id="ord-title" style="margin: 8px 0 0; font-size: 1.4rem;">상품명</h3>
                         </div>
                         
-                        <h4 style="margin-bottom: 10px;">도매처별 예상 비용 비교</h4>
-                        <div id="ord-vendors-calc">
+                        <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 24px; background: var(--bg-body); padding: 16px; border-radius: var(--radius-sm);">
+                            <label style="font-weight: 600; color: var(--text-main);">필요 수량</label>
+                            <input type="number" id="ord-qty" value="1" min="1" style="width: 120px; font-size: 1.1rem; font-weight: 700; text-align: right;" oninput="calcOrderPrices()">
+                            <span style="font-weight: 500;">개</span>
+                        </div>
+                        
+                        <h4 style="margin: 0 0 12px; font-size: 0.95rem; color: var(--text-main);">도매처별 예상 비용 비교</h4>
+                        <div id="ord-vendors-calc" style="display: flex; flex-direction: column; gap: 12px;">
                             <!-- 도매처별 계산 결과 렌더링 -->
                         </div>
                     </div>
                 </div>
             </div>
 
-
             <!-- ==============================================
                  [탭 3] 입고 상품 검수 리스트 (인쇄 화면)
                  ============================================== -->
             <div id="tab-inspect" class="tab-content">
-                <div class="no-print" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--border); padding-bottom: 10px; margin-bottom: 15px;">
-                    <h2 style="border: none; margin: 0; padding: 0;">📦 입고 상품 검수 리스트</h2>
+                <div class="no-print" style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 15px;">
+                    <div>
+                        <h2 style="margin: 0 0 5px;">입고 검수 리스트</h2>
+                        <p style="color: var(--text-muted); font-size: 0.85rem; margin: 0;">발주 완료한 상품들이 표시됩니다. 수기 검수 후 '입고 완료'를 처리하세요.</p>
+                    </div>
                     <div style="display: flex; gap: 10px;">
                         <button class="primary" onclick="window.print()">🖨️ 인쇄하기</button>
-                        <button class="danger" onclick="clearInspectList()">🗑️ 리스트 전체 비우기</button>
+                        <button class="outline" style="color: var(--danger); border-color: #fca5a5;" onclick="clearInspectList()">전체 비우기</button>
                     </div>
                 </div>
-                <p class="no-print" style="font-size: 13px; color: #666;">
-                    💡 발주 완료한 상품들이 표시됩니다. 물건이 도착하면 인쇄하여 수기 검수 후 우측의 <b>'입고 완료 처리'</b>를 누르면 재고에 추가됩니다.
-                </p>
 
-                <table>
-                    <thead>
-                        <tr>
-                            <th style="width: 8%;">확인</th>
-                            <th>상품명</th>
-                            <th class="hide-on-print" style="width: 12%;">상품번호</th>
-                            <th style="width: 10%;">주문수량</th>
-                            <th>주문 도매처</th>
-                            <th class="hide-on-print" style="width: 12%;">단가</th>
-                            <th class="hide-on-print" style="width: 15%;">총액 (배송비 포함)</th>
-                            <th class="hide-on-print" style="width: 12%;">관리</th>
-                        </tr>
-                    </thead>
-                    <tbody id="inspect-table-body">
-                        <!-- 발주 완료 리스트 렌더링 -->
-                    </tbody>
-                </table>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="width: 6%; text-align: center;">확인</th>
+                                <th>상품명</th>
+                                <th class="hide-on-print" style="width: 12%;">상품번호</th>
+                                <th style="width: 10%; text-align: right;">주문수량</th>
+                                <th>주문 도매처</th>
+                                <th class="hide-on-print" style="width: 12%; text-align: right;">단가</th>
+                                <th class="hide-on-print" style="width: 15%; text-align: right;">총액 (배송비 포함)</th>
+                                <th class="hide-on-print" style="width: 12%; text-align: center;">관리</th>
+                            </tr>
+                        </thead>
+                        <tbody id="inspect-table-body">
+                            <!-- 발주 완료 리스트 렌더링 -->
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
@@ -248,7 +375,7 @@
         import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, getDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Vercel 배포를 위한 실제 Firebase 설정값 연동
+        // Vercel 배포를 위한 실제 Firebase 설정값
         const firebaseConfig = {
             apiKey: "AIzaSyDAJzs95LRmWdHKRRRQhRNuJDXsi7HvYF8",
             authDomain: "nov-main.firebaseapp.com",
@@ -269,9 +396,8 @@
         let products = [];
         let inspectList = [];
         let currentOrderProductId = null;
-        let unsubscribeData = null; // Firestore 실시간 리스너 해제용
+        let unsubscribeData = null;
 
-        // 도매처별 기본 배송비 설정 딕셔너리
         const VENDOR_DEFAULT_SHIPPING = {
             'NCmall': 2800,
             'NOPACK': 2970,
@@ -282,32 +408,66 @@
         };
 
         // ==========================================
+        // UI 유틸리티: Toast & Confirm (alert/confirm 대체)
+        // ==========================================
+        window.showToast = (message, type = 'success') => {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            
+            // 아이콘 추가
+            const icon = type === 'success' ? '✓' : '⚠';
+            toast.innerHTML = `<span style="font-weight:bold; font-size:1.1rem;">${icon}</span> ${message}`;
+            
+            container.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.animation = 'fadeOut 0.3s forwards';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        };
+
+        let confirmCallback = null;
+        window.showConfirm = (message, callback) => {
+            document.getElementById('confirm-msg').innerText = message;
+            document.getElementById('confirm-modal').classList.add('active');
+            confirmCallback = callback;
+        };
+
+        window.closeConfirmModal = () => {
+            document.getElementById('confirm-modal').classList.remove('active');
+            confirmCallback = null;
+        };
+
+        document.getElementById('confirm-yes-btn').addEventListener('click', () => {
+            if (confirmCallback) confirmCallback();
+            window.closeConfirmModal();
+        });
+
+
+        // ==========================================
         // Firebase 인증 (구글 로그인 및 승인 처리)
         // ==========================================
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 currentUser = user;
-                
-                // Firestore에서 승인 여부 확인
                 const userDocRef = doc(db, "approved_users", user.email);
                 const userDocSnap = await getDoc(userDocRef);
 
                 if (userDocSnap.exists() && userDocSnap.data().approved === true) {
-                    // 승인된 사용자 -> 메인 앱 실행
                     isApproved = true;
                     document.getElementById('login-screen').style.display = 'none';
                     document.getElementById('main-app').style.display = 'block';
                     document.getElementById('user-info').innerText = `${user.email}`;
                     
-                    // 초기 UI 세팅 및 데이터 불러오기
                     window.addVendorRow();
                     loadDataFromFirestore();
+                    window.showToast("환영합니다!", "success");
                 } else {
-                    // 미승인 사용자 -> 대기 메시지 표시 (데이터베이스에 등록)
                     isApproved = false;
                     document.getElementById('login-screen').style.display = 'flex';
                     document.getElementById('main-app').style.display = 'none';
-                    document.querySelector('.google-btn').style.display = 'none'; // 로그인 버튼 숨김
+                    document.querySelector('.google-btn').style.display = 'none';
                     document.getElementById('approval-msg').style.display = 'block';
                     
                     if (!userDocSnap.exists()) {
@@ -320,15 +480,14 @@
                     }
                 }
             } else {
-                // 로그아웃 상태
                 currentUser = null;
                 isApproved = false;
                 document.getElementById('login-screen').style.display = 'flex';
                 document.getElementById('main-app').style.display = 'none';
-                document.querySelector('.google-btn').style.display = 'block'; // 로그인 버튼 표시
+                document.querySelector('.google-btn').style.display = 'flex';
                 document.getElementById('approval-msg').style.display = 'none';
                 
-                if (unsubscribeData) unsubscribeData(); // 실시간 데이터 수신 중지
+                if (unsubscribeData) unsubscribeData();
             }
         });
 
@@ -336,22 +495,17 @@
             const provider = new GoogleAuthProvider();
             signInWithPopup(auth, provider).catch(error => {
                 console.error("로그인 에러:", error);
-                alert("로그인 중 오류가 발생했습니다.");
+                window.showToast("로그인 중 오류가 발생했습니다.", "error");
             });
         };
 
-        window.logout = () => {
-            signOut(auth);
-        };
+        window.logout = () => signOut(auth);
 
         // ==========================================
-        // 클라우드 데이터베이스 (Firestore) 동기화
+        // 클라우드 데이터베이스 동기화
         // ==========================================
         function loadDataFromFirestore() {
-            // 회사의 통합 데이터를 관리할 경우 특정 ID("company_main")를 공유하거나 개인별로 관리할 수 있습니다.
-            // 여기서는 통합 관리(동기화)를 위해 "company_data"라는 하나의 공용 문서에 저장하도록 설정했습니다.
             const dataRef = doc(db, "inventory_system", "company_data");
-            
             unsubscribeData = onSnapshot(dataRef, (docSnap) => {
                 if (docSnap.exists()) {
                     const data = docSnap.data();
@@ -374,12 +528,12 @@
                 await setDoc(dataRef, { products, inspectList });
             } catch (error) {
                 console.error("데이터 저장 실패:", error);
-                alert("데이터 저장 중 오류가 발생했습니다.");
+                window.showToast("데이터 저장 중 오류가 발생했습니다.", "error");
             }
         }
 
         // ==========================================
-        // 전역 함수 연결 (HTML onclick 등에서 사용하기 위함)
+        // 전역 UI 제어 함수
         // ==========================================
         window.switchTab = (tabId) => {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
@@ -391,20 +545,18 @@
 
         window.addVendorRow = () => {
             const container = document.getElementById('vendor-container');
-            if(!container) return; // 초기 로딩 에러 방지
+            if(!container) return;
             const row = document.createElement('div');
             row.className = 'vendor-row';
             
             let options = '<option value="">도매처 선택</option>';
-            for(let v in VENDOR_DEFAULT_SHIPPING) {
-                options += `<option value="${v}">${v}</option>`;
-            }
+            for(let v in VENDOR_DEFAULT_SHIPPING) { options += `<option value="${v}">${v}</option>`; }
 
             row.innerHTML = `
                 <select class="v-name" onchange="window.autoFillShipping(this)" style="flex: 1;">${options}</select>
                 <input type="number" class="v-price" placeholder="상품 단가" style="flex: 1;">
                 <input type="number" class="v-ship" placeholder="배송비" style="flex: 1;" onkeypress="if(event.key==='Enter') { event.preventDefault(); window.saveProduct(); }">
-                <button class="danger" style="padding: 6px 10px;" onclick="this.parentElement.remove()">X</button>
+                <button class="outline" style="padding: 8px 12px; color: var(--danger); border-color: #fca5a5;" onclick="this.parentElement.remove()">삭제</button>
             `;
             container.appendChild(row);
         };
@@ -422,7 +574,7 @@
             const num = document.getElementById('prd-num').value;
             const stock = parseInt(document.getElementById('prd-stock').value) || 0;
 
-            if(!name.trim()) { alert("상품명을 입력해주세요."); return; }
+            if(!name.trim()) { window.showToast("상품명을 입력해주세요.", "error"); return; }
 
             const vendorRows = document.querySelectorAll('.vendor-row');
             let vendors = [];
@@ -434,10 +586,11 @@
                 if(vName) { vendors.push({ name: vName, price: vPrice, shipping: vShip }); }
             });
 
-            if(vendors.length === 0) { alert("최소 1개의 도매처를 선택하고 정보를 입력해주세요."); return; }
+            if(vendors.length === 0) { window.showToast("최소 1개의 도매처를 선택해주세요.", "error"); return; }
 
             products.push({ id: Date.now().toString(), name, itemNum: num, stock, vendors });
             saveToFirestore();
+            window.showToast("상품이 안전하게 저장되었습니다.");
             
             document.getElementById('prd-name').value = '';
             document.getElementById('prd-num').value = '';
@@ -455,33 +608,43 @@
             if(selectAllCb) selectAllCb.checked = false;
             
             if(products.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" style="padding:30px; color:#666;">등록된 상품이 없습니다.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="6" style="padding:40px; text-align:center; color:var(--text-muted);">등록된 상품이 없습니다. 새 상품을 등록해보세요.</td></tr>';
                 return;
             }
             
             products.forEach(p => {
                 let vendorDetails = p.vendors.map(v => 
-                    `<div style="margin-bottom:3px;">- ${v.name} (<span style="color:var(--primary); font-weight:bold;">${v.price.toLocaleString()}원</span> / 배송비 <span>${v.shipping.toLocaleString()}원</span>)</div>`
+                    `<div style="margin-bottom:4px; display:flex; gap:8px;">
+                        <span style="color:var(--text-main); width: 80px;">${v.name}</span>
+                        <span style="color:var(--text-muted);">|</span>
+                        <span style="color:var(--primary); font-weight:600; width: 60px; text-align:right;">${v.price.toLocaleString()}원</span>
+                        <span style="color:var(--text-muted); font-size:0.8rem; align-self:center;">(배송 ${v.shipping.toLocaleString()}원)</span>
+                    </div>`
                 ).join('');
                 
                 tbody.innerHTML += `
                     <tr>
-                        <td><input type="checkbox" class="product-checkbox" value="${p.id}"></td>
-                        <td style="font-weight:bold;">${p.name}</td>
-                        <td>${p.itemNum || '-'}</td>
-                        <td style="color:${p.stock <= 5 ? 'red' : 'black'}; font-weight:bold;">${p.stock.toLocaleString()} 개</td>
-                        <td style="font-size:13px; text-align:left; padding-left:15px;">${vendorDetails}</td>
-                        <td><button class="danger" onclick="window.deleteProduct('${p.id}')">삭제</button></td>
+                        <td style="text-align:center;"><input type="checkbox" class="product-checkbox" value="${p.id}"></td>
+                        <td style="font-weight:600; color:var(--text-main);">${p.name}</td>
+                        <td style="color:var(--text-muted);">${p.itemNum || '-'}</td>
+                        <td>
+                            <span style="font-weight:700; color:${p.stock <= 5 ? 'var(--danger)' : 'var(--text-main)'};">
+                                ${p.stock.toLocaleString()} 개
+                            </span>
+                        </td>
+                        <td style="font-size:0.85rem;">${vendorDetails}</td>
+                        <td style="text-align:center;"><button class="outline" style="color:var(--danger); padding:6px 10px;" onclick="window.deleteProduct('${p.id}')">삭제</button></td>
                     </tr>
                 `;
             });
         }
 
         window.deleteProduct = (id) => {
-            if(confirm("이 상품을 삭제하시겠습니까?")) {
+            window.showConfirm("이 상품을 삭제하시겠습니까?", () => {
                 products = products.filter(p => p.id !== id);
                 saveToFirestore();
-            }
+                window.showToast("삭제되었습니다.");
+            });
         };
 
         window.toggleSelectAllProducts = (source) => {
@@ -490,20 +653,22 @@
 
         window.deleteSelectedProducts = () => {
             const checkboxes = document.querySelectorAll('.product-checkbox:checked');
-            if (checkboxes.length === 0) { alert("삭제할 상품을 선택해주세요."); return; }
-            if (confirm(`선택한 ${checkboxes.length}개의 상품을 삭제하시겠습니까?`)) {
+            if (checkboxes.length === 0) { window.showToast("삭제할 상품을 먼저 선택해주세요.", "error"); return; }
+            window.showConfirm(`선택한 ${checkboxes.length}개의 상품을 삭제하시겠습니까?`, () => {
                 const idsToDelete = Array.from(checkboxes).map(cb => cb.value);
                 products = products.filter(p => !idsToDelete.includes(p.id));
                 saveToFirestore();
-            }
+                window.showToast("선택 항목이 삭제되었습니다.");
+            });
         };
 
         window.deleteAllProducts = () => {
             if (products.length === 0) return;
-            if (confirm("등록된 모든 상품을 삭제하시겠습니까? (복구할 수 없습니다)")) {
+            window.showConfirm("등록된 모든 상품을 삭제하시겠습니까?\n이 작업은 복구할 수 없습니다.", () => {
                 products = [];
                 saveToFirestore();
-            }
+                window.showToast("모든 데이터가 초기화되었습니다.");
+            });
         };
 
         function renderOrderProductList() {
@@ -512,7 +677,7 @@
             listDiv.innerHTML = '';
             
             if(products.length === 0) {
-                listDiv.innerHTML = '<div style="padding:20px; text-align:center; color:#777;">등록된 상품이 없습니다.</div>';
+                listDiv.innerHTML = '<div style="padding:40px; text-align:center; color:var(--text-muted);">발주할 수 있는 상품이 없습니다.</div>';
                 document.getElementById('order-detail-panel').style.display = 'none';
                 return;
             }
@@ -521,17 +686,20 @@
 
             sortedProducts.forEach(p => {
                 const isLowStock = p.stock <= 5;
-                const lowStockLabel = isLowStock ? '<span style="color:red; font-size:12px; font-weight:bold;">[재고부족]</span>' : '';
+                const lowStockLabel = isLowStock ? '<span class="badge">재고부족</span>' : '';
                 
                 const item = document.createElement('div');
-                item.className = `order-item ${isLowStock ? 'low-stock' : ''}`;
+                item.className = 'order-item';
+                
                 item.innerHTML = `
                     <div>
-                        <div style="font-weight:bold;">${p.name}</div>
-                        <div style="font-size:12px; color:#666;">상품번호: ${p.itemNum || '-'}</div>
+                        <div style="font-weight:600; color:var(--text-main); margin-bottom:4px; display:flex; align-items:center; gap:8px;">
+                            ${p.name} ${lowStockLabel}
+                        </div>
+                        <div style="font-size:0.8rem; color:var(--text-muted);">상품번호: ${p.itemNum || '-'}</div>
                     </div>
-                    <div style="text-align:right;">
-                        ${lowStockLabel}<br>현재 재고: <b>${p.stock.toLocaleString()}</b>개
+                    <div style="text-align:right; font-size:0.85rem;">
+                        현재 재고<br><span style="font-size:1.1rem; font-weight:700; color:var(--text-main);">${p.stock.toLocaleString()}</span>개
                     </div>
                 `;
                 item.onclick = () => window.selectOrderProduct(p.id, item);
@@ -546,7 +714,7 @@
             
             const p = products.find(x => x.id === id);
             document.getElementById('order-detail-panel').style.display = 'block';
-            document.getElementById('ord-title').innerHTML = `📦 ${p.name} 발주`;
+            document.getElementById('ord-title').innerText = p.name;
             document.getElementById('ord-qty').value = 1;
             window.calcOrderPrices(); 
         };
@@ -564,15 +732,15 @@
                 calcContainer.innerHTML += `
                     <div class="vendor-calc-card">
                         <div>
-                            <div style="font-weight:bold; font-size:16px;">${v.name}</div>
+                            <div style="font-weight:700; font-size:1.05rem; color:var(--text-main);">${v.name}</div>
                             <div class="calc-info">
-                                단가: ${v.price.toLocaleString()}원 × ${qty}개 = ${totalItemPrice.toLocaleString()}원<br>
-                                배송비: ${v.shipping.toLocaleString()}원
+                                단가 ${v.price.toLocaleString()}원 × ${qty}개 = ${totalItemPrice.toLocaleString()}원<br>
+                                배송비 ${v.shipping.toLocaleString()}원
                             </div>
                         </div>
                         <div style="text-align:right;">
-                            <div class="calc-total">총액 ${grandTotal.toLocaleString()}원</div>
-                            <button class="success" style="margin-top:5px;" onclick="window.placeOrder('${p.id}', '${v.name}', ${qty}, ${v.price}, ${v.shipping})">✓ 이 도매처로 주문</button>
+                            <div class="calc-total">${grandTotal.toLocaleString()}원</div>
+                            <button class="primary" style="margin-top:8px; width:100%;" onclick="window.placeOrder('${p.id}', '${v.name}', ${qty}, ${v.price}, ${v.shipping})">주문하기</button>
                         </div>
                     </div>
                 `;
@@ -593,7 +761,7 @@
                 orderDate: new Date().toLocaleDateString()
             });
             saveToFirestore();
-            alert(`[${vendorName}]에 ${p.name} ${qty}개 발주 등록 완료!\n입고 검수 리스트에서 확인 가능합니다.`);
+            window.showToast(`[${vendorName}]에 발주가 등록되었습니다.`);
         };
 
         function renderInspectList() {
@@ -602,7 +770,7 @@
             tbody.innerHTML = '';
             
             if(inspectList.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="8" style="padding:30px; color:#666;">현재 입고 대기 중인 발주 내역이 없습니다.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="8" style="padding:40px; text-align:center; color:var(--text-muted);">입고 대기 중인 발주 내역이 없습니다.</td></tr>';
                 return;
             }
 
@@ -610,19 +778,19 @@
                 const grandTotal = (item.price * item.qty) + item.shipping;
                 tbody.innerHTML += `
                     <tr>
-                        <td><span class="check-box"></span></td>
-                        <td style="font-weight:bold; text-align:left; padding-left:15px;">
+                        <td style="text-align:center;"><span class="check-box"></span></td>
+                        <td style="font-weight:600; color:var(--text-main);">
                             ${item.name}<br>
-                            <span class="no-print" style="font-size:12px; color:#888; font-weight:normal;">발주일: ${item.orderDate}</span>
+                            <span class="no-print" style="font-size:0.75rem; color:var(--text-muted); font-weight:normal; margin-top:4px; display:inline-block;">발주일: ${item.orderDate}</span>
                         </td>
-                        <td class="hide-on-print">${item.itemNum || '-'}</td>
-                        <td style="font-weight:bold; color:var(--primary); font-size:16px;">${item.qty} 개</td>
-                        <td>${item.vendorName}</td>
-                        <td class="hide-on-print">${item.price.toLocaleString()}원</td>
-                        <td class="hide-on-print" style="font-weight:bold;">${grandTotal.toLocaleString()}원</td>
-                        <td class="hide-on-print">
-                            <button class="primary" style="margin-bottom:5px; width:100%;" onclick="window.confirmReceive('${item.id}')">입고 완료</button>
-                            <button class="secondary" style="width:100%; padding:4px;" onclick="window.cancelOrder('${item.id}')">주문 취소</button>
+                        <td class="hide-on-print" style="color:var(--text-muted);">${item.itemNum || '-'}</td>
+                        <td style="font-weight:700; color:var(--primary); font-size:1.1rem; text-align:right;">${item.qty.toLocaleString()} 개</td>
+                        <td style="color:var(--text-main); font-weight:500;">${item.vendorName}</td>
+                        <td class="hide-on-print" style="text-align:right;">${item.price.toLocaleString()}원</td>
+                        <td class="hide-on-print" style="font-weight:700; text-align:right;">${grandTotal.toLocaleString()}원</td>
+                        <td class="hide-on-print" style="text-align:center; display:flex; flex-direction:column; gap:6px;">
+                            <button class="primary" style="width:100%; padding:6px;" onclick="window.confirmReceive('${item.id}')">입고</button>
+                            <button class="outline" style="width:100%; padding:6px; font-size:0.75rem;" onclick="window.cancelOrder('${item.id}')">취소</button>
                         </td>
                     </tr>
                 `;
@@ -634,27 +802,29 @@
             if(itemIndex === -1) return;
             const item = inspectList[itemIndex];
             
-            if(confirm(`[${item.name}] ${item.qty}개가 실제로 입고되었습니까?\n확인 시 재고에 자동으로 추가됩니다.`)) {
+            window.showConfirm(`[${item.name}] ${item.qty}개가 입고되었습니까?\n재고에 자동으로 추가됩니다.`, () => {
                 const prdIndex = products.findIndex(x => x.id === item.productId);
                 if(prdIndex !== -1) { products[prdIndex].stock += item.qty; }
                 inspectList.splice(itemIndex, 1);
                 saveToFirestore();
-                alert("재고 반영이 완료되었습니다.");
-            }
+                window.showToast("재고 반영이 완료되었습니다.");
+            });
         };
 
         window.cancelOrder = (inspectId) => {
-            if(confirm("이 발주 내역을 취소하고 리스트에서 지우시겠습니까?")) {
+            window.showConfirm("이 발주 내역을 취소하시겠습니까?", () => {
                 inspectList = inspectList.filter(x => x.id !== inspectId);
                 saveToFirestore();
-            }
+                window.showToast("발주가 취소되었습니다.");
+            });
         };
 
         window.clearInspectList = () => {
-            if(confirm("입고 대기 중인 모든 리스트를 삭제하시겠습니까?\n(이미 발주한 내역이 사라지며 복구할 수 없습니다)")) {
+            window.showConfirm("입고 대기 리스트를 전체 삭제하시겠습니까?\n발주 내역이 사라지며 복구 불가합니다.", () => {
                 inspectList = [];
                 saveToFirestore();
-            }
+                window.showToast("리스트가 비워졌습니다.");
+            });
         };
     </script>
 </body>
