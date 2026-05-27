@@ -411,14 +411,14 @@
         let unsubscribeData = null;
         let editingProductId = null; // 수정 중인 상품 ID
 
-        // 도매처 기본 설정 (기본 배송비 및 무료배송 기준 추가)
+        // 도매처 기본 설정 (기본 배송비 및 무료배송 기준 업데이트)
         const VENDOR_DEFAULT_SETTINGS = {
-            'NCmall': { shipping: 2800, freeThreshold: 50000 },
-            'NOPACK': { shipping: 2970, freeThreshold: 50000 },
-            '혜림봉투': { shipping: 2750, freeThreshold: 50000 },
-            '박스몰': { shipping: 3190, freeThreshold: 50000 },
-            'PJPACK': { shipping: 3000, freeThreshold: 50000 },
-            '도매매': { shipping: 3000, freeThreshold: 50000 }
+            'NCmall': { shipping: 2800, freeThreshold: 70000 },
+            'NOPACK': { shipping: 2970, freeThreshold: 55000 },
+            '혜림봉투': { shipping: 2750, freeThreshold: 60000 },
+            '박스몰': { shipping: 3190, freeThreshold: 77000 },
+            'PJPACK': { shipping: 3000, freeThreshold: 30000 },
+            '도매매': { shipping: 3000, freeThreshold: 0 }
         };
 
         // ==========================================
@@ -532,6 +532,12 @@
                 window.renderProducts();
                 window.renderOrderProductList();
                 window.renderInspectList();
+                
+                // 만약 클라우드에서 업데이트되었는데 현재 발주창에 떠있는 상품이 삭제되었다면 창 닫기
+                if (currentOrderProductId && !products.find(p => p.id === currentOrderProductId)) {
+                    currentOrderProductId = null;
+                    document.getElementById('order-detail-panel').style.display = 'none';
+                }
             });
         }
 
@@ -642,7 +648,7 @@
                 const vName = row.querySelector('.v-name').value;
                 const vPrice = parseInt(row.querySelector('.v-price').value) || 0;
                 const vShip = parseInt(row.querySelector('.v-ship').value) || 0;
-                const vFree = parseInt(row.querySelector('.v-free').value) || 50000;
+                const vFree = parseInt(row.querySelector('.v-free').value) || 0; // 0원 이상 무료배송 지원
                 if(vName) { vendors.push({ name: vName, price: vPrice, shipping: vShip, freeThreshold: vFree }); }
             });
 
@@ -737,7 +743,19 @@
             window.showConfirm("이 상품을 삭제하시겠습니까?", () => {
                 products = products.filter(p => p.id !== id);
                 if (editingProductId === id) window.cancelEdit();
+                
+                // 발주 신청 패널에서 현재 선택된 상품이 삭제된 상품이라면 패널 숨기기
+                if (currentOrderProductId === id) {
+                    currentOrderProductId = null;
+                    document.getElementById('order-detail-panel').style.display = 'none';
+                }
+                
                 saveToFirestore();
+                
+                // DB 저장과 별개로 화면 즉시 갱신
+                window.renderProducts();
+                window.renderOrderProductList();
+                
                 window.showToast("삭제되었습니다.");
             });
         };
@@ -752,8 +770,20 @@
             window.showConfirm(`선택한 ${checkboxes.length}개의 상품을 삭제하시겠습니까?`, () => {
                 const idsToDelete = Array.from(checkboxes).map(cb => cb.value);
                 products = products.filter(p => !idsToDelete.includes(p.id));
+                
                 if (idsToDelete.includes(editingProductId)) window.cancelEdit();
+                
+                // 삭제된 상품 중에 현재 발주창에 켜져있는 상품이 있다면 패널 숨기기
+                if (idsToDelete.includes(currentOrderProductId)) {
+                    currentOrderProductId = null;
+                    document.getElementById('order-detail-panel').style.display = 'none';
+                }
+                
                 saveToFirestore();
+                
+                window.renderProducts();
+                window.renderOrderProductList();
+                
                 window.showToast("선택 항목이 삭제되었습니다.");
             });
         };
@@ -763,7 +793,15 @@
             window.showConfirm("등록된 모든 상품을 삭제하시겠습니까?\n이 작업은 복구할 수 없습니다.", () => {
                 products = [];
                 window.cancelEdit();
+                
+                currentOrderProductId = null;
+                document.getElementById('order-detail-panel').style.display = 'none';
+                
                 saveToFirestore();
+                
+                window.renderProducts();
+                window.renderOrderProductList();
+                
                 window.showToast("모든 데이터가 초기화되었습니다.");
             });
         };
@@ -813,6 +851,8 @@
             currentOrderProductId = id;
             
             const p = products.find(x => x.id === id);
+            if (!p) return;
+            
             document.getElementById('order-detail-panel').style.display = 'block';
             document.getElementById('ord-title').innerText = p.name;
             document.getElementById('ord-qty').value = 1;
@@ -822,6 +862,8 @@
         window.calcOrderPrices = () => {
             if(!currentOrderProductId) return;
             const p = products.find(x => x.id === currentOrderProductId);
+            if (!p) return;
+            
             const qty = parseInt(document.getElementById('ord-qty').value) || 1;
             const calcContainer = document.getElementById('ord-vendors-calc');
             calcContainer.innerHTML = '';
