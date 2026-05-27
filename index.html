@@ -119,14 +119,14 @@
         .table-wrapper { background: var(--bg-card); border-radius: var(--radius-md); border: 1px solid var(--border-color); overflow-x: auto; box-shadow: var(--shadow-sm); }
         table { width: 100%; border-collapse: separate; border-spacing: 0; }
         th, td { padding: 16px 20px; text-align: left; vertical-align: middle; border-bottom: 1px solid var(--border-color); font-size: 0.875rem; }
-        th { background-color: #f8fafc; font-weight: 600; color: var(--text-muted); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em; }
+        th { background-color: #f8fafc; font-weight: 600; color: var(--text-muted); text-align: center; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em; }
         tbody tr { transition: var(--transition); }
         tbody tr:hover { background-color: var(--bg-hover); }
         tbody tr:last-child td { border-bottom: none; }
 
         /* 특정 탭 레이아웃 */
         .form-row { display: flex; gap: 12px; margin-bottom: 15px; align-items: center; }
-        .vendor-row { display: flex; gap: 12px; align-items: center; background: var(--bg-body); padding: 12px; border-radius: var(--radius-sm); margin-bottom: 8px; border: 1px solid var(--border-color); }
+        .vendor-row { display: flex; gap: 12px; align-items: center; background: var(--bg-body); padding: 12px; border-radius: var(--radius-sm); margin-bottom: 8px; border: 1px solid var(--border-color); flex-wrap: wrap;}
         
         .order-layout { display: flex; gap: 24px; align-items: flex-start; }
         .order-list { flex: 1; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); max-height: 650px; overflow-y: auto; box-shadow: var(--shadow-sm); }
@@ -245,7 +245,7 @@
                  ============================================== -->
             <div id="tab-products" class="tab-content active">
                 <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 15px;">
-                    <h2 style="margin: 0;">새 상품 등록</h2>
+                    <h2 id="form-title" style="margin: 0;">새 상품 등록</h2>
                 </div>
                 
                 <div class="card form-section">
@@ -257,22 +257,28 @@
                     
                     <div style="margin: 20px 0 10px; font-weight: 600; font-size: 0.95rem; color: var(--text-main);">
                         도매처 정보
-                        <span style="font-size: 0.8rem; font-weight: normal; color: var(--text-muted); margin-left: 8px;">* 도매처 선택 시 기본 배송비가 자동 입력됩니다.</span>
+                        <span style="font-size: 0.8rem; font-weight: normal; color: var(--text-muted); margin-left: 8px;">* 도매처 선택 시 기본 배송비와 무료배송 기준이 자동 입력됩니다.</span>
                     </div>
                     
                     <div id="vendor-container"></div>
                     
                     <div style="margin-top: 16px; display: flex; justify-content: space-between; align-items: center;">
                         <button class="outline" onclick="addVendorRow()">+ 도매처 추가</button>
-                        <button class="primary" onclick="saveProduct()">저장하기</button>
+                        <div style="display: flex; gap: 8px;">
+                            <button id="cancel-edit-btn" class="outline" style="display: none;" onclick="cancelEdit()">취소</button>
+                            <button id="save-prd-btn" class="primary" onclick="saveProduct()">저장하기</button>
+                        </div>
                     </div>
                 </div>
 
                 <div style="display: flex; justify-content: space-between; align-items: center; margin: 40px 0 15px;">
                     <h2 style="margin: 0;">등록된 상품 목록</h2>
-                    <div style="display: flex; gap: 8px;">
-                        <button class="outline" style="color: var(--danger); border-color: #fca5a5;" onclick="deleteSelectedProducts()">선택 삭제</button>
-                        <button class="outline" style="color: var(--secondary);" onclick="deleteAllProducts()">전체 삭제</button>
+                    <div style="display: flex; gap: 12px; align-items: center;">
+                        <input type="text" id="prd-search" placeholder="상품명 검색..." style="width: 250px; padding: 8px 12px;" oninput="renderProducts()">
+                        <div style="display: flex; gap: 8px;">
+                            <button class="outline" style="color: var(--danger); border-color: #fca5a5;" onclick="deleteSelectedProducts()">선택 삭제</button>
+                            <button class="outline" style="color: var(--secondary);" onclick="deleteAllProducts()">전체 삭제</button>
+                        </div>
                     </div>
                 </div>
                 
@@ -280,12 +286,14 @@
                     <table>
                         <thead>
                             <tr>
-                                <th style="width: 5%; text-align: center;"><input type="checkbox" id="selectAllCheckbox" onclick="toggleSelectAllProducts(this)"></th>
-                                <th style="width: 25%;">상품명</th>
+                                <th style="width: 5%;"><input type="checkbox" id="selectAllCheckbox" onclick="toggleSelectAllProducts(this)"></th>
+                                <th style="width: 20%;">상품명</th>
                                 <th style="width: 15%;">상품번호</th>
                                 <th style="width: 10%;">재고</th>
-                                <th style="width: 35%;">도매처 (단가 / 배송비)</th>
-                                <th style="width: 10%; text-align: center;">관리</th>
+                                <th style="width: 15%;">도매처</th>
+                                <th style="width: 12%;">단가</th>
+                                <th style="width: 13%;">배송비</th>
+                                <th style="width: 10%;">관리</th>
                             </tr>
                         </thead>
                         <tbody id="prd-table-body">
@@ -300,14 +308,18 @@
                  ============================================== -->
             <div id="tab-order" class="tab-content">
                 <div style="margin-bottom: 20px;">
-                    <h2 style="margin: 0;">스마트 발주 신청</h2>
-                    <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 5px;">재고가 부족한 상품을 선택해 실시간 견적을 비교하고 주문하세요.</p>
+                    <h2 style="margin: 0;">발주 신청</h2>
                 </div>
                 
                 <div class="order-layout">
                     <!-- 상품 선택 리스트 -->
-                    <div class="order-list" id="order-prd-list">
-                        <!-- 상품 목록 렌더링 -->
+                    <div class="order-list">
+                        <div style="padding: 12px 16px; border-bottom: 1px solid var(--border-color); background: var(--bg-hover);">
+                            <input type="text" id="order-search" placeholder="상품명 검색..." style="width: 100%; border: 1px solid #cbd5e1; box-shadow: none;" oninput="renderOrderProductList()">
+                        </div>
+                        <div id="order-prd-list">
+                            <!-- 상품 목록 렌더링 -->
+                        </div>
                     </div>
                     
                     <!-- 발주 계산 및 주문 패널 -->
@@ -350,14 +362,14 @@
                     <table>
                         <thead>
                             <tr>
-                                <th style="width: 6%; text-align: center;">확인</th>
+                                <th style="width: 6%;">확인</th>
                                 <th>상품명</th>
                                 <th class="hide-on-print" style="width: 12%;">상품번호</th>
                                 <th style="width: 10%; text-align: right;">주문수량</th>
                                 <th>주문 도매처</th>
                                 <th class="hide-on-print" style="width: 12%; text-align: right;">단가</th>
                                 <th class="hide-on-print" style="width: 15%; text-align: right;">총액 (배송비 포함)</th>
-                                <th class="hide-on-print" style="width: 12%; text-align: center;">관리</th>
+                                <th class="hide-on-print" style="width: 12%;">관리</th>
                             </tr>
                         </thead>
                         <tbody id="inspect-table-body">
@@ -397,14 +409,16 @@
         let inspectList = [];
         let currentOrderProductId = null;
         let unsubscribeData = null;
+        let editingProductId = null; // 수정 중인 상품 ID
 
-        const VENDOR_DEFAULT_SHIPPING = {
-            'NCmall': 2800,
-            'NOPACK': 2970,
-            '혜림봉투': 2750,
-            '박스몰': 3190,
-            'PJPACK': 3000,
-            '도매매': 3000
+        // 도매처 기본 설정 (기본 배송비 및 무료배송 기준 추가)
+        const VENDOR_DEFAULT_SETTINGS = {
+            'NCmall': { shipping: 2800, freeThreshold: 50000 },
+            'NOPACK': { shipping: 2970, freeThreshold: 50000 },
+            '혜림봉투': { shipping: 2750, freeThreshold: 50000 },
+            '박스몰': { shipping: 3190, freeThreshold: 50000 },
+            'PJPACK': { shipping: 3000, freeThreshold: 50000 },
+            '도매매': { shipping: 3000, freeThreshold: 50000 }
         };
 
         // ==========================================
@@ -515,9 +529,9 @@
                     products = [];
                     inspectList = [];
                 }
-                renderProducts();
-                renderOrderProductList();
-                renderInspectList();
+                window.renderProducts();
+                window.renderOrderProductList();
+                window.renderInspectList();
             });
         }
 
@@ -540,22 +554,64 @@
             document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
             document.getElementById(tabId).classList.add('active');
             document.querySelector(`[onclick="window.switchTab('${tabId}')"]`)?.classList.add('active');
-            if(tabId === 'tab-order') renderOrderProductList(); 
+            if(tabId === 'tab-order') window.renderOrderProductList(); 
         };
 
-        window.addVendorRow = () => {
+        // 상품 정보 수정 및 등록 취소 처리
+        window.cancelEdit = () => {
+            editingProductId = null;
+            document.getElementById('form-title').innerText = "새 상품 등록";
+            document.getElementById('save-prd-btn').innerText = "저장하기";
+            document.getElementById('cancel-edit-btn').style.display = 'none';
+            
+            document.getElementById('prd-name').value = '';
+            document.getElementById('prd-num').value = '';
+            document.getElementById('prd-stock').value = '';
+            document.getElementById('vendor-container').innerHTML = '';
+            window.addVendorRow();
+        };
+
+        window.editProduct = (id) => {
+            const p = products.find(x => x.id === id);
+            if(!p) return;
+            
+            editingProductId = p.id;
+            document.getElementById('form-title').innerHTML = `상품 수정 <span style="font-size:0.9rem; font-weight:normal; color:var(--text-muted);">(${p.name})</span>`;
+            document.getElementById('save-prd-btn').innerText = "수정 완료";
+            document.getElementById('cancel-edit-btn').style.display = 'inline-flex';
+            
+            document.getElementById('prd-name').value = p.name;
+            document.getElementById('prd-num').value = p.itemNum || '';
+            document.getElementById('prd-stock').value = p.stock || 0;
+            
+            const container = document.getElementById('vendor-container');
+            container.innerHTML = '';
+            
+            p.vendors.forEach(v => {
+                window.addVendorRow(v);
+            });
+            
+            // 맨 위로 스크롤
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
+
+        // 도매처 입력 행 추가 (데이터가 있으면 채움)
+        window.addVendorRow = (vendorData = null) => {
             const container = document.getElementById('vendor-container');
             if(!container) return;
             const row = document.createElement('div');
             row.className = 'vendor-row';
             
             let options = '<option value="">도매처 선택</option>';
-            for(let v in VENDOR_DEFAULT_SHIPPING) { options += `<option value="${v}">${v}</option>`; }
+            for(let v in VENDOR_DEFAULT_SETTINGS) { 
+                options += `<option value="${v}" ${vendorData && vendorData.name === v ? 'selected' : ''}>${v}</option>`; 
+            }
 
             row.innerHTML = `
-                <select class="v-name" onchange="window.autoFillShipping(this)" style="flex: 1;">${options}</select>
-                <input type="number" class="v-price" placeholder="상품 단가" style="flex: 1;">
-                <input type="number" class="v-ship" placeholder="배송비" style="flex: 1;" onkeypress="if(event.key==='Enter') { event.preventDefault(); window.saveProduct(); }">
+                <select class="v-name" onchange="window.autoFillShipping(this)" style="flex: 1.5; min-width: 120px;">${options}</select>
+                <input type="number" class="v-price" placeholder="상품 단가" style="flex: 1; min-width: 100px;" value="${vendorData ? vendorData.price : ''}">
+                <input type="number" class="v-ship" placeholder="기본 배송비" style="flex: 1; min-width: 100px;" value="${vendorData ? vendorData.shipping : ''}">
+                <input type="number" class="v-free" placeholder="무료배송 기준액" style="flex: 1.2; min-width: 120px;" value="${vendorData ? vendorData.freeThreshold : ''}" onkeypress="if(event.key==='Enter') { event.preventDefault(); window.saveProduct(); }">
                 <button class="outline" style="padding: 8px 12px; color: var(--danger); border-color: #fca5a5;" onclick="this.parentElement.remove()">삭제</button>
             `;
             container.appendChild(row);
@@ -564,8 +620,11 @@
         window.autoFillShipping = (selectElement) => {
             const vendorName = selectElement.value;
             const shipInput = selectElement.parentElement.querySelector('.v-ship');
-            if (vendorName && VENDOR_DEFAULT_SHIPPING[vendorName] !== undefined) {
-                shipInput.value = VENDOR_DEFAULT_SHIPPING[vendorName];
+            const freeInput = selectElement.parentElement.querySelector('.v-free');
+            
+            if (vendorName && VENDOR_DEFAULT_SETTINGS[vendorName] !== undefined) {
+                shipInput.value = VENDOR_DEFAULT_SETTINGS[vendorName].shipping;
+                freeInput.value = VENDOR_DEFAULT_SETTINGS[vendorName].freeThreshold;
             }
         };
 
@@ -583,65 +642,101 @@
                 const vName = row.querySelector('.v-name').value;
                 const vPrice = parseInt(row.querySelector('.v-price').value) || 0;
                 const vShip = parseInt(row.querySelector('.v-ship').value) || 0;
-                if(vName) { vendors.push({ name: vName, price: vPrice, shipping: vShip }); }
+                const vFree = parseInt(row.querySelector('.v-free').value) || 50000;
+                if(vName) { vendors.push({ name: vName, price: vPrice, shipping: vShip, freeThreshold: vFree }); }
             });
 
             if(vendors.length === 0) { window.showToast("최소 1개의 도매처를 선택해주세요.", "error"); return; }
 
-            products.push({ id: Date.now().toString(), name, itemNum: num, stock, vendors });
-            saveToFirestore();
-            window.showToast("상품이 안전하게 저장되었습니다.");
+            if (editingProductId) {
+                // 기존 상품 수정
+                const idx = products.findIndex(p => p.id === editingProductId);
+                if(idx !== -1) {
+                    products[idx] = { ...products[idx], name, itemNum: num, stock, vendors };
+                }
+                window.showToast("상품 정보가 수정되었습니다.");
+                window.cancelEdit(); // 수정 모드 해제
+            } else {
+                // 새 상품 등록
+                products.push({ id: Date.now().toString(), name, itemNum: num, stock, vendors });
+                window.showToast("새 상품이 저장되었습니다.");
+                
+                document.getElementById('prd-name').value = '';
+                document.getElementById('prd-num').value = '';
+                document.getElementById('prd-stock').value = '';
+                document.getElementById('vendor-container').innerHTML = '';
+                window.addVendorRow();
+                document.getElementById('prd-name').focus();
+            }
             
-            document.getElementById('prd-name').value = '';
-            document.getElementById('prd-num').value = '';
-            document.getElementById('prd-stock').value = '';
-            document.getElementById('vendor-container').innerHTML = '';
-            window.addVendorRow();
-            document.getElementById('prd-name').focus();
+            saveToFirestore();
+            window.renderProducts();
         };
 
-        function renderProducts() {
+        window.renderProducts = () => {
             const tbody = document.getElementById('prd-table-body');
             if(!tbody) return;
             tbody.innerHTML = '';
             const selectAllCb = document.getElementById('selectAllCheckbox');
             if(selectAllCb) selectAllCb.checked = false;
             
-            if(products.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" style="padding:40px; text-align:center; color:var(--text-muted);">등록된 상품이 없습니다. 새 상품을 등록해보세요.</td></tr>';
+            // 검색 필터링
+            const searchQuery = document.getElementById('prd-search')?.value.toLowerCase() || '';
+            const filteredProducts = products.filter(p => p.name.toLowerCase().includes(searchQuery) || (p.itemNum && p.itemNum.toLowerCase().includes(searchQuery)));
+            
+            if(filteredProducts.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="8" style="padding:40px; text-align:center; color:var(--text-muted);">${products.length > 0 ? '검색 결과가 없습니다.' : '등록된 상품이 없습니다. 새 상품을 등록해보세요.'}</td></tr>`;
                 return;
             }
             
-            products.forEach(p => {
-                let vendorDetails = p.vendors.map(v => 
-                    `<div style="margin-bottom:4px; display:flex; gap:8px;">
-                        <span style="color:var(--text-main); width: 80px;">${v.name}</span>
-                        <span style="color:var(--text-muted);">|</span>
-                        <span style="color:var(--primary); font-weight:600; width: 60px; text-align:right;">${v.price.toLocaleString()}원</span>
-                        <span style="color:var(--text-muted); font-size:0.8rem; align-self:center;">(배송 ${v.shipping.toLocaleString()}원)</span>
-                    </div>`
-                ).join('');
+            filteredProducts.forEach(p => {
+                const rowCount = p.vendors.length;
+                let html = '';
                 
-                tbody.innerHTML += `
-                    <tr>
-                        <td style="text-align:center;"><input type="checkbox" class="product-checkbox" value="${p.id}"></td>
-                        <td style="font-weight:600; color:var(--text-main);">${p.name}</td>
-                        <td style="color:var(--text-muted);">${p.itemNum || '-'}</td>
-                        <td>
-                            <span style="font-weight:700; color:${p.stock <= 5 ? 'var(--danger)' : 'var(--text-main)'};">
-                                ${p.stock.toLocaleString()} 개
-                            </span>
+                p.vendors.forEach((v, index) => {
+                    const tr = document.createElement('tr');
+                    
+                    if (index === 0) {
+                        tr.innerHTML += `
+                            <td rowspan="${rowCount}" style="text-align:center; border-right:1px solid var(--border-color);"><input type="checkbox" class="product-checkbox" value="${p.id}"></td>
+                            <td rowspan="${rowCount}" style="font-weight:600; color:var(--text-main); border-right:1px solid var(--border-color);">${p.name}</td>
+                            <td rowspan="${rowCount}" style="color:var(--text-muted); text-align:center; border-right:1px solid var(--border-color);">${p.itemNum || '-'}</td>
+                            <td rowspan="${rowCount}" style="text-align:center; border-right:1px solid var(--border-color);">
+                                <span style="font-weight:700; font-size:1.05rem; color:${p.stock <= 5 ? 'var(--danger)' : 'var(--text-main)'};">
+                                    ${p.stock.toLocaleString()}
+                                </span>
+                            </td>
+                        `;
+                    }
+                    
+                    tr.innerHTML += `
+                        <td style="text-align:center; color:var(--text-main); font-weight:500;">${v.name}</td>
+                        <td style="text-align:right; font-weight:600; color:var(--primary);">${v.price.toLocaleString()}원</td>
+                        <td style="text-align:right; color:var(--text-muted); font-size:0.85rem;">
+                            ${v.shipping.toLocaleString()}원<br>
+                            <span style="font-size:0.75rem; color:#9ca3af;">(${v.freeThreshold.toLocaleString()}원 이상 무료)</span>
                         </td>
-                        <td style="font-size:0.85rem;">${vendorDetails}</td>
-                        <td style="text-align:center;"><button class="outline" style="color:var(--danger); padding:6px 10px;" onclick="window.deleteProduct('${p.id}')">삭제</button></td>
-                    </tr>
-                `;
+                    `;
+                    
+                    if (index === 0) {
+                        tr.innerHTML += `
+                            <td rowspan="${rowCount}" style="text-align:center; border-left:1px solid var(--border-color);">
+                                <div style="display:flex; flex-direction:column; gap:6px;">
+                                    <button class="outline" style="color:var(--primary); border-color:#a5b4fc; padding:4px 8px; font-size:0.75rem;" onclick="window.editProduct('${p.id}')">수정</button>
+                                    <button class="outline" style="color:var(--danger); border-color:#fca5a5; padding:4px 8px; font-size:0.75rem;" onclick="window.deleteProduct('${p.id}')">삭제</button>
+                                </div>
+                            </td>
+                        `;
+                    }
+                    tbody.appendChild(tr);
+                });
             });
-        }
+        };
 
         window.deleteProduct = (id) => {
             window.showConfirm("이 상품을 삭제하시겠습니까?", () => {
                 products = products.filter(p => p.id !== id);
+                if (editingProductId === id) window.cancelEdit();
                 saveToFirestore();
                 window.showToast("삭제되었습니다.");
             });
@@ -657,6 +752,7 @@
             window.showConfirm(`선택한 ${checkboxes.length}개의 상품을 삭제하시겠습니까?`, () => {
                 const idsToDelete = Array.from(checkboxes).map(cb => cb.value);
                 products = products.filter(p => !idsToDelete.includes(p.id));
+                if (idsToDelete.includes(editingProductId)) window.cancelEdit();
                 saveToFirestore();
                 window.showToast("선택 항목이 삭제되었습니다.");
             });
@@ -666,30 +762,34 @@
             if (products.length === 0) return;
             window.showConfirm("등록된 모든 상품을 삭제하시겠습니까?\n이 작업은 복구할 수 없습니다.", () => {
                 products = [];
+                window.cancelEdit();
                 saveToFirestore();
                 window.showToast("모든 데이터가 초기화되었습니다.");
             });
         };
 
-        function renderOrderProductList() {
+        window.renderOrderProductList = () => {
             const listDiv = document.getElementById('order-prd-list');
             if(!listDiv) return;
             listDiv.innerHTML = '';
             
-            if(products.length === 0) {
-                listDiv.innerHTML = '<div style="padding:40px; text-align:center; color:var(--text-muted);">발주할 수 있는 상품이 없습니다.</div>';
+            const searchQuery = document.getElementById('order-search')?.value.toLowerCase() || '';
+            const filteredProducts = products.filter(p => p.name.toLowerCase().includes(searchQuery) || (p.itemNum && p.itemNum.toLowerCase().includes(searchQuery)));
+            
+            if(filteredProducts.length === 0) {
+                listDiv.innerHTML = `<div style="padding:40px; text-align:center; color:var(--text-muted);">${products.length > 0 ? '검색 결과가 없습니다.' : '발주할 수 있는 상품이 없습니다.'}</div>`;
                 document.getElementById('order-detail-panel').style.display = 'none';
                 return;
             }
 
-            let sortedProducts = [...products].sort((a, b) => a.stock - b.stock);
+            let sortedProducts = [...filteredProducts].sort((a, b) => a.stock - b.stock);
 
             sortedProducts.forEach(p => {
                 const isLowStock = p.stock <= 5;
                 const lowStockLabel = isLowStock ? '<span class="badge">재고부족</span>' : '';
                 
                 const item = document.createElement('div');
-                item.className = 'order-item';
+                item.className = `order-item ${currentOrderProductId === p.id ? 'active' : ''}`;
                 
                 item.innerHTML = `
                     <div>
@@ -705,7 +805,7 @@
                 item.onclick = () => window.selectOrderProduct(p.id, item);
                 listDiv.appendChild(item);
             });
-        }
+        };
 
         window.selectOrderProduct = (id, element) => {
             document.querySelectorAll('.order-item').forEach(el => el.classList.remove('active'));
@@ -728,19 +828,30 @@
 
             p.vendors.forEach(v => {
                 const totalItemPrice = v.price * qty;
-                const grandTotal = totalItemPrice + v.shipping;
+                // 무료배송 기준 적용 로직
+                const isFreeShipping = totalItemPrice >= v.freeThreshold;
+                const actualShipping = isFreeShipping ? 0 : v.shipping;
+                const grandTotal = totalItemPrice + actualShipping;
+                
+                let shippingHtml = '';
+                if (isFreeShipping && v.shipping > 0) {
+                    shippingHtml = `<span style="text-decoration:line-through; color:#94a3b8; margin-right:4px;">${v.shipping.toLocaleString()}원</span> <span style="color:var(--success); font-weight:600;">무료배송</span>`;
+                } else {
+                    shippingHtml = `${actualShipping.toLocaleString()}원`;
+                }
+                
                 calcContainer.innerHTML += `
                     <div class="vendor-calc-card">
                         <div>
                             <div style="font-weight:700; font-size:1.05rem; color:var(--text-main);">${v.name}</div>
                             <div class="calc-info">
                                 단가 ${v.price.toLocaleString()}원 × ${qty}개 = ${totalItemPrice.toLocaleString()}원<br>
-                                배송비 ${v.shipping.toLocaleString()}원
+                                배송비 ${shippingHtml} <span style="font-size:0.75rem; color:#cbd5e1;">(기준:${v.freeThreshold.toLocaleString()}원)</span>
                             </div>
                         </div>
                         <div style="text-align:right;">
                             <div class="calc-total">${grandTotal.toLocaleString()}원</div>
-                            <button class="primary" style="margin-top:8px; width:100%;" onclick="window.placeOrder('${p.id}', '${v.name}', ${qty}, ${v.price}, ${v.shipping})">주문하기</button>
+                            <button class="primary" style="margin-top:8px; width:100%;" onclick="window.placeOrder('${p.id}', '${v.name}', ${qty}, ${v.price}, ${actualShipping})">주문하기</button>
                         </div>
                     </div>
                 `;
@@ -757,14 +868,14 @@
                 vendorName: vendorName,
                 qty: qty,
                 price: price,
-                shipping: shipping,
+                shipping: shipping, // 무료배송 적용된 실제 배송비
                 orderDate: new Date().toLocaleDateString()
             });
             saveToFirestore();
             window.showToast(`[${vendorName}]에 발주가 등록되었습니다.`);
         };
 
-        function renderInspectList() {
+        window.renderInspectList = () => {
             const tbody = document.getElementById('inspect-table-body');
             if(!tbody) return;
             tbody.innerHTML = '';
@@ -776,6 +887,8 @@
 
             inspectList.forEach(item => {
                 const grandTotal = (item.price * item.qty) + item.shipping;
+                let shippingText = item.shipping === 0 ? '<span style="color:var(--success); font-size:0.8rem;">(무료배송)</span>' : '';
+                
                 tbody.innerHTML += `
                     <tr>
                         <td style="text-align:center;"><span class="check-box"></span></td>
@@ -783,14 +896,16 @@
                             ${item.name}<br>
                             <span class="no-print" style="font-size:0.75rem; color:var(--text-muted); font-weight:normal; margin-top:4px; display:inline-block;">발주일: ${item.orderDate}</span>
                         </td>
-                        <td class="hide-on-print" style="color:var(--text-muted);">${item.itemNum || '-'}</td>
+                        <td class="hide-on-print" style="color:var(--text-muted); text-align:center;">${item.itemNum || '-'}</td>
                         <td style="font-weight:700; color:var(--primary); font-size:1.1rem; text-align:right;">${item.qty.toLocaleString()} 개</td>
-                        <td style="color:var(--text-main); font-weight:500;">${item.vendorName}</td>
+                        <td style="color:var(--text-main); font-weight:500; text-align:center;">${item.vendorName}</td>
                         <td class="hide-on-print" style="text-align:right;">${item.price.toLocaleString()}원</td>
-                        <td class="hide-on-print" style="font-weight:700; text-align:right;">${grandTotal.toLocaleString()}원</td>
-                        <td class="hide-on-print" style="text-align:center; display:flex; flex-direction:column; gap:6px;">
-                            <button class="primary" style="width:100%; padding:6px;" onclick="window.confirmReceive('${item.id}')">입고</button>
-                            <button class="outline" style="width:100%; padding:6px; font-size:0.75rem;" onclick="window.cancelOrder('${item.id}')">취소</button>
+                        <td class="hide-on-print" style="font-weight:700; text-align:right;">${grandTotal.toLocaleString()}원<br>${shippingText}</td>
+                        <td class="hide-on-print" style="text-align:center;">
+                            <div style="display:flex; flex-direction:column; gap:6px;">
+                                <button class="primary" style="width:100%; padding:6px;" onclick="window.confirmReceive('${item.id}')">입고</button>
+                                <button class="outline" style="width:100%; padding:6px; font-size:0.75rem; color:var(--secondary);" onclick="window.cancelOrder('${item.id}')">취소</button>
+                            </div>
                         </td>
                     </tr>
                 `;
