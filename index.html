@@ -4,11 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>재고 및 발주 통합 관리 시스템</title>
-    <!-- 고급스러운 폰트 (Pretendard) 적용 -->
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
     <style>
         :root {
-            /* 컬러 팔레트 - 세련된 Indigo & Slate 조합 */
+            /* 컬러 팔레트 */
             --primary: #4f46e5;
             --primary-hover: #4338ca;
             --secondary: #64748b;
@@ -17,6 +16,8 @@
             --success-hover: #059669;
             --danger: #ef4444;
             --danger-hover: #dc2626;
+            --warning: #f59e0b;
+            --warning-hover: #d97706;
             
             --bg-body: #f8fafc;
             --bg-card: #ffffff;
@@ -26,7 +27,7 @@
             --text-main: #0f172a;
             --text-muted: #64748b;
             
-            /* 디자인 토큰 */
+            /* 토큰 */
             --radius-sm: 6px;
             --radius-md: 12px;
             --radius-lg: 16px;
@@ -39,36 +40,15 @@
 
         * { box-sizing: border-box; }
         
-        body { 
-            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif; 
-            margin: 0; 
-            padding: 0; 
-            background-color: var(--bg-body); 
-            color: var(--text-main); 
-            line-height: 1.5;
-            -webkit-font-smoothing: antialiased;
-        }
+        body { font-family: 'Pretendard', sans-serif; margin: 0; padding: 0; background-color: var(--bg-body); color: var(--text-main); line-height: 1.5; -webkit-font-smoothing: antialiased; }
 
         h2 { font-size: 1.25rem; font-weight: 700; margin-top: 0; margin-bottom: 1rem; color: var(--text-main); }
         h3 { font-size: 1.125rem; font-weight: 600; margin-top: 0; color: var(--text-main); }
         
-        /* 공통 카드 컴포넌트 */
-        .card {
-            background: var(--bg-card);
-            border-radius: var(--radius-md);
-            box-shadow: var(--shadow-sm);
-            border: 1px solid var(--border-color);
-            padding: 20px;
-            margin-bottom: 20px;
-        }
+        .card { background: var(--bg-card); border-radius: var(--radius-md); box-shadow: var(--shadow-sm); border: 1px solid var(--border-color); padding: 20px; margin-bottom: 20px; }
 
-        /* 버튼 시스템 */
-        button { 
-            display: inline-flex; align-items: center; justify-content: center;
-            padding: 8px 16px; border: none; border-radius: var(--radius-sm); 
-            cursor: pointer; font-weight: 600; font-size: 0.875rem; 
-            transition: var(--transition);
-        }
+        /* 버튼 */
+        button { display: inline-flex; align-items: center; justify-content: center; padding: 8px 16px; border: none; border-radius: var(--radius-sm); cursor: pointer; font-weight: 600; font-size: 0.875rem; transition: var(--transition); }
         button:active { transform: translateY(1px); }
         button.primary { background: var(--primary); color: white; box-shadow: var(--shadow-sm); }
         button.primary:hover { background: var(--primary-hover); box-shadow: var(--shadow-md); }
@@ -76,25 +56,18 @@
         button.success:hover { background: var(--success-hover); }
         button.danger { background: var(--danger); color: white; }
         button.danger:hover { background: var(--danger-hover); }
+        button.warning { background: var(--warning); color: white; }
+        button.warning:hover { background: var(--warning-hover); }
         button.secondary { background: var(--secondary); color: white; }
         button.secondary:hover { background: var(--secondary-hover); }
         button.outline { background: transparent; border: 1px solid var(--border-color); color: var(--text-main); }
         button.outline:hover { background: var(--bg-hover); }
 
-        /* 입력 폼 시스템 */
-        input, select { 
-            padding: 10px 14px; border: 1px solid var(--border-color); 
-            border-radius: var(--radius-sm); font-size: 0.875rem; 
-            transition: var(--transition); background: var(--bg-card);
-            color: var(--text-main);
-            font-family: inherit;
-        }
-        input:focus, select:focus { 
-            outline: none; border-color: var(--primary); 
-            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15); 
-        }
+        /* 입력 폼 */
+        input, select { padding: 10px 14px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); font-size: 0.875rem; transition: var(--transition); background: var(--bg-card); color: var(--text-main); font-family: inherit; }
+        input:focus, select:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15); }
 
-        /* 로그인 스크린 */
+        /* 로그인 씬 */
         #login-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background: var(--bg-body); }
         .login-box { background: var(--bg-card); padding: 48px 40px; border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); text-align: center; max-width: 420px; width: 90%; border: 1px solid var(--border-color); }
         .login-logo { font-size: 2.5rem; margin-bottom: 10px; display: block; }
@@ -104,7 +77,7 @@
 
         /* 헤더 & 탭 */
         #app-header { background: #ffffff; border-bottom: 1px solid var(--border-color); padding: 12px 24px; display: flex; justify-content: space-between; align-items: center; box-shadow: var(--shadow-sm); position: sticky; top: 0; z-index: 10; }
-        .tab-nav { display: flex; background: var(--bg-card); padding: 0 24px; border-bottom: 1px solid var(--border-color); gap: 20px; }
+        .tab-nav { display: flex; background: var(--bg-card); padding: 0 24px; border-bottom: 1px solid var(--border-color); gap: 20px; overflow-x: auto; white-space: nowrap; }
         .tab-btn { background: transparent; color: var(--text-muted); padding: 16px 4px; font-size: 0.95rem; font-weight: 600; border-radius: 0; border-bottom: 3px solid transparent; transition: var(--transition); }
         .tab-btn:hover { color: var(--primary); }
         .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
@@ -115,7 +88,7 @@
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* 테이블 (고급형) */
+        /* 테이블 */
         .table-wrapper { background: var(--bg-card); border-radius: var(--radius-md); border: 1px solid var(--border-color); overflow-x: auto; box-shadow: var(--shadow-sm); }
         table { width: 100%; border-collapse: separate; border-spacing: 0; }
         th, td { padding: 16px 20px; text-align: left; vertical-align: middle; border-bottom: 1px solid var(--border-color); font-size: 0.875rem; }
@@ -134,7 +107,9 @@
         .order-item:hover { background: var(--bg-hover); }
         .order-item.active { background: #eff6ff; border-left: 4px solid var(--primary); }
         
-        .badge { padding: 4px 8px; border-radius: 999px; font-size: 0.7rem; font-weight: 700; background: #fee2e2; color: #b91c1c; }
+        .badge { padding: 4px 8px; border-radius: 999px; font-size: 0.7rem; font-weight: 700; }
+        .badge-danger { background: #fee2e2; color: #b91c1c; }
+        .badge-warning { background: #fef3c7; color: #b45309; }
         
         .order-detail { flex: 1.2; position: sticky; top: 80px;}
         
@@ -143,7 +118,16 @@
         .calc-info { font-size: 0.875rem; color: var(--text-muted); margin-top: 4px; }
         .calc-total { font-size: 1.125rem; font-weight: 700; color: var(--primary); }
 
-        /* 커스텀 토스트 알림 */
+        /* 통계 대시보드 (탭 4) */
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px; }
+        .stat-card { background: var(--bg-card); padding: 24px; border-radius: var(--radius-md); border: 1px solid var(--border-color); box-shadow: var(--shadow-sm); }
+        .stat-title { font-size: 1rem; font-weight: 600; color: var(--text-muted); margin-bottom: 8px; }
+        .stat-value { font-size: 2rem; font-weight: 700; color: var(--primary); margin-bottom: 20px; }
+        .stat-list { list-style: none; padding: 0; margin: 0; max-height: 350px; overflow-y: auto; }
+        .stat-list li { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border-color); }
+        .stat-list li:last-child { border-bottom: none; }
+
+        /* 모달 및 토스트 */
         .toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
         .toast { background: var(--text-main); color: white; padding: 14px 20px; border-radius: var(--radius-sm); font-size: 0.875rem; font-weight: 500; box-shadow: var(--shadow-lg); display: flex; align-items: center; gap: 10px; animation: slideInRight 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
         .toast.error { background: var(--danger); }
@@ -151,7 +135,6 @@
         @keyframes slideInRight { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
         @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; transform: translateY(10px); } }
 
-        /* 커스텀 모달 (Confirm 대체) */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15, 23, 42, 0.5); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 10000; opacity: 0; transition: opacity 0.2s; pointer-events: none; }
         .modal-overlay.active { opacity: 1; pointer-events: auto; }
         .modal-box { background: var(--bg-card); padding: 32px; border-radius: var(--radius-lg); width: 90%; max-width: 400px; box-shadow: var(--shadow-lg); transform: scale(0.95); transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1); }
@@ -159,7 +142,7 @@
         .modal-msg { font-size: 1rem; color: var(--text-main); margin-bottom: 24px; font-weight: 500; line-height: 1.5; white-space: pre-wrap;}
         .modal-actions { display: flex; justify-content: flex-end; gap: 12px; }
 
-        /* 인쇄 전용 CSS */
+        /* 인쇄 */
         @media print {
             body { background: #fff; color: #000; }
             .tab-nav, .no-print, #app-header { display: none !important; }
@@ -174,13 +157,15 @@
             .check-box { width: 22px; height: 22px; border: 2px solid #000; display: inline-block; vertical-align: middle; border-radius: 4px; }
         }
         .check-box { width: 20px; height: 20px; border: 2px solid var(--border-color); display: inline-block; vertical-align: middle; border-radius: 4px; background: #fff; }
+        
+        /* 커스텀 체크박스 */
+        input[type="checkbox"].real-checkbox { width: 18px; height: 18px; accent-color: var(--primary); cursor: pointer; }
     </style>
 </head>
 <body>
 
-    <!-- 커스텀 UI 컨테이너 (Toast, Modal) -->
+    <!-- UI 컨테이너 (Toast, Modal) -->
     <div id="toast-container" class="toast-container"></div>
-    
     <div id="confirm-modal" class="modal-overlay">
         <div class="modal-box">
             <div id="confirm-msg" class="modal-msg"></div>
@@ -217,10 +202,9 @@
         </div>
     </div>
 
-    <!-- 2. 메인 앱 화면 (로그인 및 승인 완료 시 표시) -->
+    <!-- 2. 메인 앱 화면 -->
     <div id="main-app" style="display: none;">
         
-        <!-- 상단 유저 정보 헤더 -->
         <div id="app-header" class="no-print">
             <div style="font-weight: 700; font-size: 1.1rem; display: flex; align-items: center; gap: 8px;">
                 <div style="width: 8px; height: 8px; background: var(--success); border-radius: 50%;"></div>
@@ -237,11 +221,12 @@
             <button class="tab-btn active" onclick="switchTab('tab-products')">상품 & 도매처 관리</button>
             <button class="tab-btn" onclick="switchTab('tab-order')">발주 신청</button>
             <button class="tab-btn" onclick="switchTab('tab-inspect')">입고 검수 리스트</button>
+            <button class="tab-btn" onclick="switchTab('tab-stats')">📊 4. 통계 및 정산</button>
         </div>
 
         <div class="container">
             <!-- ==============================================
-                 [탭 1] 상품 및 도매처 관리
+                 [탭 1] 상품 관리
                  ============================================== -->
             <div id="tab-products" class="tab-content active">
                 <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 15px;">
@@ -296,15 +281,13 @@
                                 <th style="width: 10%;">관리</th>
                             </tr>
                         </thead>
-                        <tbody id="prd-table-body">
-                            <!-- 리스트 렌더링 -->
-                        </tbody>
+                        <tbody id="prd-table-body"></tbody>
                     </table>
                 </div>
             </div>
 
             <!-- ==============================================
-                 [탭 2] 발주 신청 (계산 및 주문)
+                 [탭 2] 발주 신청
                  ============================================== -->
             <div id="tab-order" class="tab-content">
                 <div style="margin-bottom: 20px;">
@@ -312,17 +295,13 @@
                 </div>
                 
                 <div class="order-layout">
-                    <!-- 상품 선택 리스트 -->
                     <div class="order-list">
                         <div style="padding: 12px 16px; border-bottom: 1px solid var(--border-color); background: var(--bg-hover);">
                             <input type="text" id="order-search" placeholder="상품명 검색..." style="width: 100%; border: 1px solid #cbd5e1; box-shadow: none;" oninput="renderOrderProductList()">
                         </div>
-                        <div id="order-prd-list">
-                            <!-- 상품 목록 렌더링 -->
-                        </div>
+                        <div id="order-prd-list"></div>
                     </div>
                     
-                    <!-- 발주 계산 및 주문 패널 -->
                     <div class="card order-detail" id="order-detail-panel" style="display: none; margin-bottom: 0;">
                         <div style="border-bottom: 1px solid var(--border-color); padding-bottom: 16px; margin-bottom: 16px;">
                             <span style="font-size: 0.8rem; font-weight: 700; color: var(--primary); text-transform: uppercase; letter-spacing: 0.05em;">Selected Product</span>
@@ -336,15 +315,13 @@
                         </div>
                         
                         <h4 style="margin: 0 0 12px; font-size: 0.95rem; color: var(--text-main);">도매처별 예상 비용 비교</h4>
-                        <div id="ord-vendors-calc" style="display: flex; flex-direction: column; gap: 12px;">
-                            <!-- 도매처별 계산 결과 렌더링 -->
-                        </div>
+                        <div id="ord-vendors-calc" style="display: flex; flex-direction: column; gap: 12px;"></div>
                     </div>
                 </div>
             </div>
 
             <!-- ==============================================
-                 [탭 3] 입고 상품 검수 리스트 (인쇄 화면)
+                 [탭 3] 입고 검수 리스트
                  ============================================== -->
             <div id="tab-inspect" class="tab-content">
                 <div class="no-print" style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 15px;">
@@ -352,9 +329,18 @@
                         <h2 style="margin: 0 0 5px;">입고 검수 리스트</h2>
                         <p style="color: var(--text-muted); font-size: 0.85rem; margin: 0;">발주 완료한 상품들이 표시됩니다. 수기 검수 후 '입고 완료'를 처리하세요.</p>
                     </div>
-                    <div style="display: flex; gap: 10px;">
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        
+                        <!-- 선택 모드 시 나타나는 액션 버튼들 -->
+                        <div id="selection-actions" style="display: none; gap: 8px; margin-right: 15px; padding-right: 15px; border-right: 2px solid var(--border-color);">
+                            <button class="danger" onclick="window.markSelected('반품')">반품 처리</button>
+                            <button class="warning" onclick="window.markSelected('미도착')">미도착 처리</button>
+                            <button class="outline" onclick="window.markSelected('대기')">상태 초기화</button>
+                        </div>
+                        
+                        <button id="toggle-select-btn" class="outline" style="color: var(--primary); border-color: #a5b4fc;" onclick="window.toggleSelectionMode()">선택 모드</button>
                         <button class="primary" onclick="window.print()">🖨️ 인쇄하기</button>
-                        <button class="outline" style="color: var(--danger); border-color: #fca5a5;" onclick="clearInspectList()">전체 비우기</button>
+                        <button class="outline" style="color: var(--secondary); border-color: #cbd5e1;" onclick="window.clearInspectList()">전체 비우기</button>
                     </div>
                 </div>
 
@@ -362,8 +348,9 @@
                     <table>
                         <thead>
                             <tr>
-                                <th style="width: 6%;">확인</th>
-                                <th>상품명</th>
+                                <th class="print-only-th" style="width: 5%;">확인</th>
+                                <th class="selection-col" style="width: 5%; display: none;"><input type="checkbox" id="inspect-select-all" onclick="window.toggleInspectSelectAll(this)" class="real-checkbox"></th>
+                                <th style="width: 20%;">상품명</th>
                                 <th class="hide-on-print" style="width: 12%;">상품번호</th>
                                 <th style="width: 10%; text-align: center;">주문수량</th>
                                 <th>주문 도매처</th>
@@ -372,22 +359,55 @@
                                 <th class="hide-on-print" style="width: 12%;">관리</th>
                             </tr>
                         </thead>
-                        <tbody id="inspect-table-body">
-                            <!-- 발주 완료 리스트 렌더링 -->
-                        </tbody>
+                        <tbody id="inspect-table-body"></tbody>
                     </table>
                 </div>
             </div>
+
+            <!-- ==============================================
+                 [탭 4] 통계 및 정산 카테고리
+                 ============================================== -->
+            <div id="tab-stats" class="tab-content">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h2 style="margin: 0;">📊 발주 통계 및 정산</h2>
+                    <button class="outline" style="color: var(--danger); border-color: #fca5a5; font-size: 0.8rem;" onclick="window.resetOrderHistory()">내역 초기화</button>
+                </div>
+                
+                <div class="stats-grid">
+                    <!-- 총 지출 카드 -->
+                    <div class="stat-card" style="grid-column: 1 / -1; background: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%); color: white; border: none;">
+                        <div class="stat-title" style="color: #e0e7ff;">누적 총 발주 금액</div>
+                        <div class="stat-value" id="stat-total-amount" style="color: white; font-size: 2.5rem;">0원</div>
+                        <div style="font-size: 0.9rem; color: #e0e7ff;" id="stat-total-orders">총 발주 건수: 0건</div>
+                    </div>
+
+                    <!-- 도매처별 통계 -->
+                    <div class="stat-card">
+                        <div class="stat-title">🏢 도매처별 지출액</div>
+                        <ul class="stat-list" id="stat-vendor-list">
+                            <!-- JS 렌더링 -->
+                        </ul>
+                    </div>
+
+                    <!-- 상품별 통계 -->
+                    <div class="stat-card">
+                        <div class="stat-title">📦 상품별 발주 내역</div>
+                        <ul class="stat-list" id="stat-product-list">
+                            <!-- JS 렌더링 -->
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
 
-    <!-- Firebase SDK 및 앱 로직 연동 (Type Module 사용) -->
+    <!-- Firebase SDK 연동 -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, getDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Vercel 배포를 위한 실제 Firebase 설정값
         const firebaseConfig = {
             apiKey: "AIzaSyDAJzs95LRmWdHKRRRQhRNuJDXsi7HvYF8",
             authDomain: "nov-main.firebaseapp.com",
@@ -407,9 +427,12 @@
         let isApproved = false;
         let products = [];
         let inspectList = [];
+        let orderHistory = []; // 통계용 발주 기록
+        
         let currentOrderProductId = null;
         let unsubscribeData = null;
-        let editingProductId = null; // 수정 중인 상품 ID
+        let editingProductId = null;
+        let isSelectionMode = false; // 검수 리스트 선택 모드 상태
 
         // 도매처 기본 설정
         const VENDOR_DEFAULT_SETTINGS = {
@@ -421,36 +444,21 @@
             '도매매': { shipping: 3000, freeThreshold: 0 }
         };
 
-        // ==========================================
-        // UI 유틸리티: 숫자에 천 단위 콤마 추가
-        // ==========================================
+        // UI 유틸리티
         window.formatNumberInput = (el) => {
             let val = el.value.replace(/[^0-9]/g, '');
-            if (val !== '') {
-                el.value = parseInt(val, 10).toLocaleString();
-            } else {
-                el.value = '';
-            }
+            if (val !== '') el.value = parseInt(val, 10).toLocaleString();
+            else el.value = '';
         };
 
-        // ==========================================
-        // UI 유틸리티: Toast & Confirm (alert/confirm 대체)
-        // ==========================================
         window.showToast = (message, type = 'success') => {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
             toast.className = `toast ${type}`;
-            
-            // 아이콘 추가
             const icon = type === 'success' ? '✓' : '⚠';
             toast.innerHTML = `<span style="font-weight:bold; font-size:1.1rem;">${icon}</span> ${message}`;
-            
             container.appendChild(toast);
-            
-            setTimeout(() => {
-                toast.style.animation = 'fadeOut 0.3s forwards';
-                setTimeout(() => toast.remove(), 300);
-            }, 3000);
+            setTimeout(() => { toast.style.animation = 'fadeOut 0.3s forwards'; setTimeout(() => toast.remove(), 300); }, 3000);
         };
 
         let confirmCallback = null;
@@ -459,21 +467,14 @@
             document.getElementById('confirm-modal').classList.add('active');
             confirmCallback = callback;
         };
-
-        window.closeConfirmModal = () => {
-            document.getElementById('confirm-modal').classList.remove('active');
-            confirmCallback = null;
-        };
-
+        window.closeConfirmModal = () => { document.getElementById('confirm-modal').classList.remove('active'); confirmCallback = null; };
         document.getElementById('confirm-yes-btn').addEventListener('click', () => {
             if (confirmCallback) confirmCallback();
             window.closeConfirmModal();
         });
 
 
-        // ==========================================
-        // Firebase 인증 (구글 로그인 및 승인 처리)
-        // ==========================================
+        // Firebase 인증
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 currentUser = user;
@@ -485,7 +486,6 @@
                     document.getElementById('login-screen').style.display = 'none';
                     document.getElementById('main-app').style.display = 'block';
                     document.getElementById('user-info').innerText = `${user.email}`;
-                    
                     window.addVendorRow();
                     loadDataFromFirestore();
                     window.showToast("환영합니다!", "success");
@@ -495,14 +495,8 @@
                     document.getElementById('main-app').style.display = 'none';
                     document.querySelector('.google-btn').style.display = 'none';
                     document.getElementById('approval-msg').style.display = 'block';
-                    
                     if (!userDocSnap.exists()) {
-                        await setDoc(userDocRef, { 
-                            approved: false, 
-                            email: user.email, 
-                            name: user.displayName,
-                            requestedAt: new Date().toISOString() 
-                        });
+                        await setDoc(userDocRef, { approved: false, email: user.email, name: user.displayName, requestedAt: new Date().toISOString() });
                     }
                 }
             } else {
@@ -512,24 +506,17 @@
                 document.getElementById('main-app').style.display = 'none';
                 document.querySelector('.google-btn').style.display = 'flex';
                 document.getElementById('approval-msg').style.display = 'none';
-                
                 if (unsubscribeData) unsubscribeData();
             }
         });
 
         window.loginWithGoogle = () => {
             const provider = new GoogleAuthProvider();
-            signInWithPopup(auth, provider).catch(error => {
-                console.error("로그인 에러:", error);
-                window.showToast("로그인 중 오류가 발생했습니다.", "error");
-            });
+            signInWithPopup(auth, provider).catch(error => { window.showToast("로그인 중 오류가 발생했습니다.", "error"); });
         };
-
         window.logout = () => signOut(auth);
 
-        // ==========================================
         // 클라우드 데이터베이스 동기화
-        // ==========================================
         function loadDataFromFirestore() {
             const dataRef = doc(db, "inventory_system", "company_data");
             unsubscribeData = onSnapshot(dataRef, (docSnap) => {
@@ -537,13 +524,16 @@
                     const data = docSnap.data();
                     products = data.products || [];
                     inspectList = data.inspectList || [];
+                    orderHistory = data.orderHistory || [];
                 } else {
                     products = [];
                     inspectList = [];
+                    orderHistory = [];
                 }
                 window.renderProducts();
                 window.renderOrderProductList();
                 window.renderInspectList();
+                window.renderStats();
                 
                 if (currentOrderProductId && !products.find(p => p.id === currentOrderProductId)) {
                     currentOrderProductId = null;
@@ -556,31 +546,27 @@
             if (!currentUser || !isApproved) return;
             try {
                 const dataRef = doc(db, "inventory_system", "company_data");
-                await setDoc(dataRef, { products, inspectList });
+                await setDoc(dataRef, { products, inspectList, orderHistory });
             } catch (error) {
-                console.error("데이터 저장 실패:", error);
                 window.showToast("데이터 저장 중 오류가 발생했습니다.", "error");
             }
         }
 
-        // ==========================================
-        // 전역 UI 제어 함수
-        // ==========================================
         window.switchTab = (tabId) => {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
             document.getElementById(tabId).classList.add('active');
             document.querySelector(`[onclick="window.switchTab('${tabId}')"]`)?.classList.add('active');
             if(tabId === 'tab-order') window.renderOrderProductList(); 
+            if(tabId === 'tab-stats') window.renderStats();
         };
 
-        // 상품 정보 수정 및 등록 취소 처리
+        /* ================= 탭 1: 상품 관리 ================= */
         window.cancelEdit = () => {
             editingProductId = null;
             document.getElementById('form-title').innerText = "새 상품 등록";
             document.getElementById('save-prd-btn').innerText = "저장하기";
             document.getElementById('cancel-edit-btn').style.display = 'none';
-            
             document.getElementById('prd-name').value = '';
             document.getElementById('prd-num').value = '';
             document.getElementById('prd-stock').value = '';
@@ -591,38 +577,27 @@
         window.editProduct = (id) => {
             const p = products.find(x => x.id === id);
             if(!p) return;
-            
             editingProductId = p.id;
             document.getElementById('form-title').innerHTML = `상품 수정 <span style="font-size:0.9rem; font-weight:normal; color:var(--text-muted);">(${p.name})</span>`;
             document.getElementById('save-prd-btn').innerText = "수정 완료";
             document.getElementById('cancel-edit-btn').style.display = 'inline-flex';
-            
             document.getElementById('prd-name').value = p.name;
             document.getElementById('prd-num').value = p.itemNum || '';
             document.getElementById('prd-stock').value = p.stock ? p.stock.toLocaleString() : '0';
             
             const container = document.getElementById('vendor-container');
             container.innerHTML = '';
-            
-            p.vendors.forEach(v => {
-                window.addVendorRow(v);
-            });
-            
+            p.vendors.forEach(v => window.addVendorRow(v));
             window.scrollTo({ top: 0, behavior: 'smooth' });
         };
 
-        // 도매처 입력 행 추가 (데이터가 있으면 채움)
         window.addVendorRow = (vendorData = null) => {
             const container = document.getElementById('vendor-container');
             if(!container) return;
             const row = document.createElement('div');
             row.className = 'vendor-row';
-            
             let options = '<option value="">도매처 선택</option>';
-            for(let v in VENDOR_DEFAULT_SETTINGS) { 
-                options += `<option value="${v}" ${vendorData && vendorData.name === v ? 'selected' : ''}>${v}</option>`; 
-            }
-
+            for(let v in VENDOR_DEFAULT_SETTINGS) { options += `<option value="${v}" ${vendorData && vendorData.name === v ? 'selected' : ''}>${v}</option>`; }
             row.innerHTML = `
                 <select class="v-name" onchange="window.autoFillShipping(this)" style="flex: 1.5; min-width: 120px;">${options}</select>
                 <input type="text" class="v-price" placeholder="상품 단가" style="flex: 1; min-width: 100px;" value="${vendorData ? vendorData.price.toLocaleString() : ''}" oninput="window.formatNumberInput(this)">
@@ -635,27 +610,20 @@
 
         window.autoFillShipping = (selectElement) => {
             const vendorName = selectElement.value;
-            const shipInput = selectElement.parentElement.querySelector('.v-ship');
-            const freeInput = selectElement.parentElement.querySelector('.v-free');
-            
             if (vendorName && VENDOR_DEFAULT_SETTINGS[vendorName] !== undefined) {
-                shipInput.value = VENDOR_DEFAULT_SETTINGS[vendorName].shipping.toLocaleString();
-                freeInput.value = VENDOR_DEFAULT_SETTINGS[vendorName].freeThreshold.toLocaleString();
+                selectElement.parentElement.querySelector('.v-ship').value = VENDOR_DEFAULT_SETTINGS[vendorName].shipping.toLocaleString();
+                selectElement.parentElement.querySelector('.v-free').value = VENDOR_DEFAULT_SETTINGS[vendorName].freeThreshold.toLocaleString();
             }
         };
 
         window.saveProduct = () => {
             const name = document.getElementById('prd-name').value;
             const num = document.getElementById('prd-num').value;
-            // 값 읽을 때 콤마를 제거하고 숫자로 변환
             const stock = parseInt(document.getElementById('prd-stock').value.replace(/,/g, '')) || 0;
-
             if(!name.trim()) { window.showToast("상품명을 입력해주세요.", "error"); return; }
-
-            const vendorRows = document.querySelectorAll('.vendor-row');
-            let vendors = [];
             
-            vendorRows.forEach(row => {
+            let vendors = [];
+            document.querySelectorAll('.vendor-row').forEach(row => {
                 const vName = row.querySelector('.v-name').value;
                 const vPrice = parseInt(row.querySelector('.v-price').value.replace(/,/g, '')) || 0;
                 const vShip = parseInt(row.querySelector('.v-ship').value.replace(/,/g, '')) || 0;
@@ -667,70 +635,52 @@
 
             if (editingProductId) {
                 const idx = products.findIndex(p => p.id === editingProductId);
-                if(idx !== -1) {
-                    products[idx] = { ...products[idx], name, itemNum: num, stock, vendors };
-                }
+                if(idx !== -1) products[idx] = { ...products[idx], name, itemNum: num, stock, vendors };
                 window.showToast("상품 정보가 수정되었습니다.");
                 window.cancelEdit();
             } else {
                 products.push({ id: Date.now().toString(), name, itemNum: num, stock, vendors });
                 window.showToast("새 상품이 저장되었습니다.");
-                
-                document.getElementById('prd-name').value = '';
-                document.getElementById('prd-num').value = '';
-                document.getElementById('prd-stock').value = '';
-                document.getElementById('vendor-container').innerHTML = '';
-                window.addVendorRow();
+                window.cancelEdit();
                 document.getElementById('prd-name').focus();
             }
-            
             saveToFirestore();
-            window.renderProducts();
         };
 
         window.renderProducts = () => {
             const tbody = document.getElementById('prd-table-body');
             if(!tbody) return;
             tbody.innerHTML = '';
-            const selectAllCb = document.getElementById('selectAllCheckbox');
-            if(selectAllCb) selectAllCb.checked = false;
             
             const searchQuery = document.getElementById('prd-search')?.value.toLowerCase() || '';
             const filteredProducts = products.filter(p => p.name.toLowerCase().includes(searchQuery) || (p.itemNum && p.itemNum.toLowerCase().includes(searchQuery)));
             
             if(filteredProducts.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="8" style="padding:40px; text-align:center; color:var(--text-muted);">${products.length > 0 ? '검색 결과가 없습니다.' : '등록된 상품이 없습니다. 새 상품을 등록해보세요.'}</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="8" style="padding:40px; text-align:center; color:var(--text-muted);">${products.length > 0 ? '검색 결과가 없습니다.' : '등록된 상품이 없습니다.'}</td></tr>`;
                 return;
             }
             
             filteredProducts.forEach(p => {
                 const rowCount = p.vendors.length;
-                
                 p.vendors.forEach((v, index) => {
                     const tr = document.createElement('tr');
-                    
                     if (index === 0) {
                         tr.innerHTML += `
-                            <td rowspan="${rowCount}" style="text-align:center; border-right:1px solid var(--border-color);"><input type="checkbox" class="product-checkbox" value="${p.id}"></td>
+                            <td rowspan="${rowCount}" style="text-align:center; border-right:1px solid var(--border-color);"><input type="checkbox" class="product-checkbox real-checkbox" value="${p.id}"></td>
                             <td rowspan="${rowCount}" style="text-align:center; font-weight:600; color:var(--text-main); border-right:1px solid var(--border-color);">${p.name}</td>
                             <td rowspan="${rowCount}" style="text-align:center; color:var(--text-muted); border-right:1px solid var(--border-color);">${p.itemNum || '-'}</td>
                             <td rowspan="${rowCount}" style="text-align:center; border-right:1px solid var(--border-color);">
-                                <span style="font-weight:700; font-size:1.05rem; color:${p.stock <= 5 ? 'var(--danger)' : 'var(--text-main)'};">
-                                    ${p.stock.toLocaleString()}
-                                </span>
+                                <span style="font-weight:700; font-size:1.05rem; color:${p.stock <= 5 ? 'var(--danger)' : 'var(--text-main)'};">${p.stock.toLocaleString()}</span>
                             </td>
                         `;
                     }
-                    
                     tr.innerHTML += `
                         <td style="text-align:center; color:var(--text-main); font-weight:500;">${v.name}</td>
                         <td style="text-align:center; font-weight:600; color:var(--primary);">${v.price.toLocaleString()}원</td>
                         <td style="text-align:center; color:var(--text-muted); font-size:0.85rem;">
-                            ${v.shipping.toLocaleString()}원<br>
-                            <span style="font-size:0.75rem; color:#9ca3af;">(${v.freeThreshold.toLocaleString()}원 이상 무료)</span>
+                            ${v.shipping.toLocaleString()}원<br><span style="font-size:0.75rem; color:#9ca3af;">(${v.freeThreshold.toLocaleString()}원 이상 무료)</span>
                         </td>
                     `;
-                    
                     if (index === 0) {
                         tr.innerHTML += `
                             <td rowspan="${rowCount}" style="text-align:center; border-left:1px solid var(--border-color);">
@@ -750,24 +700,13 @@
             window.showConfirm("이 상품을 삭제하시겠습니까?", () => {
                 products = products.filter(p => p.id !== id);
                 if (editingProductId === id) window.cancelEdit();
-                
-                if (currentOrderProductId === id) {
-                    currentOrderProductId = null;
-                    document.getElementById('order-detail-panel').style.display = 'none';
-                }
-                
+                if (currentOrderProductId === id) { currentOrderProductId = null; document.getElementById('order-detail-panel').style.display = 'none'; }
                 saveToFirestore();
-                
-                window.renderProducts();
-                window.renderOrderProductList();
-                
                 window.showToast("삭제되었습니다.");
             });
         };
 
-        window.toggleSelectAllProducts = (source) => {
-            document.querySelectorAll('.product-checkbox').forEach(cb => cb.checked = source.checked);
-        };
+        window.toggleSelectAllProducts = (source) => { document.querySelectorAll('.product-checkbox').forEach(cb => cb.checked = source.checked); };
 
         window.deleteSelectedProducts = () => {
             const checkboxes = document.querySelectorAll('.product-checkbox:checked');
@@ -775,19 +714,9 @@
             window.showConfirm(`선택한 ${checkboxes.length}개의 상품을 삭제하시겠습니까?`, () => {
                 const idsToDelete = Array.from(checkboxes).map(cb => cb.value);
                 products = products.filter(p => !idsToDelete.includes(p.id));
-                
                 if (idsToDelete.includes(editingProductId)) window.cancelEdit();
-                
-                if (idsToDelete.includes(currentOrderProductId)) {
-                    currentOrderProductId = null;
-                    document.getElementById('order-detail-panel').style.display = 'none';
-                }
-                
+                if (idsToDelete.includes(currentOrderProductId)) { currentOrderProductId = null; document.getElementById('order-detail-panel').style.display = 'none'; }
                 saveToFirestore();
-                
-                window.renderProducts();
-                window.renderOrderProductList();
-                
                 window.showToast("선택 항목이 삭제되었습니다.");
             });
         };
@@ -797,19 +726,14 @@
             window.showConfirm("등록된 모든 상품을 삭제하시겠습니까?\n이 작업은 복구할 수 없습니다.", () => {
                 products = [];
                 window.cancelEdit();
-                
                 currentOrderProductId = null;
                 document.getElementById('order-detail-panel').style.display = 'none';
-                
                 saveToFirestore();
-                
-                window.renderProducts();
-                window.renderOrderProductList();
-                
                 window.showToast("모든 데이터가 초기화되었습니다.");
             });
         };
 
+        /* ================= 탭 2: 발주 신청 ================= */
         window.renderOrderProductList = () => {
             const listDiv = document.getElementById('order-prd-list');
             if(!listDiv) return;
@@ -819,7 +743,7 @@
             const filteredProducts = products.filter(p => p.name.toLowerCase().includes(searchQuery) || (p.itemNum && p.itemNum.toLowerCase().includes(searchQuery)));
             
             if(filteredProducts.length === 0) {
-                listDiv.innerHTML = `<div style="padding:40px; text-align:center; color:var(--text-muted);">${products.length > 0 ? '검색 결과가 없습니다.' : '발주할 수 있는 상품이 없습니다.'}</div>`;
+                listDiv.innerHTML = `<div style="padding:40px; text-align:center; color:var(--text-muted);">발주할 수 있는 상품이 없습니다.</div>`;
                 document.getElementById('order-detail-panel').style.display = 'none';
                 return;
             }
@@ -828,15 +752,12 @@
 
             sortedProducts.forEach(p => {
                 const isLowStock = p.stock <= 5;
-                const lowStockLabel = isLowStock ? '<span class="badge">재고부족</span>' : '';
-                
                 const item = document.createElement('div');
                 item.className = `order-item ${currentOrderProductId === p.id ? 'active' : ''}`;
-                
                 item.innerHTML = `
                     <div>
                         <div style="font-weight:600; color:var(--text-main); margin-bottom:4px; display:flex; align-items:center; gap:8px;">
-                            ${p.name} ${lowStockLabel}
+                            ${p.name} ${isLowStock ? '<span class="badge badge-danger">재고부족</span>' : ''}
                         </div>
                         <div style="font-size:0.8rem; color:var(--text-muted);">상품번호: ${p.itemNum || '-'}</div>
                     </div>
@@ -878,12 +799,9 @@
                 const actualShipping = isFreeShipping ? 0 : v.shipping;
                 const grandTotal = totalItemPrice + actualShipping;
                 
-                let shippingHtml = '';
-                if (isFreeShipping && v.shipping > 0) {
-                    shippingHtml = `<span style="text-decoration:line-through; color:#94a3b8; margin-right:4px;">${v.shipping.toLocaleString()}원</span> <span style="color:var(--success); font-weight:600;">무료배송</span>`;
-                } else {
-                    shippingHtml = `${actualShipping.toLocaleString()}원`;
-                }
+                let shippingHtml = (isFreeShipping && v.shipping > 0) 
+                    ? `<span style="text-decoration:line-through; color:#94a3b8; margin-right:4px;">${v.shipping.toLocaleString()}원</span> <span style="color:var(--success); font-weight:600;">무료배송</span>`
+                    : `${actualShipping.toLocaleString()}원`;
                 
                 calcContainer.innerHTML += `
                     <div class="vendor-calc-card">
@@ -905,6 +823,9 @@
 
         window.placeOrder = (prdId, vendorName, qty, price, shipping) => {
             const p = products.find(x => x.id === prdId);
+            const totalAmount = (price * qty) + shipping;
+            
+            // 검수 리스트에 추가 (상태: 대기)
             inspectList.push({
                 id: Date.now().toString(),
                 productId: p.id,
@@ -914,10 +835,63 @@
                 qty: qty,
                 price: price,
                 shipping: shipping,
+                status: '대기', // 상태 속성 추가
                 orderDate: new Date().toLocaleDateString()
             });
+            
+            // 통계 기록에 추가
+            orderHistory.push({
+                id: Date.now().toString(),
+                productId: p.id,
+                name: p.name,
+                vendorName: vendorName,
+                qty: qty,
+                price: price,
+                shipping: shipping,
+                totalAmount: totalAmount,
+                orderDate: new Date().toISOString() // ISO 포맷으로 정확한 시간 저장
+            });
+            
             saveToFirestore();
             window.showToast(`[${vendorName}]에 발주가 등록되었습니다.`);
+        };
+
+        /* ================= 탭 3: 입고 검수 리스트 ================= */
+        window.toggleSelectionMode = () => {
+            isSelectionMode = !isSelectionMode;
+            const btn = document.getElementById('toggle-select-btn');
+            const actions = document.getElementById('selection-actions');
+            
+            if (isSelectionMode) {
+                btn.innerText = '선택 취소';
+                btn.style.background = 'var(--bg-hover)';
+                actions.style.display = 'flex';
+                document.querySelectorAll('.selection-col').forEach(el => el.style.display = 'table-cell');
+                document.querySelectorAll('.print-only-th').forEach(el => el.style.display = 'none');
+            } else {
+                btn.innerText = '선택 모드';
+                btn.style.background = 'transparent';
+                actions.style.display = 'none';
+                document.querySelectorAll('.selection-col').forEach(el => el.style.display = 'none');
+                document.querySelectorAll('.print-only-th').forEach(el => el.style.display = 'table-cell');
+            }
+            window.renderInspectList();
+        };
+
+        window.toggleInspectSelectAll = (source) => { document.querySelectorAll('.inspect-checkbox').forEach(cb => cb.checked = source.checked); };
+
+        window.markSelected = (status) => {
+            const checkboxes = document.querySelectorAll('.inspect-checkbox:checked');
+            if (checkboxes.length === 0) { window.showToast("항목을 선택해주세요.", "error"); return; }
+            
+            checkboxes.forEach(cb => {
+                const item = inspectList.find(x => x.id === cb.value);
+                if (item) item.status = status;
+            });
+            
+            saveToFirestore();
+            window.toggleSelectionMode(); // 처리 후 선택 모드 종료
+            window.showToast(`선택 항목이 ${status === '대기' ? '초기화' : status} 처리되었습니다.`);
         };
 
         window.renderInspectList = () => {
@@ -926,7 +900,7 @@
             tbody.innerHTML = '';
             
             if(inspectList.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="8" style="padding:40px; text-align:center; color:var(--text-muted);">입고 대기 중인 발주 내역이 없습니다.</td></tr>';
+                tbody.innerHTML = `<tr><td colspan="${isSelectionMode ? 9 : 8}" style="padding:40px; text-align:center; color:var(--text-muted);">입고 대기 중인 발주 내역이 없습니다.</td></tr>`;
                 return;
             }
 
@@ -934,11 +908,17 @@
                 const grandTotal = (item.price * item.qty) + item.shipping;
                 let shippingText = item.shipping === 0 ? '<span style="color:var(--success); font-size:0.8rem;">(무료배송)</span>' : '';
                 
+                // 상태 뱃지 렌더링
+                let statusBadge = '';
+                if (item.status === '반품') statusBadge = `<span class="badge badge-danger" style="margin-left:8px;">반품</span>`;
+                else if (item.status === '미도착') statusBadge = `<span class="badge badge-warning" style="margin-left:8px;">미도착</span>`;
+                
                 tbody.innerHTML += `
                     <tr>
-                        <td style="text-align:center;"><span class="check-box"></span></td>
+                        <td class="print-only-th" style="text-align:center; display: ${isSelectionMode ? 'none' : 'table-cell'};"><span class="check-box"></span></td>
+                        <td class="selection-col" style="text-align:center; display: ${isSelectionMode ? 'table-cell' : 'none'};"><input type="checkbox" class="inspect-checkbox real-checkbox" value="${item.id}"></td>
                         <td style="font-weight:600; text-align:center; color:var(--text-main);">
-                            ${item.name}<br>
+                            ${item.name} ${statusBadge}<br>
                             <span class="no-print" style="font-size:0.75rem; color:var(--text-muted); font-weight:normal; margin-top:4px; display:inline-block;">발주일: ${item.orderDate}</span>
                         </td>
                         <td class="hide-on-print" style="color:var(--text-muted); text-align:center;">${item.itemNum || '-'}</td>
@@ -948,8 +928,8 @@
                         <td class="hide-on-print" style="font-weight:700; text-align:center;">${grandTotal.toLocaleString()}원<br>${shippingText}</td>
                         <td class="hide-on-print" style="text-align:center;">
                             <div style="display:flex; flex-direction:column; gap:6px;">
-                                <button class="primary" style="width:100%; padding:6px;" onclick="window.confirmReceive('${item.id}')">입고</button>
-                                <button class="outline" style="width:100%; padding:6px; font-size:0.75rem; color:var(--secondary);" onclick="window.cancelOrder('${item.id}')">취소</button>
+                                <button class="primary" style="width:100%; padding:6px;" onclick="window.confirmReceive('${item.id}')">정상 입고</button>
+                                <button class="outline" style="width:100%; padding:6px; font-size:0.75rem; color:var(--secondary);" onclick="window.cancelOrder('${item.id}')">항목 취소</button>
                             </div>
                         </td>
                     </tr>
@@ -972,18 +952,97 @@
         };
 
         window.cancelOrder = (inspectId) => {
-            window.showConfirm("이 발주 내역을 취소하시겠습니까?", () => {
+            window.showConfirm("이 발주 내역을 리스트에서 완전히 취소하시겠습니까?", () => {
                 inspectList = inspectList.filter(x => x.id !== inspectId);
                 saveToFirestore();
-                window.showToast("발주가 취소되었습니다.");
+                window.showToast("리스트에서 제거되었습니다.");
             });
         };
 
         window.clearInspectList = () => {
-            window.showConfirm("입고 대기 리스트를 전체 삭제하시겠습니까?\n발주 내역이 사라지며 복구 불가합니다.", () => {
-                inspectList = [];
+            const normalItems = inspectList.filter(x => x.status !== '반품' && x.status !== '미도착');
+            if (normalItems.length === 0) {
+                window.showToast("비울 수 있는 정상 항목이 없습니다.", "error");
+                return;
+            }
+            window.showConfirm("문제가 발생한 항목(반품/미도착)을 제외하고\n나머지 검수 완료 항목을 리스트에서 모두 지우시겠습니까?\n(※ 재고에 추가되지 않고 리스트에서만 사라집니다)", () => {
+                // 반품, 미도착 상태인 항목만 남김
+                inspectList = inspectList.filter(x => x.status === '반품' || x.status === '미도착');
                 saveToFirestore();
-                window.showToast("리스트가 비워졌습니다.");
+                window.showToast("검수 완료 항목들이 삭제되었습니다.");
+            });
+        };
+
+        /* ================= 탭 4: 통계 및 정산 ================= */
+        window.renderStats = () => {
+            const totalAmountEl = document.getElementById('stat-total-amount');
+            const totalOrdersEl = document.getElementById('stat-total-orders');
+            const vendorListEl = document.getElementById('stat-vendor-list');
+            const productListEl = document.getElementById('stat-product-list');
+            
+            if (!totalAmountEl) return;
+
+            let totalSpent = 0;
+            const vendorStats = {};
+            const productStats = {};
+
+            orderHistory.forEach(order => {
+                totalSpent += order.totalAmount;
+                
+                // 도매처별 집계
+                if (!vendorStats[order.vendorName]) vendorStats[order.vendorName] = { amount: 0, count: 0 };
+                vendorStats[order.vendorName].amount += order.totalAmount;
+                vendorStats[order.vendorName].count += 1;
+                
+                // 상품별 집계
+                if (!productStats[order.name]) productStats[order.name] = { qty: 0, amount: 0 };
+                productStats[order.name].qty += order.qty;
+                productStats[order.name].amount += order.totalAmount;
+            });
+
+            // 화면 반영
+            totalAmountEl.innerText = `${totalSpent.toLocaleString()}원`;
+            totalOrdersEl.innerText = `총 누적 발주: ${orderHistory.length}건`;
+
+            // 도매처 리스트 렌더링 (금액 높은 순)
+            vendorListEl.innerHTML = '';
+            const sortedVendors = Object.entries(vendorStats).sort((a, b) => b[1].amount - a[1].amount);
+            if (sortedVendors.length === 0) vendorListEl.innerHTML = '<li style="color:var(--text-muted);">발주 내역이 없습니다.</li>';
+            sortedVendors.forEach(([vName, stats]) => {
+                vendorListEl.innerHTML += `
+                    <li>
+                        <div>
+                            <div style="font-weight:600; color:var(--text-main);">${vName}</div>
+                            <div style="font-size:0.8rem; color:var(--text-muted);">${stats.count}건 발주</div>
+                        </div>
+                        <div style="font-weight:700; color:var(--primary);">${stats.amount.toLocaleString()}원</div>
+                    </li>
+                `;
+            });
+
+            // 상품 리스트 렌더링 (금액 높은 순)
+            productListEl.innerHTML = '';
+            const sortedProducts = Object.entries(productStats).sort((a, b) => b[1].amount - a[1].amount);
+            if (sortedProducts.length === 0) productListEl.innerHTML = '<li style="color:var(--text-muted);">발주 내역이 없습니다.</li>';
+            sortedProducts.forEach(([pName, stats]) => {
+                productListEl.innerHTML += `
+                    <li>
+                        <div>
+                            <div style="font-weight:600; color:var(--text-main);">${pName}</div>
+                            <div style="font-size:0.8rem; color:var(--text-muted);">총 ${stats.qty.toLocaleString()}개 발주</div>
+                        </div>
+                        <div style="font-weight:700; color:var(--primary);">${stats.amount.toLocaleString()}원</div>
+                    </li>
+                `;
+            });
+        };
+
+        window.resetOrderHistory = () => {
+            if (orderHistory.length === 0) return;
+            window.showConfirm("정말로 모든 발주 통계 내역을 초기화하시겠습니까?\n(※ 입고 검수 리스트의 항목들은 지워지지 않습니다)", () => {
+                orderHistory = [];
+                saveToFirestore();
+                window.showToast("통계 내역이 초기화되었습니다.");
             });
         };
     </script>
