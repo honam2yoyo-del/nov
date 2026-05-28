@@ -310,12 +310,10 @@
                             <option value="50">50개씩 보기</option>
                         </select>
                     </div>
-                    <div style="display: flex; gap: 12px; align-items: center;">
-                        <input type="text" id="prd-search" placeholder="상품명 검색..." style="width: 250px; padding: 8px 12px;" oninput="window.resetPageAndRender()">
-                        <div style="display: flex; gap: 8px;">
-                            <button class="outline" style="color: var(--danger); border-color: #fca5a5;" onclick="deleteSelectedProducts()">선택 삭제</button>
-                            <button class="outline" style="color: var(--secondary);" onclick="deleteAllProducts()">전체 삭제</button>
-                        </div>
+                    <input type="text" id="prd-search" placeholder="상품명 검색..." style="width: 250px; padding: 8px 12px;" oninput="window.resetPageAndRender()">
+                    <div style="display: flex; gap: 8px;">
+                        <button class="outline" style="color: var(--danger); border-color: #fca5a5;" onclick="deleteSelectedProducts()">선택 삭제</button>
+                        <button class="outline" style="color: var(--secondary);" onclick="deleteAllProducts()">전체 삭제</button>
                     </div>
                 </div>
                 
