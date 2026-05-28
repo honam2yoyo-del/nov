@@ -137,7 +137,7 @@
 
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15, 23, 42, 0.5); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 10000; opacity: 0; transition: opacity 0.2s; pointer-events: none; }
         .modal-overlay.active { opacity: 1; pointer-events: auto; }
-        .modal-box { background: var(--bg-card); padding: 32px; border-radius: var(--radius-lg); width: 90%; max-width: 400px; box-shadow: var(--shadow-lg); transform: scale(0.95); transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1); }
+        .modal-box { background: var(--bg-card); padding: 32px; border-radius: var(--radius-lg); width: 90%; max-width: 500px; box-shadow: var(--shadow-lg); transform: scale(0.95); transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1); }
         .modal-overlay.active .modal-box { transform: scale(1); }
         .modal-msg { font-size: 1rem; color: var(--text-main); margin-bottom: 24px; font-weight: 500; line-height: 1.5; white-space: pre-wrap;}
         .modal-actions { display: flex; justify-content: flex-end; gap: 12px; }
@@ -171,7 +171,7 @@
     <!-- UI 컨테이너 (Toast, Modal) -->
     <div id="toast-container" class="toast-container"></div>
     <div id="confirm-modal" class="modal-overlay">
-        <div class="modal-box">
+        <div class="modal-box" style="max-width: 400px;">
             <div id="confirm-msg" class="modal-msg"></div>
             <div class="modal-actions">
                 <button class="outline" onclick="closeConfirmModal()">취소</button>
@@ -180,9 +180,28 @@
         </div>
     </div>
     
-    <!-- 도매처 추가 모달 -->
-    <div id="vendor-modal" class="modal-overlay">
+    <!-- 도매처 리스트 모달 -->
+    <div id="vendor-list-modal" class="modal-overlay">
         <div class="modal-box">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                <h3 style="margin:0;">도매처 리스트</h3>
+                <button class="primary" style="padding: 6px 12px; font-size: 0.8rem;" onclick="window.openAddVendorModal()">+ 새 도매처 등록</button>
+            </div>
+            <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:15px;">화살표 버튼을 눌러 도매처 순서를 변경할 수 있습니다.</p>
+            
+            <ul id="draggable-vendor-list" style="list-style:none; padding:0; margin:0; max-height: 400px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px;">
+                <!-- JS로 렌더링 -->
+            </ul>
+            
+            <div class="modal-actions" style="margin-top: 24px;">
+                <button class="outline" onclick="window.closeVendorListModal()">닫기</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 새 도매처 추가 모달 -->
+    <div id="add-vendor-modal" class="modal-overlay">
+        <div class="modal-box" style="max-width: 400px;">
             <h3 style="margin-top:0; margin-bottom:20px;">새 도매처 등록</h3>
             <div style="display:flex; flex-direction:column; gap:12px; margin-bottom:24px;">
                 <input type="text" id="new-vendor-name" placeholder="도매처 이름 입력 (예: ABC상사)">
@@ -190,8 +209,8 @@
                 <input type="text" id="new-vendor-free" placeholder="무료배송 기준액 숫자 입력 (예: 50000)" oninput="window.formatNumberInput(this)" onkeypress="if(event.key==='Enter') { event.preventDefault(); window.saveNewVendor(); }">
             </div>
             <div class="modal-actions">
-                <button class="outline" onclick="closeVendorModal()">취소</button>
-                <button class="primary" onclick="saveNewVendor()">등록</button>
+                <button class="outline" onclick="window.closeAddVendorModal()">취소</button>
+                <button class="primary" onclick="window.saveNewVendor()">등록</button>
             </div>
         </div>
     </div>
@@ -265,7 +284,8 @@
                             도매처 정보
                             <span style="font-size: 0.8rem; font-weight: normal; color: var(--text-muted); margin-left: 8px;">* 도매처 선택 시 기본 배송비와 무료배송 기준이 자동 입력됩니다.</span>
                         </div>
-                        <button class="outline" style="padding: 4px 10px; font-size: 0.8rem; color: var(--primary); border-color: var(--primary);" onclick="openVendorModal()">+ 새 도매처 등록</button>
+                        <!-- 새 도매처 등록 -> 도매처 리스트 버튼으로 변경 -->
+                        <button class="outline" style="padding: 4px 10px; font-size: 0.8rem; color: var(--primary); border-color: var(--primary);" onclick="window.openVendorListModal()">도매처 리스트</button>
                     </div>
                     
                     <div id="vendor-container"></div>
@@ -297,7 +317,6 @@
                                 <th style="width: 5%;"><input type="checkbox" id="selectAllCheckbox" class="real-checkbox" onclick="toggleSelectAllProducts(this)"></th>
                                 <th style="width: 20%;">상품명</th>
                                 <th style="width: 15%;">상품번호</th>
-                                <!-- 재고 정렬 토글 기능 추가 -->
                                 <th style="width: 10%; cursor: pointer; user-select: none;" onclick="window.toggleStockSort()" title="재고순 정렬">재고 <span id="sort-icon" style="color:var(--primary); font-size:1.1em;">↕</span></th>
                                 <th style="width: 15%;">도매처</th>
                                 <th style="width: 12%;">단가</th>
@@ -354,7 +373,6 @@
                         <p style="color: var(--text-muted); font-size: 0.85rem; margin: 0;">발주 완료한 상품들이 표시됩니다. 체크박스로 문제를 표시하고 '입고'를 처리하세요.</p>
                     </div>
                     <div style="display: flex; gap: 10px; align-items: center;">
-                        <!-- 선택 액션 바 -->
                         <div id="inspect-selection-actions" style="display: none; gap: 8px; margin-right: 15px; padding-right: 15px; border-right: 2px solid var(--border-color); align-items:center;">
                             <span id="inspect-checked-count" style="font-size:0.85rem; font-weight:600; margin-right:10px; color:var(--primary);">0개 선택됨</span>
                             <button class="danger" style="padding:6px 10px; font-size:0.8rem;" onclick="window.markSelected('반품')">반품</button>
@@ -397,7 +415,6 @@
                 </div>
                 
                 <div class="stats-grid">
-                    <!-- 총 지출 카드 -->
                     <div class="stat-card" style="grid-column: 1 / -1; background: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%); color: white; border: none;">
                         <div class="stat-title" style="color: #e0e7ff;">누적 총 발주 지출액 (입고 완료 기준)</div>
                         <div class="stat-value" id="stat-total-amount" style="color: white; font-size: 2.5rem;">0원</div>
@@ -405,26 +422,20 @@
                         <div style="font-size: 0.85rem; color: #c7d2fe;" id="stat-total-orders">총 누적 발주: 0건</div>
                     </div>
 
-                    <!-- 도매처별 통계 -->
                     <div class="stat-card">
                         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
                             <div class="stat-title" style="margin:0;">🏢 도매처별 지출액</div>
                             <input type="text" id="stat-vendor-search" placeholder="도매처 검색..." style="padding:4px 8px; font-size:0.8rem; width:130px;" oninput="window.renderStats()">
                         </div>
-                        <ul class="stat-list" id="stat-vendor-list">
-                            <!-- JS 렌더링 -->
-                        </ul>
+                        <ul class="stat-list" id="stat-vendor-list"></ul>
                     </div>
 
-                    <!-- 상품별 통계 -->
                     <div class="stat-card">
                         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
                             <div class="stat-title" style="margin:0;">📦 상품별 발주 내역</div>
                             <input type="text" id="stat-product-search" placeholder="상품명 검색..." style="padding:4px 8px; font-size:0.8rem; width:130px;" oninput="window.renderStats()">
                         </div>
-                        <ul class="stat-list" id="stat-product-list">
-                            <!-- JS 렌더링 -->
-                        </ul>
+                        <ul class="stat-list" id="stat-product-list"></ul>
                     </div>
                 </div>
             </div>
@@ -432,7 +443,6 @@
         </div>
     </div>
 
-    <!-- Firebase SDK 연동 -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
@@ -452,19 +462,18 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // 앱 상태 변수
         let currentUser = null;
         let isApproved = false;
         let products = [];
         let inspectList = [];
         let orderHistory = []; 
-        let vendorSettings = {}; // 클라우드 동기화 될 도매처 설정
+        let vendorSettings = {}; 
+        let vendorOrder = []; // 도매처 정렬 순서 배열
         
         let currentOrderProductId = null;
         let unsubscribeData = null;
         let editingProductId = null;
-        
-        let stockSortOrder = 'none'; // 'none', 'asc', 'desc'
+        let stockSortOrder = 'none';
 
         const VENDOR_DEFAULT_SETTINGS = {
             'NCmall': { shipping: 2800, freeThreshold: 70000 },
@@ -475,7 +484,6 @@
             '도매매': { shipping: 3000, freeThreshold: 0 }
         };
 
-        // UI 유틸리티
         window.formatNumberInput = (el) => {
             let val = el.value.replace(/[^0-9]/g, '');
             if (val !== '') el.value = parseInt(val, 10).toLocaleString();
@@ -504,7 +512,6 @@
             window.closeConfirmModal();
         });
 
-        // Firebase 인증
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 currentUser = user;
@@ -545,7 +552,6 @@
         };
         window.logout = () => signOut(auth);
 
-        // 클라우드 데이터베이스 동기화
         function loadDataFromFirestore() {
             const dataRef = doc(db, "inventory_system", "company_data");
             unsubscribeData = onSnapshot(dataRef, (docSnap) => {
@@ -555,14 +561,25 @@
                     inspectList = data.inspectList || [];
                     orderHistory = data.orderHistory || [];
                     vendorSettings = data.vendorSettings || { ...VENDOR_DEFAULT_SETTINGS };
+                    
+                    // vendorOrder 동기화
+                    if (data.vendorOrder && data.vendorOrder.length > 0) {
+                        vendorOrder = data.vendorOrder;
+                    } else {
+                        vendorOrder = Object.keys(vendorSettings);
+                    }
+                    // 새로 추가되거나 삭제된 키 정리
+                    const existingKeys = Object.keys(vendorSettings);
+                    existingKeys.forEach(k => { if (!vendorOrder.includes(k)) vendorOrder.push(k); });
+                    vendorOrder = vendorOrder.filter(k => vendorSettings[k]);
                 } else {
                     products = [];
                     inspectList = [];
                     orderHistory = [];
                     vendorSettings = { ...VENDOR_DEFAULT_SETTINGS };
+                    vendorOrder = Object.keys(vendorSettings);
                 }
                 
-                // 첫 행이 없으면 추가
                 if(document.querySelectorAll('.vendor-row').length === 0) window.addVendorRow();
                 
                 window.renderProducts();
@@ -570,6 +587,9 @@
                 window.renderInspectList();
                 window.renderStats();
                 window.updateVendorDropdowns();
+                if(document.getElementById('vendor-list-modal').classList.contains('active')) {
+                    window.renderVendorListModal();
+                }
                 
                 if (currentOrderProductId && !products.find(p => p.id === currentOrderProductId)) {
                     currentOrderProductId = null;
@@ -582,7 +602,7 @@
             if (!currentUser || !isApproved) return;
             try {
                 const dataRef = doc(db, "inventory_system", "company_data");
-                await setDoc(dataRef, { products, inspectList, orderHistory, vendorSettings });
+                await setDoc(dataRef, { products, inspectList, orderHistory, vendorSettings, vendorOrder });
             } catch (error) {
                 window.showToast("데이터 저장 중 오류가 발생했습니다.", "error");
             }
@@ -597,16 +617,89 @@
             if(tabId === 'tab-stats') window.renderStats();
         };
 
-        /* ================= 탭 1: 상품 관리 및 도매처 ================= */
-        // 도매처 모달 관리
-        window.openVendorModal = () => {
+        /* ================= 도매처 리스트 및 모달 관리 ================= */
+        window.openVendorListModal = () => {
+            window.renderVendorListModal();
+            document.getElementById('vendor-list-modal').classList.add('active');
+        };
+        window.closeVendorListModal = () => document.getElementById('vendor-list-modal').classList.remove('active');
+
+        window.renderVendorListModal = () => {
+            const listEl = document.getElementById('draggable-vendor-list');
+            listEl.innerHTML = '';
+            
+            if (vendorOrder.length === 0) {
+                listEl.innerHTML = '<li style="padding:15px; text-align:center; color:var(--text-muted);">등록된 도매처가 없습니다.</li>';
+                return;
+            }
+
+            vendorOrder.forEach((vName, index) => {
+                const li = document.createElement('li');
+                li.style.cssText = `
+                    display: flex; justify-content: space-between; align-items: center; 
+                    padding: 12px 16px; border: 1px solid var(--border-color); 
+                    border-radius: var(--radius-sm); background: var(--bg-card); 
+                    box-shadow: var(--shadow-sm); transition: var(--transition);
+                `;
+                
+                const upDisabled = index === 0 ? 'opacity:0.3; pointer-events:none;' : '';
+                const downDisabled = index === vendorOrder.length - 1 ? 'opacity:0.3; pointer-events:none;' : '';
+                
+                li.innerHTML = `
+                    <div style="font-weight:600; color:var(--text-main); font-size:1rem;">${vName}</div>
+                    <div style="display:flex; gap:6px; align-items:center;">
+                        <div style="display:flex; flex-direction:column; gap:2px; margin-right:8px;">
+                            <button class="outline" style="padding:2px 8px; font-size:0.75rem; min-height:0; ${upDisabled}" onclick="window.moveVendorUp(${index})">▲</button>
+                            <button class="outline" style="padding:2px 8px; font-size:0.75rem; min-height:0; ${downDisabled}" onclick="window.moveVendorDown(${index})">▼</button>
+                        </div>
+                        <button class="outline" style="padding:6px 10px; font-size:0.8rem; color:var(--danger); border-color:#fca5a5;" onclick="window.deleteVendor('${vName}')">삭제</button>
+                    </div>
+                `;
+                listEl.appendChild(li);
+            });
+        };
+
+        window.moveVendorUp = (index) => {
+            if (index > 0) {
+                const temp = vendorOrder[index - 1];
+                vendorOrder[index - 1] = vendorOrder[index];
+                vendorOrder[index] = temp;
+                saveToFirestore();
+            }
+        };
+
+        window.moveVendorDown = (index) => {
+            if (index < vendorOrder.length - 1) {
+                const temp = vendorOrder[index + 1];
+                vendorOrder[index + 1] = vendorOrder[index];
+                vendorOrder[index] = temp;
+                saveToFirestore();
+            }
+        };
+
+        window.deleteVendor = (vName) => {
+            window.showConfirm(`[${vName}] 도매처를 완전히 삭제하시겠습니까?\n(등록된 상품 정보는 유지됩니다)`, () => {
+                delete vendorSettings[vName];
+                vendorOrder = vendorOrder.filter(v => v !== vName);
+                saveToFirestore();
+                window.showToast(`${vName} 도매처가 삭제되었습니다.`);
+            });
+        };
+
+        window.openAddVendorModal = () => {
             document.getElementById('new-vendor-name').value = '';
             document.getElementById('new-vendor-ship').value = '';
             document.getElementById('new-vendor-free').value = '';
-            document.getElementById('vendor-modal').classList.add('active');
+            // Close list modal if open, open add modal
+            document.getElementById('vendor-list-modal').classList.remove('active');
+            document.getElementById('add-vendor-modal').classList.add('active');
             document.getElementById('new-vendor-name').focus();
         };
-        window.closeVendorModal = () => document.getElementById('vendor-modal').classList.remove('active');
+        window.closeAddVendorModal = () => {
+            document.getElementById('add-vendor-modal').classList.remove('active');
+            // Re-open list modal
+            window.openVendorListModal();
+        };
         
         window.saveNewVendor = () => {
             const vName = document.getElementById('new-vendor-name').value.trim();
@@ -614,20 +707,22 @@
             const vFree = parseInt(document.getElementById('new-vendor-free').value.replace(/,/g, '')) || 0;
             
             if(!vName) { window.showToast("도매처 이름을 입력해주세요.", "error"); return; }
+            if(vendorSettings[vName]) { window.showToast("이미 등록된 도매처입니다.", "error"); return; }
             
             vendorSettings[vName] = { shipping: vShip, freeThreshold: vFree };
+            vendorOrder.push(vName);
             saveToFirestore();
             window.showToast(`[${vName}] 도매처가 추가되었습니다.`);
-            window.closeVendorModal();
+            window.closeAddVendorModal(); // This will auto-open the list modal
         };
 
         window.updateVendorDropdowns = () => {
             document.querySelectorAll('.v-name').forEach(select => {
                 const currentVal = select.value;
                 select.innerHTML = '<option value="">도매처 선택</option>';
-                for(let v in vendorSettings) { 
+                vendorOrder.forEach(v => {
                     select.innerHTML += `<option value="${v}" ${currentVal === v ? 'selected' : ''}>${v}</option>`; 
-                }
+                });
             });
         };
 
@@ -666,7 +761,9 @@
             const row = document.createElement('div');
             row.className = 'vendor-row';
             let options = '<option value="">도매처 선택</option>';
-            for(let v in vendorSettings) { options += `<option value="${v}" ${vendorData && vendorData.name === v ? 'selected' : ''}>${v}</option>`; }
+            vendorOrder.forEach(v => {
+                options += `<option value="${v}" ${vendorData && vendorData.name === v ? 'selected' : ''}>${v}</option>`; 
+            });
             row.innerHTML = `
                 <select class="v-name" onchange="window.autoFillShipping(this)" style="flex: 1.5; min-width: 120px;">${options}</select>
                 <input type="text" class="v-price" placeholder="상품 단가" style="flex: 1; min-width: 100px;" value="${vendorData ? vendorData.price.toLocaleString() : ''}" oninput="window.formatNumberInput(this)">
@@ -765,7 +862,9 @@
                     }
                     tr.innerHTML += `
                         <td style="text-align:center; color:var(--text-main); font-weight:500;">${v.name}</td>
-                        <td style="text-align:center; font-weight:600; color:var(--primary);">${v.price.toLocaleString()}원</td>
+                        <td style="text-align:center; font-weight:600; color:var(--primary); cursor:pointer;" title="클릭하여 단가 수정" onclick="window.inlineEditPrice('${p.id}', '${v.name}', this, ${v.price})">
+                            <span style="border-bottom: 1px dashed var(--primary); padding-bottom: 1px;">${v.price.toLocaleString()}원</span>
+                        </td>
                         <td style="text-align:center; color:var(--text-muted); font-size:0.85rem;">
                             ${v.shipping.toLocaleString()}원<br><span style="font-size:0.75rem; color:#9ca3af;">(${v.freeThreshold.toLocaleString()}원 이상 무료)</span>
                         </td>
@@ -783,6 +882,49 @@
                     tbody.appendChild(tr);
                 });
             });
+        };
+
+        // 단가 인라인 직접 수정 기능
+        window.inlineEditPrice = (productId, vendorName, tdElement, currentPrice) => {
+            if(tdElement.querySelector('input')) return; // 이미 수정 중인 경우 방지
+            
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.value = currentPrice.toLocaleString();
+            input.style.width = '80px';
+            input.style.textAlign = 'center';
+            input.style.padding = '4px 8px';
+            input.style.fontSize = '0.9rem';
+            input.style.fontWeight = '600';
+            input.style.color = 'var(--primary)';
+            input.style.border = '1px solid var(--primary)';
+            input.style.borderRadius = '4px';
+            input.style.outline = 'none';
+
+            input.oninput = function() { window.formatNumberInput(this); };
+
+            const finishEdit = () => {
+                const valStr = input.value.replace(/,/g, '');
+                const newPrice = valStr ? parseInt(valStr, 10) : 0;
+                
+                const p = products.find(x => x.id === productId);
+                if (p) {
+                    const v = p.vendors.find(x => x.name === vendorName);
+                    if (v && v.price !== newPrice) {
+                        v.price = newPrice;
+                        saveToFirestore();
+                        window.showToast("단가가 수정되었습니다.");
+                    }
+                }
+                window.renderProducts(); // 원래 텍스트로 되돌리기 위해 렌더링
+            };
+
+            input.onblur = finishEdit;
+            input.onkeypress = (e) => { if(e.key === 'Enter') finishEdit(); };
+
+            tdElement.innerHTML = '';
+            tdElement.appendChild(input);
+            input.focus();
         };
 
         window.deleteProduct = (id) => {
@@ -1149,7 +1291,7 @@
                     const itemProductAmt = item.price * item.qty;
                     let itemShippingAmt = 0;
                     
-                    // 배송비 안분 계산 로직 (상품 금액 비율에 맞춰 배송비 배분)
+                    // 배송비 안분 계산 로직
                     if (g.totalProduct > 0) {
                         if (index === g.items.length - 1) {
                             itemShippingAmt = remainingShipping;
