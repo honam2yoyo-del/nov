@@ -300,8 +300,9 @@
                 </div>
 
                 <div style="display: flex; justify-content: space-between; align-items: center; margin: 40px 0 15px;">
-                    <div style="display: flex; align-items: center; gap: 12px;">
-                        <h2 style="margin: 0;">상품 목록</h2>
+                    <h2 style="margin: 0;">상품 목록</h2>
+                    <input type="text" id="prd-search" placeholder="상품명 검색..." style="width: 360px; padding: 8px 14px;" oninput="window.resetPageAndRender()">
+                    <div style="display: flex; gap: 8px; align-items: center;">
                         <select id="prd-page-size" onchange="window.resetPageAndRender()" style="padding: 8px 12px;">
                             <option value="10">10개씩 보기</option>
                             <option value="20">20개씩 보기</option>
@@ -309,9 +310,6 @@
                             <option value="40">40개씩 보기</option>
                             <option value="50">50개씩 보기</option>
                         </select>
-                    </div>
-                    <input type="text" id="prd-search" placeholder="상품명 검색..." style="width: 250px; padding: 8px 12px;" oninput="window.resetPageAndRender()">
-                    <div style="display: flex; gap: 8px;">
                         <button class="outline" style="color: var(--danger); border-color: #fca5a5;" onclick="deleteSelectedProducts()">선택 삭제</button>
                         <button class="outline" style="color: var(--secondary);" onclick="deleteAllProducts()">전체 삭제</button>
                     </div>
