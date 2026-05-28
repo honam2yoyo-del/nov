@@ -137,7 +137,7 @@
 
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15, 23, 42, 0.5); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 10000; opacity: 0; transition: opacity 0.2s; pointer-events: none; }
         .modal-overlay.active { opacity: 1; pointer-events: auto; }
-        .modal-box { background: var(--bg-card); padding: 32px; border-radius: var(--radius-lg); width: 90%; max-width: 500px; box-shadow: var(--shadow-lg); transform: scale(0.95); transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1); }
+        .modal-box { background: var(--bg-card); padding: 32px; border-radius: var(--radius-lg); width: 90%; max-width: 500px; box-shadow: var(--shadow-lg); transform: scale(0.95); transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1); max-height: 90vh; overflow-y: auto; }
         .modal-overlay.active .modal-box { transform: scale(1); }
         .modal-msg { font-size: 1rem; color: var(--text-main); margin-bottom: 24px; font-weight: 500; line-height: 1.5; white-space: pre-wrap;}
         .modal-actions { display: flex; justify-content: flex-end; gap: 12px; }
@@ -241,6 +241,35 @@
         </div>
     </div>
 
+    <!-- 상품 수정 모달 -->
+    <div id="edit-product-modal" class="modal-overlay">
+        <div class="modal-box" style="max-width: 800px; width: 90%;">
+            <h3 style="margin-top:0; margin-bottom:20px;">상품 정보 수정</h3>
+            
+            <div class="form-row">
+                <input type="text" id="edit-prd-name" placeholder="상품명 (필수)" style="flex: 2;">
+                <input type="text" id="edit-prd-num" placeholder="상품번호" style="flex: 1;">
+                <input type="text" id="edit-prd-stock" placeholder="현재 재고 수량" style="flex: 1;" oninput="window.formatNumberInput(this)">
+            </div>
+            
+            <div style="margin: 20px 0 10px; font-weight: 600; font-size: 0.95rem; color: var(--text-main);">
+                도매처 정보
+            </div>
+            
+            <!-- 수정용 도매처 입력 폼이 여기에 그려짐 -->
+            <div id="edit-vendor-container"></div>
+            
+            <div style="margin-top: 16px;">
+                <button class="outline" onclick="window.addVendorRowToModal()">+ 판매 도매처 칸 추가</button>
+            </div>
+            
+            <div class="modal-actions" style="margin-top: 24px;">
+                <button class="outline" onclick="window.closeEditProductModal()">취소</button>
+                <button class="primary" onclick="window.saveEditProductModal()">수정 완료</button>
+            </div>
+        </div>
+    </div>
+
     <!-- 1. 로그인 스크린 -->
     <div id="login-screen">
         <div class="login-box">
@@ -295,7 +324,7 @@
                  ============================================== -->
             <div id="tab-products" class="tab-content active">
                 <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 15px;">
-                    <h2 id="form-title" style="margin: 0;">새 상품 등록</h2>
+                    <h2 style="margin: 0;">새 상품 등록</h2>
                 </div>
                 
                 <div class="card form-section">
@@ -318,8 +347,7 @@
                     <div style="margin-top: 16px; display: flex; justify-content: space-between; align-items: center;">
                         <button class="outline" onclick="addVendorRow()">+ 판매 도매처 칸 추가</button>
                         <div style="display: flex; gap: 8px;">
-                            <button id="cancel-edit-btn" class="outline" style="display: none;" onclick="cancelEdit()">취소</button>
-                            <button id="save-prd-btn" class="primary" onclick="saveProduct()">저장하기</button>
+                            <button class="primary" onclick="saveProduct()">저장하기</button>
                         </div>
                     </div>
                 </div>
@@ -499,8 +527,6 @@
         let unsubscribeData = null;
         let editingProductId = null;
         let stockSortOrder = 'none';
-        
-        let savedScrollPosition = 0; // 스크롤 복원을 위한 변수
 
         const VENDOR_DEFAULT_SETTINGS = {
             'NCmall': { shipping: 2800, freeThreshold: 70000 },
@@ -606,7 +632,7 @@
                     vendorOrder = Object.keys(vendorSettings);
                 }
                 
-                // ================= PJPACK 마이그레이션 (1회 실행) =================
+                // ================= PJPACK 마이그레이션 =================
                 let needsMigration = false;
                 if (vendorSettings['PJPACK']) {
                     vendorSettings['PJPACK(3)'] = { ...vendorSettings['PJPACK'] };
@@ -635,9 +661,9 @@
                 if (needsMigration) {
                     saveToFirestore();
                 }
-                // ===================================================================
+                // =========================================================
 
-                if(document.querySelectorAll('.vendor-row').length === 0) window.addVendorRow();
+                if(document.querySelectorAll('#vendor-container .vendor-row').length === 0) window.addVendorRow();
                 
                 window.renderProducts();
                 window.renderOrderProductList();
@@ -779,7 +805,6 @@
             window.closeAddVendorModal(); 
         };
 
-        // 도매처 정보 수정
         window.openEditVendorModal = (vName) => {
             const setting = vendorSettings[vName] || {shipping:0, freeThreshold:0};
             document.getElementById('edit-vendor-original-name').value = vName;
@@ -832,49 +857,31 @@
             });
         };
 
-        window.cancelEdit = () => {
-            editingProductId = null;
-            document.getElementById('form-title').innerText = "새 상품 등록";
-            document.getElementById('save-prd-btn').innerText = "저장하기";
-            document.getElementById('cancel-edit-btn').style.display = 'none';
-            document.getElementById('prd-name').value = '';
-            document.getElementById('prd-num').value = '';
-            document.getElementById('prd-stock').value = '';
-            document.getElementById('vendor-container').innerHTML = '';
-            window.addVendorRow();
-            
-            // 수정 모드 취소 후 스크롤 복원
-            if (savedScrollPosition > 0) {
-                setTimeout(() => {
-                    window.scrollTo({ top: savedScrollPosition, behavior: 'smooth' });
-                    savedScrollPosition = 0;
-                }, 100);
-            }
-        };
-
+        /* ================= 상품 관리 모달 및 수정 ================= */
+        // 모달 열기 및 세팅
         window.editProduct = (id) => {
             const p = products.find(x => x.id === id);
             if(!p) return;
             
-            // 수정 모드 진입 시 현재 스크롤 위치 저장
-            savedScrollPosition = window.scrollY || document.documentElement.scrollTop;
-            
             editingProductId = p.id;
-            document.getElementById('form-title').innerHTML = `상품 수정 <span style="font-size:0.9rem; font-weight:normal; color:var(--text-muted);">(${p.name})</span>`;
-            document.getElementById('save-prd-btn').innerText = "수정 완료";
-            document.getElementById('cancel-edit-btn').style.display = 'inline-flex';
-            document.getElementById('prd-name').value = p.name;
-            document.getElementById('prd-num').value = p.itemNum || '';
-            document.getElementById('prd-stock').value = p.stock ? p.stock.toLocaleString() : '0';
+            document.getElementById('edit-prd-name').value = p.name;
+            document.getElementById('edit-prd-num').value = p.itemNum || '';
+            document.getElementById('edit-prd-stock').value = p.stock ? p.stock.toLocaleString() : '0';
             
-            const container = document.getElementById('vendor-container');
+            const container = document.getElementById('edit-vendor-container');
             container.innerHTML = '';
-            p.vendors.forEach(v => window.addVendorRow(v));
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            p.vendors.forEach(v => window.addVendorRowToModal(v));
+            
+            document.getElementById('edit-product-modal').classList.add('active');
         };
 
-        window.addVendorRow = (vendorData = null) => {
-            const container = document.getElementById('vendor-container');
+        window.closeEditProductModal = () => {
+            editingProductId = null;
+            document.getElementById('edit-product-modal').classList.remove('active');
+        };
+
+        window.addVendorRowToModal = (vendorData = null) => {
+            const container = document.getElementById('edit-vendor-container');
             if(!container) return;
             const row = document.createElement('div');
             row.className = 'vendor-row';
@@ -886,7 +893,57 @@
                 <select class="v-name" onchange="window.autoFillShipping(this)" style="flex: 1.5; min-width: 120px;">${options}</select>
                 <input type="text" class="v-price" placeholder="상품 단가" style="flex: 1; min-width: 100px;" value="${vendorData ? vendorData.price.toLocaleString() : ''}" oninput="window.formatNumberInput(this)">
                 <input type="text" class="v-ship" placeholder="기본 배송비" style="flex: 1; min-width: 100px;" value="${vendorData ? vendorData.shipping.toLocaleString() : ''}" oninput="window.formatNumberInput(this)">
-                <input type="text" class="v-free" placeholder="무료배송 기준액" style="flex: 1.2; min-width: 120px;" value="${vendorData ? vendorData.freeThreshold.toLocaleString() : ''}" oninput="window.formatNumberInput(this)" onkeypress="if(event.key==='Enter') { event.preventDefault(); window.saveProduct(); }">
+                <input type="text" class="v-free" placeholder="무료배송 기준액" style="flex: 1.2; min-width: 120px;" value="${vendorData ? vendorData.freeThreshold.toLocaleString() : ''}" oninput="window.formatNumberInput(this)" onkeypress="if(event.key==='Enter') { event.preventDefault(); window.saveEditProductModal(); }">
+                <button class="outline" style="padding: 8px 12px; color: var(--danger); border-color: #fca5a5;" onclick="this.parentElement.remove()">삭제</button>
+            `;
+            container.appendChild(row);
+        };
+
+        window.saveEditProductModal = () => {
+            const name = document.getElementById('edit-prd-name').value;
+            const num = document.getElementById('edit-prd-num').value;
+            const stock = parseInt(document.getElementById('edit-prd-stock').value.replace(/,/g, '')) || 0;
+            
+            if(!name.trim()) { window.showToast("상품명을 입력해주세요.", "error"); return; }
+            
+            let vendors = [];
+            const container = document.getElementById('edit-vendor-container');
+            container.querySelectorAll('.vendor-row').forEach(row => {
+                const vName = row.querySelector('.v-name').value;
+                const vPrice = parseInt(row.querySelector('.v-price').value.replace(/,/g, '')) || 0;
+                const vShip = parseInt(row.querySelector('.v-ship').value.replace(/,/g, '')) || 0;
+                const vFree = parseInt(row.querySelector('.v-free').value.replace(/,/g, '')) || 0; 
+                if(vName) { vendors.push({ name: vName, price: vPrice, shipping: vShip, freeThreshold: vFree }); }
+            });
+
+            if(vendors.length === 0) { window.showToast("최소 1개의 도매처를 선택해주세요.", "error"); return; }
+
+            const idx = products.findIndex(p => p.id === editingProductId);
+            if(idx !== -1) {
+                products[idx] = { ...products[idx], name, itemNum: num, stock, vendors };
+                saveToFirestore();
+                window.showToast("상품 정보가 수정되었습니다.");
+                window.closeEditProductModal();
+                window.renderProducts();
+                window.renderOrderProductList();
+            }
+        };
+
+        // 메인 화면 새 상품 저장
+        window.addVendorRow = () => {
+            const container = document.getElementById('vendor-container');
+            if(!container) return;
+            const row = document.createElement('div');
+            row.className = 'vendor-row';
+            let options = '<option value="">도매처 선택</option>';
+            vendorOrder.forEach(v => {
+                options += `<option value="${v}">${v}</option>`; 
+            });
+            row.innerHTML = `
+                <select class="v-name" onchange="window.autoFillShipping(this)" style="flex: 1.5; min-width: 120px;">${options}</select>
+                <input type="text" class="v-price" placeholder="상품 단가" style="flex: 1; min-width: 100px;" oninput="window.formatNumberInput(this)">
+                <input type="text" class="v-ship" placeholder="기본 배송비" style="flex: 1; min-width: 100px;" oninput="window.formatNumberInput(this)">
+                <input type="text" class="v-free" placeholder="무료배송 기준액" style="flex: 1.2; min-width: 120px;" oninput="window.formatNumberInput(this)" onkeypress="if(event.key==='Enter') { event.preventDefault(); window.saveProduct(); }">
                 <button class="outline" style="padding: 8px 12px; color: var(--danger); border-color: #fca5a5;" onclick="this.parentElement.remove()">삭제</button>
             `;
             container.appendChild(row);
@@ -907,7 +964,7 @@
             if(!name.trim()) { window.showToast("상품명을 입력해주세요.", "error"); return; }
             
             let vendors = [];
-            document.querySelectorAll('.vendor-row').forEach(row => {
+            document.querySelectorAll('#vendor-container .vendor-row').forEach(row => {
                 const vName = row.querySelector('.v-name').value;
                 const vPrice = parseInt(row.querySelector('.v-price').value.replace(/,/g, '')) || 0;
                 const vShip = parseInt(row.querySelector('.v-ship').value.replace(/,/g, '')) || 0;
@@ -917,17 +974,16 @@
 
             if(vendors.length === 0) { window.showToast("최소 1개의 도매처를 선택해주세요.", "error"); return; }
 
-            if (editingProductId) {
-                const idx = products.findIndex(p => p.id === editingProductId);
-                if(idx !== -1) products[idx] = { ...products[idx], name, itemNum: num, stock, vendors };
-                window.showToast("상품 정보가 수정되었습니다.");
-                window.cancelEdit();
-            } else {
-                products.push({ id: Date.now().toString(), name, itemNum: num, stock, vendors });
-                window.showToast("새 상품이 저장되었습니다.");
-                window.cancelEdit();
-                document.getElementById('prd-name').focus();
-            }
+            products.push({ id: Date.now().toString(), name, itemNum: num, stock, vendors });
+            window.showToast("새 상품이 저장되었습니다.");
+            
+            document.getElementById('prd-name').value = '';
+            document.getElementById('prd-num').value = '';
+            document.getElementById('prd-stock').value = '';
+            document.getElementById('vendor-container').innerHTML = '';
+            window.addVendorRow();
+            document.getElementById('prd-name').focus();
+            
             saveToFirestore();
         };
 
@@ -1006,7 +1062,7 @@
                         tr.innerHTML += `
                             <td rowspan="${rowCount}" style="text-align:center; border-left:1px solid var(--border-color);">
                                 <div style="display:flex; flex-direction:column; gap:6px;">
-                                    <button class="outline" style="color:var(--primary); border-color:#a5b4fc; padding:4px 8px; font-size:0.75rem;" onclick="window.editProduct('${p.id}')">수정</button>
+                                    <button class="outline" style="color:var(--primary); border-color:#a5b4fc; padding:4px 8px; font-size:0.75rem;" onclick="window.editProduct('${p.id}')">수정 모달열기</button>
                                     <button class="outline" style="color:var(--danger); border-color:#fca5a5; padding:4px 8px; font-size:0.75rem;" onclick="window.deleteProduct('${p.id}')">삭제</button>
                                 </div>
                             </td>
@@ -1050,7 +1106,7 @@
                         window.showToast(`${fieldNames[field]}이(가) 수정되었습니다.`);
                     }
                 }
-                window.renderProducts(); // 수정 완료 후 다시 원래 UI로 렌더링
+                window.renderProducts(); 
             };
 
             input.onblur = finishEdit;
@@ -1157,7 +1213,6 @@
         window.deleteProduct = (id) => {
             window.showConfirm("이 상품을 삭제하시겠습니까?", () => {
                 products = products.filter(p => p.id !== id);
-                if (editingProductId === id) window.cancelEdit();
                 if (currentOrderProductId === id) { currentOrderProductId = null; document.getElementById('order-detail-panel').style.display = 'none'; }
                 saveToFirestore();
                 window.showToast("삭제되었습니다.");
@@ -1172,7 +1227,6 @@
             window.showConfirm(`선택한 ${checkboxes.length}개의 상품을 삭제하시겠습니까?`, () => {
                 const idsToDelete = Array.from(checkboxes).map(cb => cb.value);
                 products = products.filter(p => !idsToDelete.includes(p.id));
-                if (idsToDelete.includes(editingProductId)) window.cancelEdit();
                 if (idsToDelete.includes(currentOrderProductId)) { currentOrderProductId = null; document.getElementById('order-detail-panel').style.display = 'none'; }
                 saveToFirestore();
                 window.showToast("선택 항목이 삭제되었습니다.");
@@ -1183,7 +1237,6 @@
             if (products.length === 0) return;
             window.showConfirm("등록된 모든 상품을 삭제하시겠습니까?\n이 작업은 복구할 수 없습니다.", () => {
                 products = [];
-                window.cancelEdit();
                 currentOrderProductId = null;
                 document.getElementById('order-detail-panel').style.display = 'none';
                 saveToFirestore();
