@@ -499,6 +499,8 @@
         let unsubscribeData = null;
         let editingProductId = null;
         let stockSortOrder = 'none';
+        
+        let savedScrollPosition = 0; // 스크롤 복원을 위한 변수
 
         const VENDOR_DEFAULT_SETTINGS = {
             'NCmall': { shipping: 2800, freeThreshold: 70000 },
@@ -840,11 +842,23 @@
             document.getElementById('prd-stock').value = '';
             document.getElementById('vendor-container').innerHTML = '';
             window.addVendorRow();
+            
+            // 수정 모드 취소 후 스크롤 복원
+            if (savedScrollPosition > 0) {
+                setTimeout(() => {
+                    window.scrollTo({ top: savedScrollPosition, behavior: 'smooth' });
+                    savedScrollPosition = 0;
+                }, 100);
+            }
         };
 
         window.editProduct = (id) => {
             const p = products.find(x => x.id === id);
             if(!p) return;
+            
+            // 수정 모드 진입 시 현재 스크롤 위치 저장
+            savedScrollPosition = window.scrollY || document.documentElement.scrollTop;
+            
             editingProductId = p.id;
             document.getElementById('form-title').innerHTML = `상품 수정 <span style="font-size:0.9rem; font-weight:normal; color:var(--text-muted);">(${p.name})</span>`;
             document.getElementById('save-prd-btn').innerText = "수정 완료";
