@@ -297,7 +297,8 @@
                                 <th style="width: 5%;"><input type="checkbox" id="selectAllCheckbox" class="real-checkbox" onclick="toggleSelectAllProducts(this)"></th>
                                 <th style="width: 20%;">상품명</th>
                                 <th style="width: 15%;">상품번호</th>
-                                <th style="width: 10%;">재고</th>
+                                <!-- 재고 정렬 토글 기능 추가 -->
+                                <th style="width: 10%; cursor: pointer; user-select: none;" onclick="window.toggleStockSort()" title="재고순 정렬">재고 <span id="sort-icon" style="color:var(--primary); font-size:1.1em;">↕</span></th>
                                 <th style="width: 15%;">도매처</th>
                                 <th style="width: 12%;">단가</th>
                                 <th style="width: 13%;">배송비</th>
@@ -462,6 +463,8 @@
         let currentOrderProductId = null;
         let unsubscribeData = null;
         let editingProductId = null;
+        
+        let stockSortOrder = 'none'; // 'none', 'asc', 'desc'
 
         const VENDOR_DEFAULT_SETTINGS = {
             'NCmall': { shipping: 2800, freeThreshold: 70000 },
@@ -713,6 +716,13 @@
             saveToFirestore();
         };
 
+        window.toggleStockSort = () => {
+            if (stockSortOrder === 'none') stockSortOrder = 'asc';
+            else if (stockSortOrder === 'asc') stockSortOrder = 'desc';
+            else stockSortOrder = 'none';
+            window.renderProducts();
+        };
+
         window.renderProducts = () => {
             const tbody = document.getElementById('prd-table-body');
             if(!tbody) return;
@@ -721,12 +731,25 @@
             const searchQuery = document.getElementById('prd-search')?.value.toLowerCase() || '';
             const filteredProducts = products.filter(p => p.name.toLowerCase().includes(searchQuery) || (p.itemNum && p.itemNum.toLowerCase().includes(searchQuery)));
             
-            if(filteredProducts.length === 0) {
+            // 재고순 정렬 처리
+            let displayProducts = [...filteredProducts];
+            const sortIconEl = document.getElementById('sort-icon');
+            if (stockSortOrder === 'asc') {
+                displayProducts.sort((a, b) => a.stock - b.stock);
+                if(sortIconEl) sortIconEl.innerText = '↑';
+            } else if (stockSortOrder === 'desc') {
+                displayProducts.sort((a, b) => b.stock - a.stock);
+                if(sortIconEl) sortIconEl.innerText = '↓';
+            } else {
+                if(sortIconEl) sortIconEl.innerText = '↕';
+            }
+            
+            if(displayProducts.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="8" style="padding:40px; text-align:center; color:var(--text-muted);">${products.length > 0 ? '검색 결과가 없습니다.' : '등록된 상품이 없습니다.'}</td></tr>`;
                 return;
             }
             
-            filteredProducts.forEach(p => {
+            displayProducts.forEach(p => {
                 const rowCount = p.vendors.length;
                 p.vendors.forEach((v, index) => {
                     const tr = document.createElement('tr');
@@ -1118,12 +1141,28 @@
                 vendorStats[g.vendorName].product += g.totalProduct;
                 vendorStats[g.vendorName].count += 1;
 
-                g.items.forEach(item => {
+                let remainingShipping = groupShipping;
+
+                g.items.forEach((item, index) => {
                     globalProductSum += (item.price * item.qty);
                     
-                    if (!productStats[item.name]) productStats[item.name] = { qty: 0, amount: 0 };
+                    const itemProductAmt = item.price * item.qty;
+                    let itemShippingAmt = 0;
+                    
+                    // 배송비 안분 계산 로직 (상품 금액 비율에 맞춰 배송비 배분)
+                    if (g.totalProduct > 0) {
+                        if (index === g.items.length - 1) {
+                            itemShippingAmt = remainingShipping;
+                        } else {
+                            itemShippingAmt = Math.round(groupShipping * (itemProductAmt / g.totalProduct));
+                            remainingShipping -= itemShippingAmt;
+                        }
+                    }
+                    
+                    if (!productStats[item.name]) productStats[item.name] = { qty: 0, product: 0, shipping: 0 };
                     productStats[item.name].qty += item.qty;
-                    productStats[item.name].amount += (item.price * item.qty);
+                    productStats[item.name].product += itemProductAmt;
+                    productStats[item.name].shipping += itemShippingAmt;
                 });
             });
 
@@ -1154,11 +1193,11 @@
                 `;
             });
 
-            // 상품 렌더링 (검색 필터 적용)
+            // 상품 렌더링 (검색 필터 적용 및 배송비 분리)
             productListEl.innerHTML = '';
             const sortedProducts = Object.entries(productStats)
                 .filter(([pName]) => pName.toLowerCase().includes(productSearchQuery))
-                .sort((a, b) => b[1].amount - a[1].amount);
+                .sort((a, b) => (b[1].product + b[1].shipping) - (a[1].product + a[1].shipping));
                 
             if (sortedProducts.length === 0) productListEl.innerHTML = '<li style="color:var(--text-muted); padding:20px 0;">조회된 상품 내역이 없습니다.</li>';
             sortedProducts.forEach(([pName, stats]) => {
@@ -1166,9 +1205,12 @@
                     <li>
                         <div>
                             <div style="font-weight:600; color:var(--text-main);">${pName}</div>
-                            <div style="font-size:0.8rem; color:var(--text-muted);">총 ${stats.qty.toLocaleString()}개 발주</div>
+                            <div style="font-size:0.8rem; color:var(--text-muted);">총 ${stats.qty.toLocaleString()}개 입고</div>
                         </div>
-                        <div style="font-weight:700; color:var(--primary);">${stats.amount.toLocaleString()}원</div>
+                        <div style="text-align:right;">
+                            <div style="font-weight:700; color:var(--primary);">${(stats.product + stats.shipping).toLocaleString()}원</div>
+                            <div style="font-size:0.75rem; color:var(--text-muted);">상품 ${stats.product.toLocaleString()} + 배송 ${stats.shipping.toLocaleString()}</div>
+                        </div>
                     </li>
                 `;
             });
