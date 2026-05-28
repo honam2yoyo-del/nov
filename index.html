@@ -170,6 +170,11 @@
 
     <!-- UI 컨테이너 (Toast, Modal) -->
     <div id="toast-container" class="toast-container"></div>
+    <div id="product-float-actions" style="display:none; position:fixed; bottom:32px; left:50%; transform:translateX(-50%); z-index:5000; background:var(--text-main); color:white; padding:14px 28px; border-radius:999px; box-shadow:var(--shadow-lg); align-items:center; gap:20px; white-space:nowrap;">
+        <span id="product-selected-count" style="font-size:0.95rem; font-weight:600;">0개 선택됨</span>
+        <button class="danger" style="border-radius:999px; padding:8px 22px;" onclick="window.deleteSelectedProducts()">삭제</button>
+        <button class="outline" style="border-radius:999px; padding:8px 18px; background:transparent; border-color:rgba(255,255,255,0.4); color:white; font-size:0.8rem;" onclick="window.clearProductSelection()">선택 해제</button>
+    </div>
     <div id="confirm-modal" class="modal-overlay">
         <div class="modal-box" style="max-width: 400px;">
             <div id="confirm-msg" class="modal-msg"></div>
@@ -301,18 +306,17 @@
 
                 <div style="display: flex; justify-content: space-between; align-items: center; margin: 40px 0 15px;">
                     <h2 style="margin: 0;">상품 목록</h2>
-                    <input type="text" id="prd-search" placeholder="상품명 검색..." style="width: 360px; padding: 8px 14px;" oninput="window.resetPageAndRender()">
-                    <div style="display: flex; gap: 8px; align-items: center;">
-                        <select id="prd-page-size" onchange="window.resetPageAndRender()" style="padding: 8px 12px;">
-                            <option value="10">10개씩 보기</option>
-                            <option value="20">20개씩 보기</option>
-                            <option value="30">30개씩 보기</option>
-                            <option value="40">40개씩 보기</option>
-                            <option value="50">50개씩 보기</option>
-                        </select>
-                        <button class="outline" style="color: var(--danger); border-color: #fca5a5;" onclick="deleteSelectedProducts()">선택 삭제</button>
-                        <button class="outline" style="color: var(--secondary);" onclick="deleteAllProducts()">전체 삭제</button>
+                    <div style="position: relative; flex: 1; max-width: 520px; margin: 0 32px;">
+                        <svg style="position:absolute; left:14px; top:50%; transform:translateY(-50%); width:18px; height:18px; color:var(--text-muted); pointer-events:none;" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                        <input type="text" id="prd-search" placeholder="상품명 검색..." style="width:100%; padding:11px 14px 11px 42px; font-size:0.95rem;" oninput="window.resetPageAndRender()">
                     </div>
+                    <select id="prd-page-size" onchange="window.resetPageAndRender()" style="padding: 10px 14px; font-size:0.875rem;">
+                        <option value="10">10개씩 보기</option>
+                        <option value="20">20개씩 보기</option>
+                        <option value="30">30개씩 보기</option>
+                        <option value="40">40개씩 보기</option>
+                        <option value="50">50개씩 보기</option>
+                    </select>
                 </div>
                 
                 <div class="table-wrapper">
@@ -481,6 +485,7 @@
         let editingProductId = null;
         let stockSortOrder = 'none';
         let currentProductPage = 1;
+        let selectedProductIds = new Set();
 
         const VENDOR_DEFAULT_SETTINGS = {
             'NCmall': { shipping: 2800, freeThreshold: 70000 },
@@ -874,7 +879,7 @@
                     const tr = document.createElement('tr');
                     if (index === 0) {
                         tr.innerHTML += `
-                            <td rowspan="${rowCount}" style="text-align:center; border-right:1px solid var(--border-color);"><input type="checkbox" class="product-checkbox real-checkbox" value="${p.id}"></td>
+                            <td rowspan="${rowCount}" style="text-align:center; border-right:1px solid var(--border-color);"><input type="checkbox" class="product-checkbox real-checkbox" value="${p.id}" ${selectedProductIds.has(p.id) ? 'checked' : ''} onclick="window.toggleProductCheckbox('${p.id}', this)"></td>
                             <td rowspan="${rowCount}" style="text-align:center; font-weight:600; color:var(--text-main); border-right:1px solid var(--border-color);">${p.name}</td>
                             <td rowspan="${rowCount}" style="text-align:center; color:var(--text-muted); border-right:1px solid var(--border-color);">${p.itemNum || '-'}</td>
                             <td rowspan="${rowCount}" style="text-align:center; border-right:1px solid var(--border-color);">
@@ -904,6 +909,14 @@
                     tbody.appendChild(tr);
                 });
             });
+
+            // selectAll 체크박스 상태 동기화
+            const selectAllCb = document.getElementById('selectAllCheckbox');
+            if (selectAllCb) {
+                const allChecked = pageProducts.length > 0 && pageProducts.every(p => selectedProductIds.has(p.id));
+                selectAllCb.checked = allChecked;
+            }
+            window.updateProductFloatActions();
 
             // 페이지네이션 렌더링
             if(paginationEl) {
@@ -1003,18 +1016,51 @@
             });
         };
 
-        window.toggleSelectAllProducts = (source) => { document.querySelectorAll('.product-checkbox').forEach(cb => cb.checked = source.checked); };
+        window.updateProductFloatActions = () => {
+            const bar = document.getElementById('product-float-actions');
+            if (!bar) return;
+            if (selectedProductIds.size > 0) {
+                bar.style.display = 'flex';
+                document.getElementById('product-selected-count').innerText = `${selectedProductIds.size}개 선택됨`;
+            } else {
+                bar.style.display = 'none';
+            }
+        };
+
+        window.toggleProductCheckbox = (id, el) => {
+            if (el.checked) selectedProductIds.add(id);
+            else selectedProductIds.delete(id);
+            window.updateProductFloatActions();
+        };
+
+        window.clearProductSelection = () => {
+            selectedProductIds.clear();
+            document.querySelectorAll('.product-checkbox').forEach(cb => cb.checked = false);
+            const sa = document.getElementById('selectAllCheckbox');
+            if (sa) sa.checked = false;
+            window.updateProductFloatActions();
+        };
+
+        window.toggleSelectAllProducts = (source) => {
+            document.querySelectorAll('.product-checkbox').forEach(cb => {
+                cb.checked = source.checked;
+                if (source.checked) selectedProductIds.add(cb.value);
+                else selectedProductIds.delete(cb.value);
+            });
+            window.updateProductFloatActions();
+        };
 
         window.deleteSelectedProducts = () => {
-            const checkboxes = document.querySelectorAll('.product-checkbox:checked');
-            if (checkboxes.length === 0) { window.showToast("삭제할 상품을 먼저 선택해주세요.", "error"); return; }
-            window.showConfirm(`선택한 ${checkboxes.length}개의 상품을 삭제하시겠습니까?`, () => {
-                const idsToDelete = Array.from(checkboxes).map(cb => cb.value);
+            if (selectedProductIds.size === 0) return;
+            window.showConfirm(`선택한 ${selectedProductIds.size}개의 상품을 삭제하시겠습니까?`, () => {
+                const idsToDelete = Array.from(selectedProductIds);
                 products = products.filter(p => !idsToDelete.includes(p.id));
+                selectedProductIds.clear();
                 if (idsToDelete.includes(editingProductId)) window.cancelEdit();
                 if (idsToDelete.includes(currentOrderProductId)) { currentOrderProductId = null; document.getElementById('order-detail-panel').style.display = 'none'; }
                 saveToFirestore();
                 window.showToast("선택 항목이 삭제되었습니다.");
+                window.updateProductFloatActions();
             });
         };
 
