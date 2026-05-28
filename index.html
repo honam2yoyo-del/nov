@@ -215,6 +215,32 @@
         </div>
     </div>
 
+    <!-- 도매처 수정 모달 -->
+    <div id="edit-vendor-modal" class="modal-overlay">
+        <div class="modal-box" style="max-width: 400px;">
+            <h3 style="margin-top:0; margin-bottom:20px;">도매처 수정</h3>
+            <div style="display:flex; flex-direction:column; gap:12px; margin-bottom:24px;">
+                <input type="hidden" id="edit-vendor-original-name">
+                <div>
+                    <label style="font-size:0.8rem; font-weight:bold; color:var(--text-main); margin-bottom:4px; display:block;">도매처 이름</label>
+                    <input type="text" id="edit-vendor-name" placeholder="도매처 이름" style="width:100%;">
+                </div>
+                <div>
+                    <label style="font-size:0.8rem; font-weight:bold; color:var(--text-main); margin-bottom:4px; display:block;">기본 배송비</label>
+                    <input type="text" id="edit-vendor-ship" placeholder="기본 배송비" oninput="window.formatNumberInput(this)" style="width:100%;">
+                </div>
+                <div>
+                    <label style="font-size:0.8rem; font-weight:bold; color:var(--text-main); margin-bottom:4px; display:block;">무료배송 기준액</label>
+                    <input type="text" id="edit-vendor-free" placeholder="무료배송 기준액" oninput="window.formatNumberInput(this)" onkeypress="if(event.key==='Enter') { event.preventDefault(); window.saveEditVendor(); }" style="width:100%;">
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="outline" onclick="window.closeEditVendorModal()">취소</button>
+                <button class="primary" onclick="window.saveEditVendor()">수정 저장</button>
+            </div>
+        </div>
+    </div>
+
     <!-- 1. 로그인 스크린 -->
     <div id="login-screen">
         <div class="login-box">
@@ -673,14 +699,21 @@
                 
                 const upDisabled = index === 0 ? 'opacity:0.3; pointer-events:none;' : '';
                 const downDisabled = index === vendorOrder.length - 1 ? 'opacity:0.3; pointer-events:none;' : '';
+                const vSet = vendorSettings[vName] || { shipping: 0, freeThreshold: 0 };
                 
                 li.innerHTML = `
-                    <div style="font-weight:600; color:var(--text-main); font-size:1rem;">${vName}</div>
+                    <div style="font-weight:600; color:var(--text-main); font-size:1rem;">
+                        ${vName}
+                        <div style="font-size:0.75rem; color:var(--text-muted); font-weight:normal; margin-top:4px;">
+                            기본 배송비: ${vSet.shipping.toLocaleString()}원 / 무료조건: ${vSet.freeThreshold.toLocaleString()}원
+                        </div>
+                    </div>
                     <div style="display:flex; gap:6px; align-items:center;">
                         <div style="display:flex; flex-direction:column; gap:2px; margin-right:8px;">
                             <button class="outline" style="padding:2px 8px; font-size:0.75rem; min-height:0; ${upDisabled}" onclick="window.moveVendorUp(${index})">▲</button>
                             <button class="outline" style="padding:2px 8px; font-size:0.75rem; min-height:0; ${downDisabled}" onclick="window.moveVendorDown(${index})">▼</button>
                         </div>
+                        <button class="outline" style="padding:6px 10px; font-size:0.8rem; color:var(--primary); border-color:#a5b4fc;" onclick="window.openEditVendorModal('${vName}')">수정</button>
                         <button class="outline" style="padding:6px 10px; font-size:0.8rem; color:var(--danger); border-color:#fca5a5;" onclick="window.deleteVendor('${vName}')">삭제</button>
                     </div>
                 `;
@@ -723,6 +756,7 @@
             document.getElementById('add-vendor-modal').classList.add('active');
             document.getElementById('new-vendor-name').focus();
         };
+        
         window.closeAddVendorModal = () => {
             document.getElementById('add-vendor-modal').classList.remove('active');
             window.openVendorListModal();
@@ -741,6 +775,49 @@
             saveToFirestore();
             window.showToast(`[${vName}] 도매처가 추가되었습니다.`);
             window.closeAddVendorModal(); 
+        };
+
+        // 도매처 정보 수정
+        window.openEditVendorModal = (vName) => {
+            const setting = vendorSettings[vName] || {shipping:0, freeThreshold:0};
+            document.getElementById('edit-vendor-original-name').value = vName;
+            document.getElementById('edit-vendor-name').value = vName;
+            document.getElementById('edit-vendor-ship').value = setting.shipping.toLocaleString();
+            document.getElementById('edit-vendor-free').value = setting.freeThreshold.toLocaleString();
+
+            document.getElementById('vendor-list-modal').classList.remove('active');
+            document.getElementById('edit-vendor-modal').classList.add('active');
+        };
+
+        window.closeEditVendorModal = () => {
+            document.getElementById('edit-vendor-modal').classList.remove('active');
+            window.openVendorListModal();
+        };
+
+        window.saveEditVendor = () => {
+            const oldName = document.getElementById('edit-vendor-original-name').value;
+            const newName = document.getElementById('edit-vendor-name').value.trim();
+            const newShip = parseInt(document.getElementById('edit-vendor-ship').value.replace(/,/g, '')) || 0;
+            const newFree = parseInt(document.getElementById('edit-vendor-free').value.replace(/,/g, '')) || 0;
+
+            if(!newName) { window.showToast("도매처 이름을 입력해주세요.", "error"); return; }
+            if(newName !== oldName && vendorSettings[newName]) { window.showToast("이미 존재하는 도매처 이름입니다.", "error"); return; }
+
+            vendorSettings[newName] = { shipping: newShip, freeThreshold: newFree };
+
+            if(newName !== oldName) {
+                delete vendorSettings[oldName];
+                const idx = vendorOrder.indexOf(oldName);
+                if(idx !== -1) vendorOrder[idx] = newName;
+
+                products.forEach(p => { p.vendors.forEach(v => { if (v.name === oldName) v.name = newName; }); });
+                inspectList.forEach(item => { if (item.vendorName === oldName) item.vendorName = newName; });
+                orderHistory.forEach(order => { if (order.vendorName === oldName) order.vendorName = newName; });
+            }
+
+            saveToFirestore();
+            window.showToast(`[${newName}] 도매처 정보가 수정되었습니다.`);
+            window.closeEditVendorModal(); 
         };
 
         window.updateVendorDropdowns = () => {
@@ -874,8 +951,11 @@
             }
             
             displayProducts.forEach(p => {
-                const rowCount = p.vendors.length;
-                p.vendors.forEach((v, index) => {
+                // 도매처를 가나다(ABC) 순으로 정렬
+                const sortedVendors = [...p.vendors].sort((a, b) => a.name.localeCompare(b.name, 'ko-KR', { sensitivity: 'base' }));
+                const rowCount = sortedVendors.length;
+                
+                sortedVendors.forEach((v, index) => {
                     const tr = document.createElement('tr');
                     if (index === 0) {
                         tr.innerHTML += `
