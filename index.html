@@ -324,7 +324,7 @@
                  ============================================== -->
             <div id="tab-products" class="tab-content active">
                 <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 15px;">
-                    <h2 style="margin: 0;">새 상품 등록</h2>
+                    <h2 id="form-title" style="margin: 0;">새 상품 등록</h2>
                 </div>
                 
                 <div class="card form-section">
@@ -352,14 +352,14 @@
                     </div>
                 </div>
 
-                <div style="display: flex; justify-content: space-between; align-items: center; margin: 40px 0 15px;">
-                    <h2 style="margin: 0;">등록된 상품 목록</h2>
-                    <div style="display: flex; gap: 12px; align-items: center;">
-                        <input type="text" id="prd-search" placeholder="상품명 검색..." style="width: 250px; padding: 8px 12px;" oninput="renderProducts()">
-                        <div style="display: flex; gap: 8px;">
-                            <button class="outline" style="color: var(--danger); border-color: #fca5a5;" onclick="deleteSelectedProducts()">선택 삭제</button>
-                            <button class="outline" style="color: var(--secondary);" onclick="deleteAllProducts()">전체 삭제</button>
-                        </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin: 40px 0 15px; gap: 20px;">
+                    <h2 style="margin: 0; flex: 1;">등록된 상품 목록</h2>
+                    <div style="flex: 2; display: flex; justify-content: center;">
+                        <input type="text" id="prd-search" placeholder="상품명 검색..." style="width: 100%; max-width: 500px; padding: 12px 20px; font-size: 1rem; border-radius: var(--radius-md);" oninput="renderProducts()">
+                    </div>
+                    <div style="display: flex; gap: 8px; flex: 1; justify-content: flex-end;">
+                        <button class="outline" style="color: var(--danger); border-color: #fca5a5;" onclick="deleteSelectedProducts()">선택 삭제</button>
+                        <button class="outline" style="color: var(--secondary);" onclick="deleteAllProducts()">전체 삭제</button>
                     </div>
                 </div>
                 
