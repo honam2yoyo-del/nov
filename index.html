@@ -152,6 +152,32 @@
                     </div>
                 </div>
 
+                <!-- 상품번호 일괄 변경 -->
+                <details style="margin-bottom:20px;">
+                    <summary style="cursor:pointer; font-weight:600; font-size:0.95rem; color:var(--text-muted); padding:10px 0; user-select:none; list-style:none; display:flex; align-items:center; gap:8px;">
+                        <span style="font-size:1rem;">⚙</span> 상품번호 일괄 변경
+                        <span style="font-size:0.75rem; font-weight:normal; color:#94a3b8;">(클릭하여 펼치기)</span>
+                    </summary>
+                    <div class="card" style="margin-top:8px; border-left:3px solid var(--warning); background:#fffbeb;">
+                        <p style="font-size:0.85rem; color:#92400e; margin:0 0 16px;">
+                            상품번호 <b>앞자리(접두어)</b>를 일괄 변경합니다. 숫자 부분은 그대로 유지됩니다.
+                        </p>
+                        <div style="display:flex; gap:16px; align-items:center; flex-wrap:wrap;">
+                            <div style="display:flex; align-items:center; gap:8px;">
+                                <label style="font-size:0.875rem; font-weight:600; white-space:nowrap;">현재 접두어</label>
+                                <input type="text" id="bulk-find-prefix" placeholder="예: A" style="width:90px; background:#fff;">
+                            </div>
+                            <span style="font-size:1.4rem; color:var(--text-muted);">→</span>
+                            <div style="display:flex; align-items:center; gap:8px;">
+                                <label style="font-size:0.875rem; font-weight:600; white-space:nowrap;">변경할 접두어</label>
+                                <input type="text" id="bulk-replace-prefix" placeholder="예: NC" style="width:90px; background:#fff;">
+                            </div>
+                            <button class="warning" onclick="window.applyBulkItemNumPrefix()">일괄 변경 적용</button>
+                        </div>
+                        <div id="bulk-preview" style="margin-top:12px; font-size:0.82rem; color:#92400e; min-height:1.2em;"></div>
+                    </div>
+                </details>
+
                 <div style="display:flex; justify-content:space-between; align-items:center; margin:40px 0 15px;">
                     <h2 style="margin:0;">상품 목록</h2>
                     <div style="position:relative; flex:1; max-width:520px; margin:0 32px;">

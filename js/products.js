@@ -351,6 +351,39 @@ export function deleteSelectedProducts() {
     });
 }
 
+export function applyBulkItemNumPrefix() {
+    const findPrefix    = document.getElementById('bulk-find-prefix').value;
+    const replacePrefix = document.getElementById('bulk-replace-prefix').value;
+    const previewEl     = document.getElementById('bulk-preview');
+
+    if (!findPrefix) { showToast("현재 접두어를 입력해주세요.", "error"); return; }
+
+    const targets = state.products.filter(p =>
+        p.itemNum && p.itemNum.startsWith(findPrefix)
+    );
+
+    if (targets.length === 0) {
+        if (previewEl) previewEl.innerText = `"${findPrefix}"로 시작하는 상품번호가 없습니다.`;
+        showToast(`"${findPrefix}"로 시작하는 상품번호가 없습니다.`, "error");
+        return;
+    }
+
+    const example = targets[0].itemNum;
+    const exampleAfter = replacePrefix + example.slice(findPrefix.length);
+    const msg = `총 ${targets.length}개 변경 예정 (예: ${example} → ${exampleAfter})\n정말 변경하시겠습니까?`;
+
+    showConfirm(msg, () => {
+        targets.forEach(p => {
+            p.itemNum = replacePrefix + p.itemNum.slice(findPrefix.length);
+        });
+        saveToFirestore();
+        showToast(`${targets.length}개 상품번호가 변경되었습니다.`);
+        if (previewEl) previewEl.innerText = `완료: ${targets.length}개 변경됨 (${findPrefix}... → ${replacePrefix}...)`;
+        document.getElementById('bulk-find-prefix').value    = '';
+        document.getElementById('bulk-replace-prefix').value = '';
+    });
+}
+
 export function deleteAllProducts() {
     if (state.products.length === 0) return;
     showConfirm("등록된 모든 상품을 삭제하시겠습니까?\n이 작업은 복구할 수 없습니다.", () => {
@@ -363,6 +396,7 @@ export function deleteAllProducts() {
     });
 }
 
+window.applyBulkItemNumPrefix   = applyBulkItemNumPrefix;
 window.saveProduct              = saveProduct;
 window.saveProductModal         = saveProductModal;
 window.editProduct              = editProduct;
