@@ -151,5 +151,3 @@ tbody tr:last-child td { border-bottom: none; }
 
 input[type="checkbox"].real-checkbox { width: 18px; height: 18px; accent-color: var(--primary); cursor: pointer; }
 
-.prd-filter-btn.active { background: var(--primary) !important; color: white !important; border-color: var(--primary) !important; }
-.prd-filter-btn:not(.active):hover { background: var(--bg-hover) !important; color: var(--text-main) !important; }

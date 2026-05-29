@@ -85,7 +85,10 @@
     <!-- 상품 수정 모달 -->
     <div id="product-edit-modal" class="modal-overlay">
         <div class="modal-box" style="max-width:680px; width:95%; max-height:90vh; display:flex; flex-direction:column;">
-            <h3 id="modal-edit-title" style="margin-top:0; margin-bottom:20px; flex-shrink:0;">상품 수정</h3>
+            <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:20px; flex-shrink:0;">
+                <h3 id="modal-edit-title" style="margin:0;">상품 수정</h3>
+                <span id="modal-created-at" style="font-size:0.8rem; color:var(--text-muted);"></span>
+            </div>
             <div style="overflow-y:auto; flex:1; padding-right:4px;">
                 <div style="display:flex; gap:12px; margin-bottom:16px; flex-wrap:wrap;">
                     <input type="text" id="modal-prd-name"  placeholder="상품명 (필수)"  style="flex:2; min-width:140px;">
@@ -175,18 +178,18 @@
                     </div>
                 </div>
 
-                <div style="display:flex; justify-content:space-between; align-items:center; margin:40px 0 15px;">
-                    <h2 style="margin:0;">상품 목록</h2>
-                    <div style="position:relative; flex:1; max-width:520px; margin:0 32px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; margin:40px 0 15px;">
+                    <h2 style="margin:0; white-space:nowrap;">상품 목록</h2>
+                    <select id="prd-filter" onchange="window.setProductFilter(this.value)" style="padding:10px 14px; font-size:0.875rem; flex-shrink:0;">
+                        <option value="all">전체</option>
+                        <option value="접착">접착</option>
+                        <option value="비접착">비접착</option>
+                    </select>
+                    <div style="position:relative; flex:1;">
                         <svg style="position:absolute; left:14px; top:50%; transform:translateY(-50%); width:18px; height:18px; color:var(--text-muted); pointer-events:none;" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
                         <input type="text" id="prd-search" placeholder="상품명 검색..." style="width:100%; padding:11px 14px 11px 42px; font-size:0.95rem;" oninput="window.resetPageAndRender()">
                     </div>
-                    <div style="display:flex; align-items:center; gap:4px;">
-                        <button class="prd-filter-btn active" data-filter="all"   onclick="window.setProductFilter('all')"   style="padding:8px 14px; font-size:0.85rem; border-radius:var(--radius-sm); background:var(--primary); color:white; border:1px solid var(--primary); font-weight:600; cursor:pointer;">전체</button>
-                        <button class="prd-filter-btn"       data-filter="접착"   onclick="window.setProductFilter('접착')"  style="padding:8px 14px; font-size:0.85rem; border-radius:var(--radius-sm); background:var(--bg-card); color:var(--text-muted); border:1px solid var(--border-color); font-weight:600; cursor:pointer;">접착</button>
-                        <button class="prd-filter-btn"       data-filter="비접착" onclick="window.setProductFilter('비접착')" style="padding:8px 14px; font-size:0.85rem; border-radius:var(--radius-sm); background:var(--bg-card); color:var(--text-muted); border:1px solid var(--border-color); font-weight:600; cursor:pointer;">비접착</button>
-                    </div>
-                    <select id="prd-page-size" onchange="window.resetPageAndRender()" style="padding:10px 14px; font-size:0.875rem;">
+                    <select id="prd-page-size" onchange="window.resetPageAndRender()" style="padding:10px 14px; font-size:0.875rem; flex-shrink:0;">
                         <option value="10">10개씩 보기</option>
                         <option value="20">20개씩 보기</option>
                         <option value="30">30개씩 보기</option>
@@ -200,7 +203,7 @@
                         <thead>
                             <tr>
                                 <th style="width:5%;"><input type="checkbox" id="selectAllCheckbox" class="real-checkbox" onclick="toggleSelectAllProducts(this)"></th>
-                                <th style="width:20%;">상품명</th>
+                                <th style="width:20%; cursor:pointer; user-select:none;" onclick="window.toggleNameSort()" title="이름순 정렬">상품명 <span id="name-sort-icon" style="color:var(--primary); font-size:1.1em;">↕</span></th>
                                 <th style="width:15%;">상품번호 <button onclick="window.openBulkItemNumModal()" style="background:none; border:none; cursor:pointer; padding:2px 4px; color:var(--text-muted); font-size:0.95rem; line-height:1;" title="상품번호 일괄 변경">⚙</button></th>
                                 <th style="width:10%; cursor:pointer; user-select:none;" onclick="window.toggleStockSort()" title="재고순 정렬">재고 <span id="sort-icon" style="color:var(--primary); font-size:1.1em;">↕</span></th>
                                 <th style="width:15%;">도매처</th>

@@ -19,6 +19,7 @@ export const state = {
     unsubscribeData: null,
     editingProductId: null,
     stockSortOrder: 'none',
+    nameSortOrder: 'none',
     currentProductPage: 1,
     selectedProductIds: new Set(),
     productFilter: 'all',
