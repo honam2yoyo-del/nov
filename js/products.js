@@ -33,7 +33,7 @@ export function editProduct(id) {
 
 export function saveProduct() {
     const name  = document.getElementById('prd-name').value.trim();
-    const num   = document.getElementById('prd-num').value;
+    const num   = document.getElementById('prd-num').value.trim();
     const stock = parseInt(document.getElementById('prd-stock').value.replace(/,/g, '')) || 0;
 
     if (!name) { showToast("상품명을 입력해주세요.", "error"); return; }
@@ -46,6 +46,18 @@ export function saveProduct() {
     if (isDuplicate) {
         showToast("이미 등록된 상품명입니다.", "error");
         return;
+    }
+
+    // 상품번호 중복 체크 (입력된 경우에만, 수정 중인 상품 본인 제외)
+    if (num) {
+        const isDuplicateNum = state.products.some(p =>
+            p.itemNum && p.itemNum.trim().toLowerCase() === num.toLowerCase() &&
+            p.id !== state.editingProductId
+        );
+        if (isDuplicateNum) {
+            showToast("이미 등록된 상품번호입니다.", "error");
+            return;
+        }
     }
 
     const vendors = [];
