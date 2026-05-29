@@ -351,6 +351,18 @@ export function deleteSelectedProducts() {
     });
 }
 
+export function openBulkItemNumModal() {
+    document.getElementById('bulk-find-prefix').value    = '';
+    document.getElementById('bulk-replace-prefix').value = '';
+    document.getElementById('bulk-preview').innerText    = '';
+    document.getElementById('bulk-itemnum-modal').classList.add('active');
+    document.getElementById('bulk-find-prefix').focus();
+}
+
+export function closeBulkItemNumModal() {
+    document.getElementById('bulk-itemnum-modal').classList.remove('active');
+}
+
 export function applyBulkItemNumPrefix() {
     const findPrefix    = document.getElementById('bulk-find-prefix').value;
     const replacePrefix = document.getElementById('bulk-replace-prefix').value;
@@ -364,13 +376,12 @@ export function applyBulkItemNumPrefix() {
 
     if (targets.length === 0) {
         if (previewEl) previewEl.innerText = `"${findPrefix}"로 시작하는 상품번호가 없습니다.`;
-        showToast(`"${findPrefix}"로 시작하는 상품번호가 없습니다.`, "error");
         return;
     }
 
-    const example = targets[0].itemNum;
+    const example      = targets[0].itemNum;
     const exampleAfter = replacePrefix + example.slice(findPrefix.length);
-    const msg = `총 ${targets.length}개 변경 예정 (예: ${example} → ${exampleAfter})\n정말 변경하시겠습니까?`;
+    const msg = `총 ${targets.length}개 변경 예정\n예: ${example} → ${exampleAfter}\n\n정말 변경하시겠습니까?`;
 
     showConfirm(msg, () => {
         targets.forEach(p => {
@@ -378,9 +389,7 @@ export function applyBulkItemNumPrefix() {
         });
         saveToFirestore();
         showToast(`${targets.length}개 상품번호가 변경되었습니다.`);
-        if (previewEl) previewEl.innerText = `완료: ${targets.length}개 변경됨 (${findPrefix}... → ${replacePrefix}...)`;
-        document.getElementById('bulk-find-prefix').value    = '';
-        document.getElementById('bulk-replace-prefix').value = '';
+        closeBulkItemNumModal();
     });
 }
 
@@ -396,6 +405,8 @@ export function deleteAllProducts() {
     });
 }
 
+window.openBulkItemNumModal     = openBulkItemNumModal;
+window.closeBulkItemNumModal    = closeBulkItemNumModal;
 window.applyBulkItemNumPrefix   = applyBulkItemNumPrefix;
 window.saveProduct              = saveProduct;
 window.saveProductModal         = saveProductModal;
