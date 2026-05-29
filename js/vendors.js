@@ -107,8 +107,8 @@ export function updateVendorDropdowns() {
     });
 }
 
-export function addVendorRow(vendorData = null) {
-    const container = document.getElementById('vendor-container');
+export function addVendorRow(vendorData = null, containerId = 'vendor-container') {
+    const container = document.getElementById(containerId);
     if (!container) return;
     const row = document.createElement('div');
     row.className = 'vendor-row';
@@ -116,11 +116,14 @@ export function addVendorRow(vendorData = null) {
     state.vendorOrder.forEach(v => {
         options += `<option value="${v}" ${vendorData && vendorData.name === v ? 'selected' : ''}>${v}</option>`;
     });
+    const enterSave = containerId === 'modal-vendor-container'
+        ? `onkeypress="if(event.key==='Enter'){event.preventDefault();window.saveProductModal();}"`
+        : `onkeypress="if(event.key==='Enter'){event.preventDefault();window.saveProduct();}"`;
     row.innerHTML = `
         <select class="v-name" onchange="window.autoFillShipping(this)" style="flex:1.5; min-width:120px;">${options}</select>
-        <input type="text" class="v-price" placeholder="상품 단가" style="flex:1; min-width:100px;" value="${vendorData ? vendorData.price.toLocaleString() : ''}" oninput="window.formatNumberInput(this)">
-        <input type="text" class="v-ship"  placeholder="기본 배송비" style="flex:1; min-width:100px;" value="${vendorData ? vendorData.shipping.toLocaleString() : ''}" oninput="window.formatNumberInput(this)">
-        <input type="text" class="v-free"  placeholder="무료배송 기준액" style="flex:1.2; min-width:120px;" value="${vendorData ? vendorData.freeThreshold.toLocaleString() : ''}" oninput="window.formatNumberInput(this)" onkeypress="if(event.key==='Enter'){event.preventDefault();window.saveProduct();}">
+        <input type="text" class="v-price" placeholder="상품 단가"      style="flex:1; min-width:100px;"   value="${vendorData ? vendorData.price.toLocaleString() : ''}"         oninput="window.formatNumberInput(this)">
+        <input type="text" class="v-ship"  placeholder="기본 배송비"    style="flex:1; min-width:100px;"   value="${vendorData ? vendorData.shipping.toLocaleString() : ''}"      oninput="window.formatNumberInput(this)">
+        <input type="text" class="v-free"  placeholder="무료배송 기준액" style="flex:1.2; min-width:120px;" value="${vendorData ? vendorData.freeThreshold.toLocaleString() : ''}" oninput="window.formatNumberInput(this)" ${enterSave}>
         <button class="outline" style="padding:8px 12px; color:var(--danger); border-color:#fca5a5;" onclick="this.parentElement.remove()">삭제</button>
     `;
     container.appendChild(row);

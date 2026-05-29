@@ -3,11 +3,8 @@ import { saveToFirestore } from './firestore.js';
 import { showToast, showConfirm } from './ui.js';
 import { addVendorRow } from './vendors.js';
 
+// 상품 등록 폼(상단) 초기화
 export function cancelEdit() {
-    state.editingProductId = null;
-    document.getElementById('form-title').innerText = "새 상품 등록";
-    document.getElementById('save-prd-btn').innerText = "저장하기";
-    document.getElementById('cancel-edit-btn').style.display = 'none';
     document.getElementById('prd-name').value = '';
     document.getElementById('prd-num').value = '';
     document.getElementById('prd-stock').value = '';
@@ -15,22 +12,71 @@ export function cancelEdit() {
     addVendorRow();
 }
 
+// 수정 모달 열기
 export function editProduct(id) {
     const p = state.products.find(x => x.id === id);
     if (!p) return;
     state.editingProductId = p.id;
-    document.getElementById('form-title').innerHTML = `상품 수정 <span style="font-size:0.9rem; font-weight:normal; color:var(--text-muted);">(${p.name})</span>`;
-    document.getElementById('save-prd-btn').innerText = "수정 완료";
-    document.getElementById('cancel-edit-btn').style.display = 'inline-flex';
-    document.getElementById('prd-name').value = p.name;
-    document.getElementById('prd-num').value = p.itemNum || '';
-    document.getElementById('prd-stock').value = p.stock ? p.stock.toLocaleString() : '0';
-    const container = document.getElementById('vendor-container');
+
+    document.getElementById('modal-edit-title').innerHTML =
+        `상품 수정 <span style="font-size:0.85rem; font-weight:normal; color:var(--text-muted);">${p.name}</span>`;
+    document.getElementById('modal-prd-name').value  = p.name;
+    document.getElementById('modal-prd-num').value   = p.itemNum || '';
+    document.getElementById('modal-prd-stock').value = p.stock ? p.stock.toLocaleString() : '0';
+
+    const container = document.getElementById('modal-vendor-container');
     container.innerHTML = '';
-    p.vendors.forEach(v => addVendorRow(v));
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    p.vendors.forEach(v => addVendorRow(v, 'modal-vendor-container'));
+
+    document.getElementById('product-edit-modal').classList.add('active');
 }
 
+export function closeProductEditModal() {
+    state.editingProductId = null;
+    document.getElementById('product-edit-modal').classList.remove('active');
+}
+
+// 수정 모달 저장
+export function saveProductModal() {
+    const name  = document.getElementById('modal-prd-name').value.trim();
+    const num   = document.getElementById('modal-prd-num').value.trim();
+    const stock = parseInt(document.getElementById('modal-prd-stock').value.replace(/,/g, '')) || 0;
+
+    if (!name) { showToast("상품명을 입력해주세요.", "error"); return; }
+
+    const isDuplicateName = state.products.some(p =>
+        p.name.trim().toLowerCase() === name.toLowerCase() &&
+        p.id !== state.editingProductId
+    );
+    if (isDuplicateName) { showToast("이미 등록된 상품명입니다.", "error"); return; }
+
+    if (num) {
+        const isDuplicateNum = state.products.some(p =>
+            p.itemNum && p.itemNum.trim().toLowerCase() === num.toLowerCase() &&
+            p.id !== state.editingProductId
+        );
+        if (isDuplicateNum) { showToast("이미 등록된 상품번호입니다.", "error"); return; }
+    }
+
+    const vendors = [];
+    document.querySelectorAll('#modal-vendor-container .vendor-row').forEach(row => {
+        const vName  = row.querySelector('.v-name').value;
+        const vPrice = parseInt(row.querySelector('.v-price').value.replace(/,/g, '')) || 0;
+        const vShip  = parseInt(row.querySelector('.v-ship').value.replace(/,/g, ''))  || 0;
+        const vFree  = parseInt(row.querySelector('.v-free').value.replace(/,/g, ''))  || 0;
+        if (vName) vendors.push({ name: vName, price: vPrice, shipping: vShip, freeThreshold: vFree });
+    });
+    if (vendors.length === 0) { showToast("최소 1개의 도매처를 선택해주세요.", "error"); return; }
+
+    const idx = state.products.findIndex(p => p.id === state.editingProductId);
+    if (idx !== -1) state.products[idx] = { ...state.products[idx], name, itemNum: num, stock, vendors };
+
+    saveToFirestore();
+    showToast("상품 정보가 수정되었습니다.");
+    closeProductEditModal();
+}
+
+// 새 상품 등록 (상단 폼)
 export function saveProduct() {
     const name  = document.getElementById('prd-name').value.trim();
     const num   = document.getElementById('prd-num').value.trim();
@@ -38,57 +84,39 @@ export function saveProduct() {
 
     if (!name) { showToast("상품명을 입력해주세요.", "error"); return; }
 
-    // 상품명 중복 체크 (수정 중인 상품 본인 제외, 대소문자 무시)
-    const isDuplicate = state.products.some(p =>
-        p.name.trim().toLowerCase() === name.toLowerCase() &&
-        p.id !== state.editingProductId
+    const isDuplicateName = state.products.some(p =>
+        p.name.trim().toLowerCase() === name.toLowerCase()
     );
-    if (isDuplicate) {
-        showToast("이미 등록된 상품명입니다.", "error");
-        return;
-    }
+    if (isDuplicateName) { showToast("이미 등록된 상품명입니다.", "error"); return; }
 
-    // 상품번호 중복 체크 (입력된 경우에만, 수정 중인 상품 본인 제외)
     if (num) {
         const isDuplicateNum = state.products.some(p =>
-            p.itemNum && p.itemNum.trim().toLowerCase() === num.toLowerCase() &&
-            p.id !== state.editingProductId
+            p.itemNum && p.itemNum.trim().toLowerCase() === num.toLowerCase()
         );
-        if (isDuplicateNum) {
-            showToast("이미 등록된 상품번호입니다.", "error");
-            return;
-        }
+        if (isDuplicateNum) { showToast("이미 등록된 상품번호입니다.", "error"); return; }
     }
 
     const vendors = [];
-    document.querySelectorAll('.vendor-row').forEach(row => {
+    document.querySelectorAll('#vendor-container .vendor-row').forEach(row => {
         const vName  = row.querySelector('.v-name').value;
         const vPrice = parseInt(row.querySelector('.v-price').value.replace(/,/g, '')) || 0;
-        const vShip  = parseInt(row.querySelector('.v-ship').value.replace(/,/g, '')) || 0;
-        const vFree  = parseInt(row.querySelector('.v-free').value.replace(/,/g, '')) || 0;
+        const vShip  = parseInt(row.querySelector('.v-ship').value.replace(/,/g, ''))  || 0;
+        const vFree  = parseInt(row.querySelector('.v-free').value.replace(/,/g, ''))  || 0;
         if (vName) vendors.push({ name: vName, price: vPrice, shipping: vShip, freeThreshold: vFree });
     });
-
     if (vendors.length === 0) { showToast("최소 1개의 도매처를 선택해주세요.", "error"); return; }
 
-    if (state.editingProductId) {
-        const idx = state.products.findIndex(p => p.id === state.editingProductId);
-        if (idx !== -1) state.products[idx] = { ...state.products[idx], name, itemNum: num, stock, vendors };
-        showToast("상품 정보가 수정되었습니다.");
-        cancelEdit();
-    } else {
-        state.products.push({ id: Date.now().toString(), name, itemNum: num, stock, vendors });
-        showToast("새 상품이 저장되었습니다.");
-        cancelEdit();
-        document.getElementById('prd-name').focus();
-    }
+    state.products.push({ id: Date.now().toString(), name, itemNum: num, stock, vendors });
     saveToFirestore();
+    showToast("새 상품이 저장되었습니다.");
+    cancelEdit();
+    document.getElementById('prd-name').focus();
 }
 
 export function toggleStockSort() {
-    if (state.stockSortOrder === 'none')       state.stockSortOrder = 'asc';
-    else if (state.stockSortOrder === 'asc')   state.stockSortOrder = 'desc';
-    else                                        state.stockSortOrder = 'none';
+    if (state.stockSortOrder === 'none')     state.stockSortOrder = 'asc';
+    else if (state.stockSortOrder === 'asc') state.stockSortOrder = 'desc';
+    else                                      state.stockSortOrder = 'none';
     state.currentProductPage = 1;
     renderProducts();
 }
@@ -99,7 +127,7 @@ export function resetPageAndRender() {
 }
 
 export function renderProducts() {
-    const tbody       = document.getElementById('prd-table-body');
+    const tbody        = document.getElementById('prd-table-body');
     const paginationEl = document.getElementById('prd-pagination');
     if (!tbody) return;
     tbody.innerHTML = '';
@@ -128,12 +156,12 @@ export function renderProducts() {
         return;
     }
 
-    const pageSize   = parseInt(document.getElementById('prd-page-size')?.value || '10');
-    const totalPages = Math.ceil(display.length / pageSize);
+    const pageSize    = parseInt(document.getElementById('prd-page-size')?.value || '10');
+    const totalPages  = Math.ceil(display.length / pageSize);
     if (state.currentProductPage > totalPages) state.currentProductPage = totalPages;
     if (state.currentProductPage < 1)          state.currentProductPage = 1;
 
-    const startIdx    = (state.currentProductPage - 1) * pageSize;
+    const startIdx     = (state.currentProductPage - 1) * pageSize;
     const pageProducts = display.slice(startIdx, startIdx + pageSize);
 
     pageProducts.forEach(p => {
@@ -195,7 +223,6 @@ export function renderProducts() {
             color:${active ? 'white' : 'var(--text-main)'};
             transition:var(--transition);
         `;
-
         const mkBtn = (label, page, disabled = false) => {
             const btn = document.createElement('button');
             btn.innerHTML = label;
@@ -204,7 +231,6 @@ export function renderProducts() {
             else btn.onclick = () => { state.currentProductPage = page; renderProducts(); };
             return btn;
         };
-
         const dots = () => {
             const s = document.createElement('span');
             s.innerText = '…';
@@ -254,7 +280,7 @@ export function inlineEditPrice(productId, vendorName, tdElement, currentPrice) 
         renderProducts();
     };
 
-    input.onblur    = finishEdit;
+    input.onblur     = finishEdit;
     input.onkeypress = (e) => { if (e.key === 'Enter') finishEdit(); };
     tdElement.innerHTML = '';
     tdElement.appendChild(input);
@@ -264,7 +290,7 @@ export function inlineEditPrice(productId, vendorName, tdElement, currentPrice) 
 export function deleteProduct(id) {
     showConfirm("이 상품을 삭제하시겠습니까?", () => {
         state.products = state.products.filter(p => p.id !== id);
-        if (state.editingProductId === id) cancelEdit();
+        if (state.editingProductId === id) closeProductEditModal();
         if (state.currentOrderProductId === id) {
             state.currentOrderProductId = null;
             document.getElementById('order-detail-panel').style.display = 'none';
@@ -314,7 +340,7 @@ export function deleteSelectedProducts() {
         const ids = Array.from(state.selectedProductIds);
         state.products = state.products.filter(p => !ids.includes(p.id));
         state.selectedProductIds.clear();
-        if (ids.includes(state.editingProductId)) cancelEdit();
+        if (ids.includes(state.editingProductId)) closeProductEditModal();
         if (ids.includes(state.currentOrderProductId)) {
             state.currentOrderProductId = null;
             document.getElementById('order-detail-panel').style.display = 'none';
@@ -329,7 +355,7 @@ export function deleteAllProducts() {
     if (state.products.length === 0) return;
     showConfirm("등록된 모든 상품을 삭제하시겠습니까?\n이 작업은 복구할 수 없습니다.", () => {
         state.products = [];
-        cancelEdit();
+        closeProductEditModal();
         state.currentOrderProductId = null;
         document.getElementById('order-detail-panel').style.display = 'none';
         saveToFirestore();
@@ -337,17 +363,19 @@ export function deleteAllProducts() {
     });
 }
 
-window.saveProduct             = saveProduct;
-window.editProduct             = editProduct;
-window.cancelEdit              = cancelEdit;
-window.renderProducts          = renderProducts;
-window.resetPageAndRender      = resetPageAndRender;
-window.toggleStockSort         = toggleStockSort;
-window.inlineEditPrice         = inlineEditPrice;
-window.deleteProduct           = deleteProduct;
+window.saveProduct              = saveProduct;
+window.saveProductModal         = saveProductModal;
+window.editProduct              = editProduct;
+window.closeProductEditModal    = closeProductEditModal;
+window.cancelEdit               = cancelEdit;
+window.renderProducts           = renderProducts;
+window.resetPageAndRender       = resetPageAndRender;
+window.toggleStockSort          = toggleStockSort;
+window.inlineEditPrice          = inlineEditPrice;
+window.deleteProduct            = deleteProduct;
 window.updateProductFloatActions = updateProductFloatActions;
-window.toggleProductCheckbox   = toggleProductCheckbox;
-window.clearProductSelection   = clearProductSelection;
-window.toggleSelectAllProducts = toggleSelectAllProducts;
-window.deleteSelectedProducts  = deleteSelectedProducts;
-window.deleteAllProducts       = deleteAllProducts;
+window.toggleProductCheckbox    = toggleProductCheckbox;
+window.clearProductSelection    = clearProductSelection;
+window.toggleSelectAllProducts  = toggleSelectAllProducts;
+window.deleteSelectedProducts   = deleteSelectedProducts;
+window.deleteAllProducts        = deleteAllProducts;
