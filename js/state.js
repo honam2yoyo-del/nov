@@ -21,4 +21,5 @@ export const state = {
     stockSortOrder: 'none',
     currentProductPage: 1,
     selectedProductIds: new Set(),
+    productFilter: 'all',
 };

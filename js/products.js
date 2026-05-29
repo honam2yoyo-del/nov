@@ -121,6 +121,15 @@ export function toggleStockSort() {
     renderProducts();
 }
 
+export function setProductFilter(filter) {
+    state.productFilter = filter;
+    state.currentProductPage = 1;
+    document.querySelectorAll('.prd-filter-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.filter === filter);
+    });
+    renderProducts();
+}
+
 export function resetPageAndRender() {
     state.currentProductPage = 1;
     renderProducts();
@@ -133,10 +142,14 @@ export function renderProducts() {
     tbody.innerHTML = '';
 
     const searchQuery = document.getElementById('prd-search')?.value.toLowerCase() || '';
-    const filtered = state.products.filter(p =>
-        p.name.toLowerCase().includes(searchQuery) ||
-        (p.itemNum && p.itemNum.toLowerCase().includes(searchQuery))
-    );
+    const filtered = state.products.filter(p => {
+        const matchesSearch = p.name.toLowerCase().includes(searchQuery) ||
+            (p.itemNum && p.itemNum.toLowerCase().includes(searchQuery));
+        if (!matchesSearch) return false;
+        if (state.productFilter === '접착')   return p.name.includes('접착') && !p.name.includes('비접착');
+        if (state.productFilter === '비접착') return p.name.includes('비접착');
+        return true;
+    });
 
     let display = [...filtered];
     const sortIconEl = document.getElementById('sort-icon');
@@ -405,6 +418,7 @@ export function deleteAllProducts() {
     });
 }
 
+window.setProductFilter         = setProductFilter;
 window.openBulkItemNumModal     = openBulkItemNumModal;
 window.closeBulkItemNumModal    = closeBulkItemNumModal;
 window.applyBulkItemNumPrefix   = applyBulkItemNumPrefix;

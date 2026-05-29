@@ -181,6 +181,11 @@
                         <svg style="position:absolute; left:14px; top:50%; transform:translateY(-50%); width:18px; height:18px; color:var(--text-muted); pointer-events:none;" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
                         <input type="text" id="prd-search" placeholder="상품명 검색..." style="width:100%; padding:11px 14px 11px 42px; font-size:0.95rem;" oninput="window.resetPageAndRender()">
                     </div>
+                    <div style="display:flex; align-items:center; gap:4px;">
+                        <button class="prd-filter-btn active" data-filter="all"   onclick="window.setProductFilter('all')"   style="padding:8px 14px; font-size:0.85rem; border-radius:var(--radius-sm); background:var(--primary); color:white; border:1px solid var(--primary); font-weight:600; cursor:pointer;">전체</button>
+                        <button class="prd-filter-btn"       data-filter="접착"   onclick="window.setProductFilter('접착')"  style="padding:8px 14px; font-size:0.85rem; border-radius:var(--radius-sm); background:var(--bg-card); color:var(--text-muted); border:1px solid var(--border-color); font-weight:600; cursor:pointer;">접착</button>
+                        <button class="prd-filter-btn"       data-filter="비접착" onclick="window.setProductFilter('비접착')" style="padding:8px 14px; font-size:0.85rem; border-radius:var(--radius-sm); background:var(--bg-card); color:var(--text-muted); border:1px solid var(--border-color); font-weight:600; cursor:pointer;">비접착</button>
+                    </div>
                     <select id="prd-page-size" onchange="window.resetPageAndRender()" style="padding:10px 14px; font-size:0.875rem;">
                         <option value="10">10개씩 보기</option>
                         <option value="20">20개씩 보기</option>
