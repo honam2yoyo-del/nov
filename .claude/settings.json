@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mkdir -p \"C:\\\\Users\\\\USER\\\\Desktop\\\\nov\\\\css\" \"C:\\\\Users\\\\USER\\\\Desktop\\\\nov\\\\js\")"
+    ],
+    "additionalDirectories": [
+      "C:\\Users\\USER\\Desktop\\nov"
+    ]
+  }
+}
