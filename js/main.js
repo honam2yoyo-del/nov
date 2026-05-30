@@ -4,6 +4,7 @@ import { state, VENDOR_DEFAULT_SETTINGS } from './state.js';
 import { initAuth } from './auth.js';
 import { addVendorRow, updateVendorDropdowns, renderVendorListModal } from './vendors.js';
 import { renderProducts } from './products.js';
+import { saveToFirestore } from './firestore.js';
 import { renderOrderProductList } from './orders.js';
 import { renderInspectList } from './inspect.js';
 import { renderStats } from './stats.js';
@@ -32,6 +33,14 @@ function loadDataFromFirestore() {
             state.orderHistory   = [];
             state.vendorSettings = { ...VENDOR_DEFAULT_SETTINGS };
             state.vendorOrder    = Object.keys(state.vendorSettings);
+        }
+
+        // createdAt 없는 기존 상품에 오늘 날짜 일괄 적용 (최초 1회)
+        const todayTs = new Date().setHours(0, 0, 0, 0);
+        const missing = state.products.filter(p => !p.createdAt);
+        if (missing.length > 0) {
+            missing.forEach(p => { p.createdAt = todayTs; });
+            saveToFirestore();
         }
 
         if (document.querySelectorAll('.vendor-row').length === 0) addVendorRow();

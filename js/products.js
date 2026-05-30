@@ -25,12 +25,9 @@ export function editProduct(id) {
     if (createdAtEl) {
         if (p.createdAt) {
             const d = new Date(p.createdAt);
-            const yyyy = d.getFullYear();
-            const mm   = String(d.getMonth() + 1).padStart(2, '0');
-            const dd   = String(d.getDate()).padStart(2, '0');
-            createdAtEl.value = `${yyyy}-${mm}-${dd}`;
+            createdAtEl.innerText = `${d.getFullYear()}년 ${d.getMonth()+1}월 ${d.getDate()}일`;
         } else {
-            createdAtEl.value = '';
+            createdAtEl.innerText = '';
         }
     }
 
@@ -82,11 +79,8 @@ export function saveProductModal() {
     });
     if (vendors.length === 0) { showToast("최소 1개의 도매처를 선택해주세요.", "error"); return; }
 
-    const dateVal   = document.getElementById('modal-created-at').value;
-    const createdAt = dateVal ? new Date(dateVal).getTime() : (state.products.find(p => p.id === state.editingProductId)?.createdAt || null);
-
     const idx = state.products.findIndex(p => p.id === state.editingProductId);
-    if (idx !== -1) state.products[idx] = { ...state.products[idx], name, itemNum: num, stock, vendors, ...(createdAt && { createdAt }) };
+    if (idx !== -1) state.products[idx] = { ...state.products[idx], name, itemNum: num, stock, vendors };
 
     saveToFirestore();
     showToast("상품 정보가 수정되었습니다.");
@@ -134,7 +128,6 @@ export function toggleNameSort() {
     if (state.nameSortOrder === 'none')     state.nameSortOrder = 'asc';
     else if (state.nameSortOrder === 'asc') state.nameSortOrder = 'desc';
     else                                     state.nameSortOrder = 'none';
-    state.stockSortOrder = 'none';
     state.currentProductPage = 1;
     renderProducts();
 }
@@ -143,7 +136,6 @@ export function toggleStockSort() {
     if (state.stockSortOrder === 'none')     state.stockSortOrder = 'asc';
     else if (state.stockSortOrder === 'asc') state.stockSortOrder = 'desc';
     else                                      state.stockSortOrder = 'none';
-    state.nameSortOrder = 'none';
     state.currentProductPage = 1;
     renderProducts();
 }
@@ -179,29 +171,31 @@ export function renderProducts() {
     let display = [...filtered];
     const sortIconEl     = document.getElementById('sort-icon');
     const nameSortIconEl = document.getElementById('name-sort-icon');
+    const nameActive     = state.nameSortOrder  !== 'none';
+    const stockActive    = state.stockSortOrder !== 'none';
 
-    if (state.nameSortOrder === 'asc') {
-        display.sort((a, b) => a.name.localeCompare(b.name, 'ko'));
-        if (nameSortIconEl) nameSortIconEl.innerText = '↑';
-        if (sortIconEl)     sortIconEl.innerText = '↕';
-    } else if (state.nameSortOrder === 'desc') {
-        display.sort((a, b) => b.name.localeCompare(a.name, 'ko'));
-        if (nameSortIconEl) nameSortIconEl.innerText = '↓';
-        if (sortIconEl)     sortIconEl.innerText = '↕';
-    } else if (state.stockSortOrder === 'asc') {
-        display.sort((a, b) => a.stock - b.stock);
-        if (sortIconEl)     sortIconEl.innerText = '↑';
-        if (nameSortIconEl) nameSortIconEl.innerText = '↕';
-    } else if (state.stockSortOrder === 'desc') {
-        display.sort((a, b) => b.stock - a.stock);
-        if (sortIconEl)     sortIconEl.innerText = '↓';
-        if (nameSortIconEl) nameSortIconEl.innerText = '↕';
+    if (nameActive || stockActive) {
+        display.sort((a, b) => {
+            if (nameActive) {
+                const cmp = state.nameSortOrder === 'asc'
+                    ? a.name.localeCompare(b.name, 'ko')
+                    : b.name.localeCompare(a.name, 'ko');
+                if (cmp !== 0) return cmp;
+            }
+            if (stockActive) {
+                return state.stockSortOrder === 'asc'
+                    ? a.stock - b.stock
+                    : b.stock - a.stock;
+            }
+            return 0;
+        });
     } else {
-        // 기본: 최신 등록순 (createdAt 내림차순)
+        // 기본: 최신 등록순
         display.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
-        if (sortIconEl)     sortIconEl.innerText = '↕';
-        if (nameSortIconEl) nameSortIconEl.innerText = '↕';
     }
+
+    if (nameSortIconEl) nameSortIconEl.innerText = state.nameSortOrder  === 'asc' ? '↑' : state.nameSortOrder  === 'desc' ? '↓' : '↕';
+    if (sortIconEl)     sortIconEl.innerText     = state.stockSortOrder === 'asc' ? '↑' : state.stockSortOrder === 'desc' ? '↓' : '↕';
 
     if (display.length === 0) {
         tbody.innerHTML = `<tr><td colspan="8" style="padding:40px; text-align:center; color:var(--text-muted);">${state.products.length > 0 ? '검색 결과가 없습니다.' : '등록된 상품이 없습니다.'}</td></tr>`;
