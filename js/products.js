@@ -25,9 +25,12 @@ export function editProduct(id) {
     if (createdAtEl) {
         if (p.createdAt) {
             const d = new Date(p.createdAt);
-            createdAtEl.innerText = `등록일: ${d.getFullYear()}년 ${d.getMonth()+1}월 ${d.getDate()}일`;
+            const yyyy = d.getFullYear();
+            const mm   = String(d.getMonth() + 1).padStart(2, '0');
+            const dd   = String(d.getDate()).padStart(2, '0');
+            createdAtEl.value = `${yyyy}-${mm}-${dd}`;
         } else {
-            createdAtEl.innerText = '등록일: 알 수 없음';
+            createdAtEl.value = '';
         }
     }
 
@@ -79,8 +82,11 @@ export function saveProductModal() {
     });
     if (vendors.length === 0) { showToast("최소 1개의 도매처를 선택해주세요.", "error"); return; }
 
+    const dateVal   = document.getElementById('modal-created-at').value;
+    const createdAt = dateVal ? new Date(dateVal).getTime() : (state.products.find(p => p.id === state.editingProductId)?.createdAt || null);
+
     const idx = state.products.findIndex(p => p.id === state.editingProductId);
-    if (idx !== -1) state.products[idx] = { ...state.products[idx], name, itemNum: num, stock, vendors };
+    if (idx !== -1) state.products[idx] = { ...state.products[idx], name, itemNum: num, stock, vendors, ...(createdAt && { createdAt }) };
 
     saveToFirestore();
     showToast("상품 정보가 수정되었습니다.");

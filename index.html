@@ -85,9 +85,12 @@
     <!-- 상품 수정 모달 -->
     <div id="product-edit-modal" class="modal-overlay">
         <div class="modal-box" style="max-width:680px; width:95%; max-height:90vh; display:flex; flex-direction:column;">
-            <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:20px; flex-shrink:0;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-shrink:0;">
                 <h3 id="modal-edit-title" style="margin:0;">상품 수정</h3>
-                <span id="modal-created-at" style="font-size:0.8rem; color:var(--text-muted);"></span>
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <label style="font-size:0.8rem; color:var(--text-muted); white-space:nowrap;">등록일</label>
+                    <input type="date" id="modal-created-at" style="font-size:0.8rem; padding:4px 8px; border:1px solid var(--border-color); border-radius:var(--radius-sm); color:var(--text-muted);">
+                </div>
             </div>
             <div style="overflow-y:auto; flex:1; padding-right:4px;">
                 <div style="display:flex; gap:12px; margin-bottom:16px; flex-wrap:wrap;">
