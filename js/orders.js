@@ -104,6 +104,19 @@ export function calcOrderPrices() {
 export function placeOrder(prdId, vendorName, qty, price, shipping) {
     const p = state.products.find(x => x.id === prdId);
     const now = new Date();
+
+    // 같은 상품 + 같은 도매처 + 대기 상태인 항목이 있으면 수량만 합산
+    const existing = state.inspectList.find(x =>
+        x.productId === p.id && x.vendorName === vendorName && x.status === '대기'
+    );
+    if (existing) {
+        existing.qty += qty;
+        saveToFirestore();
+        showToast(`[${vendorName}] ${p.name} 수량이 추가되었습니다. (총 ${existing.qty}개)`);
+        calcOrderPrices();
+        return;
+    }
+
     state.inspectList.push({
         id: Date.now().toString(),
         productId: p.id,
