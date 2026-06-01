@@ -145,13 +145,26 @@
             </div>
         </div>
 
-        <div class="tab-nav no-print">
-            <button class="tab-btn active" onclick="switchTab('tab-products')">상품 & 도매처 관리</button>
-            <button class="tab-btn" onclick="switchTab('tab-order')">발주 신청</button>
-            <button class="tab-btn" onclick="switchTab('tab-inspect')">입고 검수 리스트</button>
-            <button class="tab-btn" onclick="switchTab('tab-stats')">통계 및 정산</button>
-        </div>
-
+        <div class="app-body">
+        <nav id="sidebar" class="no-print">
+            <button class="sidebar-btn active" data-tab="tab-products" onclick="switchTab('tab-products')">
+                <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10"/></svg>
+                <span>상품 & 도매처 관리</span>
+            </button>
+            <button class="sidebar-btn" data-tab="tab-order" onclick="switchTab('tab-order')">
+                <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2 9m12-9l2 9M9 21a1 1 0 100-2 1 1 0 000 2zm10 0a1 1 0 100-2 1 1 0 000 2z"/></svg>
+                <span>발주 신청</span>
+            </button>
+            <button class="sidebar-btn" data-tab="tab-inspect" onclick="switchTab('tab-inspect')">
+                <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+                <span>입고 검수 리스트</span>
+            </button>
+            <button class="sidebar-btn" data-tab="tab-stats" onclick="switchTab('tab-stats')">
+                <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                <span>통계 및 정산</span>
+            </button>
+        </nav>
+        <div class="main-content">
         <div class="container">
 
             <!-- 탭 1: 상품 관리 -->
@@ -318,6 +331,8 @@
             </div>
 
         </div>
+        </div><!-- /.main-content -->
+        </div><!-- /.app-body -->
     </div>
 
     <script type="module" src="js/main.js"></script>

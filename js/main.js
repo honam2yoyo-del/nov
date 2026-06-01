@@ -70,9 +70,9 @@ function onLogout() {
 
 function switchTab(tabId) {
     document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-    document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.sidebar-btn').forEach(el => el.classList.remove('active'));
     document.getElementById(tabId).classList.add('active');
-    document.querySelector(`.tab-btn[onclick="switchTab('${tabId}')"]`)?.classList.add('active');
+    document.querySelector(`.sidebar-btn[data-tab="${tabId}"]`)?.classList.add('active');
     if (tabId === 'tab-order') renderOrderProductList();
     if (tabId === 'tab-stats') renderStats();
 }
