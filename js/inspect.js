@@ -2,6 +2,46 @@ import { state } from './state.js';
 import { saveToFirestore } from './firestore.js';
 import { showToast, showConfirm } from './ui.js';
 
+function dateStrOf(daysAgo) {
+    const d = new Date();
+    d.setDate(d.getDate() - daysAgo);
+    return d.toISOString().split('T')[0];
+}
+
+function labelOf(dateStr) {
+    if (dateStr === dateStrOf(0)) return '오늘';
+    if (dateStr === dateStrOf(1)) return '어제';
+    if (dateStr === dateStrOf(2)) return '그저께';
+    const [y, m, dd] = dateStr.split('-');
+    return `${m}/${dd}`;
+}
+
+export function setInspectDateFilter(val) {
+    state.inspectDateFilter = val;
+    renderInspectList();
+}
+
+export function renderInspectDateFilters() {
+    const container = document.getElementById('inspect-date-filter-bar');
+    if (!container) return;
+
+    const dateCounts = {};
+    state.inspectList.forEach(item => {
+        const d = item.orderDateISO ? item.orderDateISO.split('T')[0] : '';
+        if (d) dateCounts[d] = (dateCounts[d] || 0) + 1;
+    });
+
+    const sortedDates = Object.keys(dateCounts).sort().reverse();
+    const cur = state.inspectDateFilter;
+
+    let html = `<button class="idf-btn ${cur === 'all' ? 'idf-active' : ''}" onclick="window.setInspectDateFilter('all')">전체 <em>${state.inspectList.length}건</em></button>`;
+    sortedDates.forEach(d => {
+        html += `<button class="idf-btn ${cur === d ? 'idf-active' : ''}" onclick="window.setInspectDateFilter('${d}')">${labelOf(d)} <em>${dateCounts[d]}건</em></button>`;
+    });
+
+    container.innerHTML = html;
+}
+
 export function toggleInspectSelectAll(source) {
     document.querySelectorAll('.inspect-checkbox').forEach(cb => cb.checked = source.checked);
     updateInspectActions();
@@ -28,19 +68,32 @@ export function markSelected(status) {
 }
 
 export function renderInspectList() {
+    renderInspectDateFilters();
+
     const tbody = document.getElementById('inspect-table-body');
     if (!tbody) return;
     tbody.innerHTML = '';
 
-    if (state.inspectList.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="9" style="padding:40px; text-align:center; color:var(--text-muted);">입고 대기 중인 발주 내역이 없습니다.</td></tr>`;
+    const filterDate = state.inspectDateFilter;
+    const displayList = filterDate === 'all'
+        ? state.inspectList
+        : state.inspectList.filter(item => {
+            const d = item.orderDateISO ? item.orderDateISO.split('T')[0] : '';
+            return d === filterDate;
+        });
+
+    if (displayList.length === 0) {
+        const msg = state.inspectList.length === 0
+            ? '입고 대기 중인 발주 내역이 없습니다.'
+            : '선택한 날짜의 발주 내역이 없습니다.';
+        tbody.innerHTML = `<tr><td colspan="9" style="padding:40px; text-align:center; color:var(--text-muted);">${msg}</td></tr>`;
         document.getElementById('inspect-select-all').checked = false;
         updateInspectActions();
         return;
     }
 
     const groups = {};
-    state.inspectList.forEach(item => {
+    displayList.forEach(item => {
         if (!groups[item.vendorName]) groups[item.vendorName] = [];
         groups[item.vendorName].push(item);
     });
@@ -151,6 +204,7 @@ export function receiveAllNormalItems() {
     });
 }
 
+window.setInspectDateFilter   = setInspectDateFilter;
 window.toggleInspectSelectAll = toggleInspectSelectAll;
 window.updateInspectActions   = updateInspectActions;
 window.markSelected           = markSelected;

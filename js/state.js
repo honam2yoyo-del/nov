@@ -23,4 +23,5 @@ export const state = {
     currentProductPage: 1,
     selectedProductIds: new Set(),
     productFilter: 'all',
+    inspectDateFilter: 'all',
 };

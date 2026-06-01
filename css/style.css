@@ -151,3 +151,8 @@ tbody tr:last-child td { border-bottom: none; }
 
 input[type="checkbox"].real-checkbox { width: 18px; height: 18px; accent-color: var(--primary); cursor: pointer; }
 
+.idf-btn { background: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-muted); padding: 6px 14px; border-radius: var(--radius-sm); font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: var(--transition); }
+.idf-btn:hover { background: var(--bg-hover); color: var(--text-main); }
+.idf-btn.idf-active { background: var(--primary); border-color: var(--primary); color: white; }
+.idf-btn em { font-style: normal; font-size: 0.75rem; opacity: 0.85; margin-left: 4px; }
+
