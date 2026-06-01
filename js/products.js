@@ -222,8 +222,8 @@ export function renderProducts() {
                     </td>
                     <td rowspan="${rowCount}" style="text-align:center; font-weight:600; color:var(--text-main); border-right:1px solid var(--border-color);">${p.name}</td>
                     <td rowspan="${rowCount}" style="text-align:center; color:var(--text-muted); border-right:1px solid var(--border-color);">${p.itemNum || '-'}</td>
-                    <td rowspan="${rowCount}" style="text-align:center; border-right:1px solid var(--border-color);">
-                        <span style="font-weight:700; font-size:1.05rem; color:${p.stock <= 5 ? 'var(--danger)' : 'var(--text-main)'};">${p.stock.toLocaleString()}</span>
+                    <td rowspan="${rowCount}" style="text-align:center; border-right:1px solid var(--border-color); cursor:pointer;" title="클릭하여 재고 수정" onclick="window.inlineEditStock('${p.id}', this, ${p.stock})">
+                        <span style="font-weight:700; font-size:1.05rem; color:${p.stock <= 5 ? 'var(--danger)' : 'var(--text-main)'}; border-bottom:1px dashed ${p.stock <= 5 ? 'var(--danger)' : 'var(--text-muted)'}; padding-bottom:1px;">${p.stock.toLocaleString()}</span>
                     </td>
                 `;
             }
@@ -303,6 +303,33 @@ export function renderProducts() {
         info.innerText = `${state.currentProductPage} / ${totalPages} 페이지 (총 ${display.length}개)`;
         paginationEl.appendChild(info);
     }
+}
+
+export function inlineEditStock(productId, tdElement, currentStock) {
+    if (tdElement.querySelector('input')) return;
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.value = currentStock.toLocaleString();
+    input.style.cssText = 'width:70px; text-align:center; padding:4px 8px; font-size:1rem; font-weight:700; border:1px solid var(--primary); border-radius:4px; outline:none;';
+    input.oninput = function() { window.formatNumberInput(this); };
+
+    const finishEdit = () => {
+        const newStock = parseInt(input.value.replace(/,/g, ''), 10) || 0;
+        const p = state.products.find(x => x.id === productId);
+        if (p && p.stock !== newStock) {
+            p.stock = newStock;
+            saveToFirestore();
+            showToast("재고가 수정되었습니다.");
+        }
+        renderProducts();
+    };
+
+    input.onblur     = finishEdit;
+    input.onkeypress = (e) => { if (e.key === 'Enter') finishEdit(); };
+    tdElement.innerHTML = '';
+    tdElement.appendChild(input);
+    input.focus();
+    input.select();
 }
 
 export function inlineEditPrice(productId, vendorName, tdElement, currentPrice) {
@@ -465,6 +492,7 @@ window.cancelEdit               = cancelEdit;
 window.renderProducts           = renderProducts;
 window.resetPageAndRender       = resetPageAndRender;
 window.toggleStockSort          = toggleStockSort;
+window.inlineEditStock          = inlineEditStock;
 window.inlineEditPrice          = inlineEditPrice;
 window.deleteProduct            = deleteProduct;
 window.updateProductFloatActions = updateProductFloatActions;
