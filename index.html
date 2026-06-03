@@ -135,19 +135,16 @@
     <!-- 메인 앱 -->
     <div id="main-app" style="display:none;">
         <div id="app-header" class="no-print">
-            <div class="header-inner">
-                <div style="font-weight:700; font-size:1.1rem; display:flex; align-items:center; gap:8px;">
-                    <div style="width:8px; height:8px; background:var(--success); border-radius:50%;"></div>
-                    <span>WorkSpace</span>
-                </div>
-                <div style="display:flex; align-items:center; gap:15px;">
-                    <span id="user-info" style="font-size:0.85rem; color:var(--text-muted); font-weight:500;"></span>
-                    <button onclick="window.logout()" class="outline" style="padding:6px 12px; font-size:0.75rem;">로그아웃</button>
-                </div>
+            <div style="font-weight:700; font-size:1.1rem; display:flex; align-items:center; gap:8px;">
+                <div style="width:8px; height:8px; background:var(--success); border-radius:50%;"></div>
+                <span>WorkSpace</span>
+            </div>
+            <div style="display:flex; align-items:center; gap:15px;">
+                <span id="user-info" style="font-size:0.85rem; color:var(--text-muted); font-weight:500;"></span>
+                <button onclick="window.logout()" class="outline" style="padding:6px 12px; font-size:0.75rem;">로그아웃</button>
             </div>
         </div>
 
-        <div class="app-body-outer">
         <div class="app-body">
         <nav id="sidebar" class="no-print">
             <button class="sidebar-btn active" data-tab="tab-products" onclick="switchTab('tab-products')">
@@ -336,7 +333,6 @@
         </div>
         </div><!-- /.main-content -->
         </div><!-- /.app-body -->
-        </div><!-- /.app-body-outer -->
     </div>
 
     <script type="module" src="js/main.js"></script>
