@@ -112,13 +112,13 @@ export function renderInspectList() {
 
             tr.innerHTML += `
                 <td style="text-align:center;"><input type="checkbox" class="inspect-checkbox real-checkbox" value="${item.id}" onchange="window.updateInspectActions()"></td>
-                <td style="font-weight:600; text-align:center; color:var(--text-main);">
+                <td class="ip-name" style="font-weight:600; color:var(--text-main);">
                     ${item.name} ${statusBadge}<br>
                     <span class="no-print" style="font-size:0.75rem; color:var(--text-muted); font-weight:normal; margin-top:4px; display:inline-block;">발주일: ${item.orderDate}</span>
                 </td>
                 <td class="hide-on-print" style="color:var(--text-muted); text-align:center;">${item.itemNum || '-'}</td>
-                <td style="font-weight:700; color:var(--primary); font-size:1.1rem; text-align:center;">${item.qty.toLocaleString()} 개</td>
-                <td style="color:var(--text-main); font-weight:500; text-align:center;">${item.vendorName}</td>
+                <td class="ip-qty" style="font-weight:700; color:var(--primary); font-size:1.1rem; text-align:center;">${item.qty.toLocaleString()} 개</td>
+                <td class="ip-vendor" style="color:var(--text-main); font-weight:500; text-align:center;">${item.vendorName}</td>
                 <td class="hide-on-print" style="text-align:center;">${item.price.toLocaleString()}원</td>
                 <td class="hide-on-print" style="font-weight:700; text-align:center;">${(item.price * item.qty).toLocaleString()}원</td>
             `;

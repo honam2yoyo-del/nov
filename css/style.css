@@ -160,6 +160,17 @@ tbody tr:last-child td { border-bottom: none; }
     th { background-color: #f8fafc !important; color: #64748b !important; }
     .check-box { width: 22px; height: 22px; border: 2px solid #000; display: inline-block; vertical-align: middle; border-radius: 4px; }
     .real-checkbox { display: none !important; }
+    .app-body { display: block !important; min-height: unset !important; }
+    .main-content { display: block !important; }
+
+    /* 입고 검수 테이블 인쇄 컬럼 너비 최적화 */
+    #tab-inspect table { table-layout: fixed; width: 100%; }
+    .ip-name   { width: 52% !important; text-align: left !important; font-size: 11pt !important; word-break: break-word; }
+    .ip-qty    { width: 13% !important; text-align: center !important; font-size: 11pt !important; white-space: nowrap; }
+    .ip-vendor { width: 25% !important; text-align: left !important; font-size: 11pt !important; word-break: break-word; }
+    #tab-inspect th, #tab-inspect td { padding: 10px 8px !important; }
+    /* 체크박스 칸에 수기 체크용 빈 박스 표시 */
+    #tab-inspect td:first-child::after { content: ''; display: block; width: 20px; height: 20px; border: 2px solid #333; border-radius: 3px; margin: 0 auto; }
 }
 
 input[type="checkbox"].real-checkbox { width: 18px; height: 18px; accent-color: var(--primary); cursor: pointer; }
