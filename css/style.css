@@ -167,7 +167,7 @@ tbody tr:last-child td { border-bottom: none; }
     #tab-inspect table { table-layout: fixed; width: 100%; }
     .ip-name   { width: 52% !important; text-align: center !important; font-size: 11pt !important; word-break: break-word; }
     .ip-qty    { width: 13% !important; text-align: center !important; font-size: 11pt !important; white-space: nowrap; }
-    .ip-vendor { width: 25% !important; text-align: left !important; font-size: 11pt !important; word-break: break-word; }
+    .ip-vendor { width: 25% !important; text-align: center !important; font-size: 11pt !important; word-break: break-word; }
     #tab-inspect th, #tab-inspect td { padding: 10px 8px !important; }
     /* 체크박스 칸에 수기 체크용 빈 박스 표시 */
     #tab-inspect td:first-child::after { content: ''; display: block; width: 20px; height: 20px; border: 2px solid #333; border-radius: 3px; margin: 0 auto; }
