@@ -165,7 +165,7 @@ tbody tr:last-child td { border-bottom: none; }
 
     /* 입고 검수 테이블 인쇄 컬럼 너비 최적화 */
     #tab-inspect table { table-layout: fixed; width: 100%; }
-    .ip-name   { width: 52% !important; text-align: left !important; font-size: 11pt !important; word-break: break-word; }
+    .ip-name   { width: 52% !important; text-align: center !important; font-size: 11pt !important; word-break: break-word; }
     .ip-qty    { width: 13% !important; text-align: center !important; font-size: 11pt !important; white-space: nowrap; }
     .ip-vendor { width: 25% !important; text-align: left !important; font-size: 11pt !important; word-break: break-word; }
     #tab-inspect th, #tab-inspect td { padding: 10px 8px !important; }

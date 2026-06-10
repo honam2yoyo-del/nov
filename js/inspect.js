@@ -74,12 +74,20 @@ export function renderInspectList() {
     if (!tbody) return;
     tbody.innerHTML = '';
 
-    const filterDate = state.inspectDateFilter;
-    const displayList = filterDate === 'all'
-        ? state.inspectList
-        : state.inspectList.filter(item => {
-            const d = item.orderDateISO ? item.orderDateISO.split('T')[0] : '';
-            return d === filterDate;
+    const filterDate  = state.inspectDateFilter;
+    const searchQuery = document.getElementById('inspect-search')?.value.toLowerCase() || '';
+
+    const displayList = state.inspectList
+        .filter(item => {
+            if (filterDate !== 'all') {
+                const d = item.orderDateISO ? item.orderDateISO.split('T')[0] : '';
+                if (d !== filterDate) return false;
+            }
+            if (searchQuery) {
+                return item.name.toLowerCase().includes(searchQuery) ||
+                       item.vendorName.toLowerCase().includes(searchQuery);
+            }
+            return true;
         });
 
     if (displayList.length === 0) {
@@ -112,7 +120,7 @@ export function renderInspectList() {
 
             tr.innerHTML += `
                 <td style="text-align:center;"><input type="checkbox" class="inspect-checkbox real-checkbox" value="${item.id}" onchange="window.updateInspectActions()"></td>
-                <td class="ip-name" style="font-weight:600; color:var(--text-main);">
+                <td class="ip-name" style="font-weight:600; text-align:center; color:var(--text-main);">
                     ${item.name} ${statusBadge}<br>
                     <span class="no-print" style="font-size:0.75rem; color:var(--text-muted); font-weight:normal; margin-top:4px; display:inline-block;">발주일: ${item.orderDate}</span>
                 </td>
@@ -204,6 +212,29 @@ export function receiveAllNormalItems() {
     });
 }
 
+export function printSelectedInspectItems() {
+    const checkedIds = new Set();
+    document.querySelectorAll('.inspect-checkbox:checked').forEach(cb => checkedIds.add(cb.value));
+
+    if (checkedIds.size === 0) {
+        showToast("선택된 항목이 없습니다. 체크박스를 먼저 선택해주세요.", "error");
+        return;
+    }
+
+    const originalList   = [...state.inspectList];
+    const originalFilter = state.inspectDateFilter;
+
+    state.inspectList     = state.inspectList.filter(item => checkedIds.has(item.id));
+    state.inspectDateFilter = 'all';
+    renderInspectList();
+
+    window.print();
+
+    state.inspectList     = originalList;
+    state.inspectDateFilter = originalFilter;
+    renderInspectList();
+}
+
 window.setInspectDateFilter   = setInspectDateFilter;
 window.toggleInspectSelectAll = toggleInspectSelectAll;
 window.updateInspectActions   = updateInspectActions;
@@ -211,4 +242,5 @@ window.markSelected           = markSelected;
 window.renderInspectList      = renderInspectList;
 window.confirmReceive         = confirmReceive;
 window.cancelOrder            = cancelOrder;
-window.receiveAllNormalItems  = receiveAllNormalItems;
+window.receiveAllNormalItems      = receiveAllNormalItems;
+window.printSelectedInspectItems  = printSelectedInspectItems;

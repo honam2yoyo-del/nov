@@ -274,11 +274,18 @@
                             <button class="warning" style="padding:6px 10px; font-size:0.8rem;" onclick="window.markSelected('미도착')">미도착</button>
                             <button class="outline" style="padding:6px 10px; font-size:0.8rem;" onclick="window.markSelected('대기')">정상</button>
                         </div>
-                        <button class="outline"  onclick="window.print()">🖨️ 인쇄</button>
+                        <button class="outline"  onclick="window.printSelectedInspectItems()">🖨️ 선택 인쇄</button>
+                        <button class="outline"  onclick="window.print()">🖨️ 전체 인쇄</button>
                         <button class="success"  onclick="window.receiveAllNormalItems()">📦 전체 입고</button>
                     </div>
                 </div>
-                <div id="inspect-date-filter-bar" class="no-print" style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:12px;"></div>
+                <div class="no-print" style="display:flex; gap:10px; align-items:center; margin-bottom:10px; flex-wrap:wrap;">
+                    <div style="position:relative; flex:1; max-width:340px;">
+                        <svg style="position:absolute; left:12px; top:50%; transform:translateY(-50%); width:16px; height:16px; color:var(--text-muted); pointer-events:none;" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                        <input type="text" id="inspect-search" placeholder="상품명 또는 도매처 검색..." style="width:100%; padding:9px 12px 9px 36px; font-size:0.875rem;" oninput="window.renderInspectList()">
+                    </div>
+                    <div id="inspect-date-filter-bar" style="display:flex; gap:6px; flex-wrap:wrap;"></div>
+                </div>
 
                 <div class="table-wrapper">
                     <table>
