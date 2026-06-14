@@ -273,12 +273,17 @@
                             <button class="danger"  style="padding:6px 10px; font-size:0.8rem;" onclick="window.markSelected('반품')">반품</button>
                             <button class="warning" style="padding:6px 10px; font-size:0.8rem;" onclick="window.markSelected('미도착')">미도착</button>
                             <button class="outline" style="padding:6px 10px; font-size:0.8rem;" onclick="window.markSelected('대기')">정상</button>
-                            <button class="danger"  style="padding:6px 10px; font-size:0.8rem;" onclick="window.deleteSelectedInspectItems()">🗑️ 선택 삭제</button>
                         </div>
                         <button class="outline"  onclick="window.printSelectedInspectItems()">🖨️ 선택 인쇄</button>
                         <button class="outline"  onclick="window.printAllInspectItems()">🖨️ 전체 인쇄</button>
-                        <button class="danger"   style="background:transparent; border:1px solid #fca5a5; color:var(--danger);" onclick="window.deleteAllInspectItems()">🗑️ 전체 삭제</button>
-                        <button class="success"  onclick="window.receiveAllNormalItems()">📦 전체 입고</button>
+                        <div style="display:flex; flex-direction:column; gap:4px;">
+                            <button class="danger" style="background:transparent; border:1px solid #fca5a5; color:var(--danger); padding:6px 12px; font-size:0.85rem;" onclick="window.deleteAllInspectItems()">🗑️ 전체 삭제</button>
+                            <button id="btn-delete-selected" class="danger" style="background:transparent; border:1px solid #fca5a5; color:var(--danger); padding:6px 12px; font-size:0.85rem; display:none;" onclick="window.deleteSelectedInspectItems()">🗑️ 선택 삭제</button>
+                        </div>
+                        <div style="display:flex; flex-direction:column; gap:4px;">
+                            <button class="success" style="padding:6px 12px; font-size:0.85rem;" onclick="window.receiveAllNormalItems()">📦 전체 입고</button>
+                            <button id="btn-receive-selected" class="success" style="padding:6px 12px; font-size:0.85rem; display:none;" onclick="window.receiveSelectedInspectItems()">📦 선택 입고</button>
+                        </div>
                     </div>
                 </div>
                 <div class="no-print" style="display:flex; gap:10px; align-items:center; margin-bottom:10px; flex-wrap:wrap;">

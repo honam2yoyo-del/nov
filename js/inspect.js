@@ -50,11 +50,17 @@ export function toggleInspectSelectAll(source) {
 export function updateInspectActions() {
     const checked = document.querySelectorAll('.inspect-checkbox:checked').length;
     const bar = document.getElementById('inspect-selection-actions');
+    const btnDel = document.getElementById('btn-delete-selected');
+    const btnRcv = document.getElementById('btn-receive-selected');
     if (checked > 0) {
         bar.style.display = 'flex';
         document.getElementById('inspect-checked-count').innerText = `${checked}개 선택됨`;
+        if (btnDel) btnDel.style.display = '';
+        if (btnRcv) btnRcv.style.display = '';
     } else {
         bar.style.display = 'none';
+        if (btnDel) btnDel.style.display = 'none';
+        if (btnRcv) btnRcv.style.display = 'none';
     }
 }
 
@@ -241,6 +247,43 @@ export function printSelectedInspectItems() {
     renderInspectList();
 }
 
+export function receiveSelectedInspectItems() {
+    const checkedIds = new Set();
+    document.querySelectorAll('.inspect-checkbox:checked').forEach(cb => checkedIds.add(cb.value));
+
+    if (checkedIds.size === 0) {
+        showToast("선택된 항목이 없습니다.", "error");
+        return;
+    }
+
+    const targets = state.inspectList.filter(item => checkedIds.has(item.id) && item.status !== '반품' && item.status !== '미도착');
+    const skipped = checkedIds.size - targets.length;
+
+    const msg = skipped > 0
+        ? `선택한 항목 중 정상 항목 ${targets.length}개를 입고하시겠습니까?\n(반품/미도착 ${skipped}개는 제외됩니다.)`
+        : `선택한 ${targets.length}개 항목을 입고하시겠습니까?\n재고와 통계에 반영됩니다.`;
+
+    showConfirm(msg, () => {
+        targets.forEach((item, idx) => {
+            const prdIndex = state.products.findIndex(x => x.id === item.productId);
+            if (prdIndex !== -1) state.products[prdIndex].stock += item.qty;
+            state.orderHistory.push({
+                id: Date.now().toString() + idx,
+                productId: item.productId,
+                name: item.name,
+                vendorName: item.vendorName,
+                qty: item.qty,
+                price: item.price,
+                orderDate: item.orderDateISO || new Date().toISOString()
+            });
+        });
+        const targetIds = new Set(targets.map(x => x.id));
+        state.inspectList = state.inspectList.filter(x => !targetIds.has(x.id));
+        saveToFirestore();
+        showToast(`${targets.length}개 항목 입고 완료!`);
+    });
+}
+
 export function deleteSelectedInspectItems() {
     const checkedIds = new Set();
     document.querySelectorAll('.inspect-checkbox:checked').forEach(cb => checkedIds.add(cb.value));
@@ -295,5 +338,6 @@ window.cancelOrder            = cancelOrder;
 window.receiveAllNormalItems      = receiveAllNormalItems;
 window.printSelectedInspectItems  = printSelectedInspectItems;
 window.printAllInspectItems       = printAllInspectItems;
-window.deleteSelectedInspectItems = deleteSelectedInspectItems;
-window.deleteAllInspectItems      = deleteAllInspectItems;
+window.deleteSelectedInspectItems  = deleteSelectedInspectItems;
+window.deleteAllInspectItems       = deleteAllInspectItems;
+window.receiveSelectedInspectItems = receiveSelectedInspectItems;
