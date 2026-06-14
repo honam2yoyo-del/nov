@@ -241,6 +241,36 @@ export function printSelectedInspectItems() {
     renderInspectList();
 }
 
+export function deleteSelectedInspectItems() {
+    const checkedIds = new Set();
+    document.querySelectorAll('.inspect-checkbox:checked').forEach(cb => checkedIds.add(cb.value));
+
+    if (checkedIds.size === 0) {
+        showToast("선택된 항목이 없습니다.", "error");
+        return;
+    }
+
+    showConfirm(`선택한 ${checkedIds.size}개 항목을 삭제하시겠습니까?\n삭제된 항목은 복구할 수 없습니다.`, () => {
+        state.inspectList = state.inspectList.filter(item => !checkedIds.has(item.id));
+        saveToFirestore();
+        showToast(`${checkedIds.size}개 항목이 삭제되었습니다.`);
+    });
+}
+
+export function deleteAllInspectItems() {
+    if (state.inspectList.length === 0) {
+        showToast("삭제할 항목이 없습니다.", "error");
+        return;
+    }
+
+    showConfirm(`입고 검수 리스트 전체 ${state.inspectList.length}개를 삭제하시겠습니까?\n삭제된 항목은 복구할 수 없습니다.`, () => {
+        const count = state.inspectList.length;
+        state.inspectList = [];
+        saveToFirestore();
+        showToast(`전체 ${count}개 항목이 삭제되었습니다.`);
+    });
+}
+
 export function printAllInspectItems() {
     const originalFilter = state.inspectDateFilter;
 
@@ -265,3 +295,5 @@ window.cancelOrder            = cancelOrder;
 window.receiveAllNormalItems      = receiveAllNormalItems;
 window.printSelectedInspectItems  = printSelectedInspectItems;
 window.printAllInspectItems       = printAllInspectItems;
+window.deleteSelectedInspectItems = deleteSelectedInspectItems;
+window.deleteAllInspectItems      = deleteAllInspectItems;

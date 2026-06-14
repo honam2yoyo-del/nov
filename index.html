@@ -273,9 +273,11 @@
                             <button class="danger"  style="padding:6px 10px; font-size:0.8rem;" onclick="window.markSelected('반품')">반품</button>
                             <button class="warning" style="padding:6px 10px; font-size:0.8rem;" onclick="window.markSelected('미도착')">미도착</button>
                             <button class="outline" style="padding:6px 10px; font-size:0.8rem;" onclick="window.markSelected('대기')">정상</button>
+                            <button class="danger"  style="padding:6px 10px; font-size:0.8rem;" onclick="window.deleteSelectedInspectItems()">🗑️ 선택 삭제</button>
                         </div>
                         <button class="outline"  onclick="window.printSelectedInspectItems()">🖨️ 선택 인쇄</button>
                         <button class="outline"  onclick="window.printAllInspectItems()">🖨️ 전체 인쇄</button>
+                        <button class="danger"   style="background:transparent; border:1px solid #fca5a5; color:var(--danger);" onclick="window.deleteAllInspectItems()">🗑️ 전체 삭제</button>
                         <button class="success"  onclick="window.receiveAllNormalItems()">📦 전체 입고</button>
                     </div>
                 </div>
