@@ -24,4 +24,5 @@ export const state = {
     selectedProductIds: new Set(),
     productFilter: 'all',
     inspectDateFilter: 'all',
+    isPrintMode: false,
 };

@@ -77,7 +77,7 @@ export function renderInspectList() {
     const filterDate  = state.inspectDateFilter;
     const searchQuery = document.getElementById('inspect-search')?.value.toLowerCase() || '';
 
-    const displayList = state.inspectList
+    let displayList = state.inspectList
         .filter(item => {
             if (filterDate !== 'all') {
                 const d = item.orderDateISO ? item.orderDateISO.split('T')[0] : '';
@@ -89,6 +89,10 @@ export function renderInspectList() {
             }
             return true;
         });
+
+    if (state.isPrintMode) {
+        displayList = [...displayList].sort((a, b) => a.name.localeCompare(b.name, 'ko'));
+    }
 
     if (displayList.length === 0) {
         const msg = state.inspectList.length === 0
@@ -224,14 +228,30 @@ export function printSelectedInspectItems() {
     const originalList   = [...state.inspectList];
     const originalFilter = state.inspectDateFilter;
 
-    state.inspectList     = state.inspectList.filter(item => checkedIds.has(item.id));
+    state.inspectList       = state.inspectList.filter(item => checkedIds.has(item.id));
     state.inspectDateFilter = 'all';
+    state.isPrintMode       = true;
     renderInspectList();
 
     window.print();
 
-    state.inspectList     = originalList;
+    state.inspectList       = originalList;
     state.inspectDateFilter = originalFilter;
+    state.isPrintMode       = false;
+    renderInspectList();
+}
+
+export function printAllInspectItems() {
+    const originalFilter = state.inspectDateFilter;
+
+    state.inspectDateFilter = 'all';
+    state.isPrintMode       = true;
+    renderInspectList();
+
+    window.print();
+
+    state.inspectDateFilter = originalFilter;
+    state.isPrintMode       = false;
     renderInspectList();
 }
 
@@ -244,3 +264,4 @@ window.confirmReceive         = confirmReceive;
 window.cancelOrder            = cancelOrder;
 window.receiveAllNormalItems      = receiveAllNormalItems;
 window.printSelectedInspectItems  = printSelectedInspectItems;
+window.printAllInspectItems       = printAllInspectItems;
