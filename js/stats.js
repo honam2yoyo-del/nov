@@ -50,10 +50,11 @@ export function renderStats() {
                     remainingShipping -= itemShippingAmt;
                 }
             }
-            if (!productStats[item.name]) productStats[item.name] = { qty: 0, product: 0, shipping: 0 };
+            if (!productStats[item.name]) productStats[item.name] = { qty: 0, product: 0, shipping: 0, vendors: new Set() };
             productStats[item.name].qty      += item.qty;
             productStats[item.name].product  += itemProductAmt;
             productStats[item.name].shipping += itemShippingAmt;
+            productStats[item.name].vendors.add(item.vendorName);
         });
     });
 
@@ -84,20 +85,27 @@ export function renderStats() {
 
     productListEl.innerHTML = '';
     const sortedProducts = Object.entries(productStats)
-        .filter(([n]) => n.toLowerCase().includes(productQuery))
+        .filter(([n, s]) => {
+            if (!productQuery) return true;
+            return n.toLowerCase().includes(productQuery) ||
+                [...s.vendors].some(v => v.toLowerCase().includes(productQuery));
+        })
         .sort((a, b) => (b[1].product + b[1].shipping) - (a[1].product + a[1].shipping));
     if (sortedProducts.length === 0) productListEl.innerHTML = '<li style="color:var(--text-muted); padding:20px 0;">조회된 상품 내역이 없습니다.</li>';
     sortedProducts.forEach(([pName, s]) => {
+        const vendorLabel = [...s.vendors].join(', ');
         productListEl.innerHTML += `
-            <li>
-                <div>
+            <li style="gap:12px;">
+                <div style="flex:1; min-width:0;">
                     <div style="font-weight:600; color:var(--text-main);">${pName}</div>
-                    <div style="font-size:0.8rem; color:var(--text-muted);">총 ${s.qty.toLocaleString()}개 입고</div>
+                    <div style="font-size:0.8rem; color:var(--text-muted); margin-top:2px;">총 ${s.qty.toLocaleString()}개 입고 · ${vendorLabel}</div>
                 </div>
-                <div style="text-align:right;">
+                <div style="text-align:right; flex-shrink:0;">
                     <div style="font-weight:700; color:var(--primary);">${(s.product + s.shipping).toLocaleString()}원</div>
                     <div style="font-size:0.75rem; color:var(--text-muted);">상품 ${s.product.toLocaleString()} + 배송 ${s.shipping.toLocaleString()}</div>
                 </div>
+                <button onclick="window.openOrderHistoryEditModal(${JSON.stringify(pName)})"
+                        style="flex-shrink:0; background:transparent; border:1px solid var(--primary); color:var(--primary); padding:4px 10px; border-radius:6px; font-size:0.8rem; cursor:pointer;">수정</button>
             </li>
         `;
     });
@@ -112,5 +120,107 @@ export function resetOrderHistory() {
     });
 }
 
-window.renderStats       = renderStats;
-window.resetOrderHistory = resetOrderHistory;
+/* ────────────────────────────────────────────
+   발주 내역 수정 모달
+──────────────────────────────────────────── */
+let _editingProductName = null;
+
+export function openOrderHistoryEditModal(productName) {
+    _editingProductName = productName;
+    document.getElementById('order-history-edit-title').textContent = `📦 ${productName} 발주 내역 수정`;
+    _renderOrderHistoryEditTable(productName);
+    document.getElementById('order-history-edit-modal').classList.add('active');
+}
+
+function _renderOrderHistoryEditTable(productName) {
+    const tbody = document.getElementById('order-history-edit-tbody');
+    const entries = state.orderHistory.filter(o => o.name === productName);
+
+    if (entries.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px; color:var(--text-muted);">내역이 없습니다.</td></tr>';
+        return;
+    }
+
+    tbody.innerHTML = entries.map(entry => {
+        const date = entry.orderDate ? entry.orderDate.split('T')[0] : '-';
+        const subtotal = (entry.price * entry.qty).toLocaleString();
+        return `
+            <tr data-id="${entry.id}" style="border-bottom:1px solid var(--border-color);">
+                <td style="padding:10px 8px; color:var(--text-muted); font-size:0.85rem; white-space:nowrap;">${date}</td>
+                <td style="padding:10px 8px;">
+                    <input type="text" value="${(entry.vendorName || '').replace(/"/g, '&quot;')}" data-field="vendorName"
+                           style="width:100%; border:1px solid var(--border-color); padding:5px 7px; border-radius:5px; font-size:0.85rem; background:var(--bg-main);">
+                </td>
+                <td style="padding:10px 8px; text-align:center;">
+                    <input type="number" value="${entry.qty}" data-field="qty" min="1"
+                           style="width:70px; border:1px solid var(--border-color); padding:5px 7px; border-radius:5px; font-size:0.85rem; text-align:center; background:var(--bg-main);"
+                           oninput="window.updateOrderHistoryRowTotal(this)">
+                </td>
+                <td style="padding:10px 8px; text-align:center;">
+                    <input type="number" value="${entry.price}" data-field="price" min="0"
+                           style="width:90px; border:1px solid var(--border-color); padding:5px 7px; border-radius:5px; font-size:0.85rem; text-align:center; background:var(--bg-main);"
+                           oninput="window.updateOrderHistoryRowTotal(this)">
+                </td>
+                <td style="padding:10px 8px; text-align:right; font-weight:600; color:var(--primary); white-space:nowrap;" data-subtotal>
+                    ${subtotal}원
+                </td>
+                <td style="padding:10px 8px; text-align:center;">
+                    <button onclick="window.deleteOrderHistoryEntry(${JSON.stringify(entry.id)})"
+                            style="background:transparent; border:1px solid #fca5a5; color:var(--danger); padding:4px 9px; border-radius:5px; font-size:0.8rem; cursor:pointer;">삭제</button>
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+export function updateOrderHistoryRowTotal(input) {
+    const row = input.closest('tr');
+    const qty   = parseInt(row.querySelector('[data-field="qty"]').value)   || 0;
+    const price = parseInt(row.querySelector('[data-field="price"]').value) || 0;
+    row.querySelector('[data-subtotal]').textContent = `${(qty * price).toLocaleString()}원`;
+}
+
+export function saveOrderHistoryEdits() {
+    const tbody = document.getElementById('order-history-edit-tbody');
+    tbody.querySelectorAll('tr[data-id]').forEach(row => {
+        const entry = state.orderHistory.find(o => o.id === row.dataset.id);
+        if (!entry) return;
+        entry.vendorName = row.querySelector('[data-field="vendorName"]').value.trim();
+        entry.qty   = parseInt(row.querySelector('[data-field="qty"]').value)   || entry.qty;
+        entry.price = parseInt(row.querySelector('[data-field="price"]').value) || entry.price;
+    });
+    saveToFirestore();
+    showToast("발주 내역이 수정되었습니다.");
+    closeOrderHistoryEditModal();
+    renderStats();
+}
+
+export function closeOrderHistoryEditModal() {
+    document.getElementById('order-history-edit-modal').classList.remove('active');
+    _editingProductName = null;
+}
+
+export function deleteOrderHistoryEntry(id) {
+    showConfirm("이 발주 내역을 삭제하시겠습니까?", () => {
+        state.orderHistory = state.orderHistory.filter(o => o.id !== id);
+        saveToFirestore();
+        renderStats();
+        if (_editingProductName) {
+            const remaining = state.orderHistory.filter(o => o.name === _editingProductName);
+            if (remaining.length === 0) {
+                closeOrderHistoryEditModal();
+            } else {
+                _renderOrderHistoryEditTable(_editingProductName);
+            }
+        }
+        showToast("삭제되었습니다.");
+    });
+}
+
+window.renderStats                  = renderStats;
+window.resetOrderHistory            = resetOrderHistory;
+window.openOrderHistoryEditModal    = openOrderHistoryEditModal;
+window.closeOrderHistoryEditModal   = closeOrderHistoryEditModal;
+window.updateOrderHistoryRowTotal   = updateOrderHistoryRowTotal;
+window.saveOrderHistoryEdits        = saveOrderHistoryEdits;
+window.deleteOrderHistoryEntry      = deleteOrderHistoryEntry;

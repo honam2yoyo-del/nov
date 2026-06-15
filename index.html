@@ -82,6 +82,34 @@
         </div>
     </div>
 
+    <!-- 발주 내역 수정 모달 -->
+    <div id="order-history-edit-modal" class="modal-overlay">
+        <div class="modal-box" style="max-width:740px; width:95%; max-height:85vh; display:flex; flex-direction:column;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-shrink:0;">
+                <h3 id="order-history-edit-title" style="margin:0;">발주 내역 수정</h3>
+            </div>
+            <div style="overflow-y:auto; flex:1;">
+                <table style="width:100%; border-collapse:collapse; font-size:0.9rem;">
+                    <thead>
+                        <tr style="border-bottom:2px solid var(--border-color); background:var(--bg-hover);">
+                            <th style="text-align:left; padding:10px 8px; color:var(--text-muted); font-weight:600; font-size:0.82rem;">입고일</th>
+                            <th style="text-align:left; padding:10px 8px; color:var(--text-muted); font-weight:600; font-size:0.82rem;">도매처</th>
+                            <th style="text-align:center; padding:10px 8px; color:var(--text-muted); font-weight:600; font-size:0.82rem;">수량</th>
+                            <th style="text-align:center; padding:10px 8px; color:var(--text-muted); font-weight:600; font-size:0.82rem;">단가</th>
+                            <th style="text-align:right; padding:10px 8px; color:var(--text-muted); font-weight:600; font-size:0.82rem;">소계</th>
+                            <th style="padding:10px 8px;"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="order-history-edit-tbody"></tbody>
+                </table>
+            </div>
+            <div class="modal-actions" style="margin-top:20px; flex-shrink:0; padding-top:16px; border-top:1px solid var(--border-color);">
+                <button class="outline" onclick="window.closeOrderHistoryEditModal()">닫기</button>
+                <button class="primary" onclick="window.saveOrderHistoryEdits()">저장</button>
+            </div>
+        </div>
+    </div>
+
     <!-- 상품 수정 모달 -->
     <div id="product-edit-modal" class="modal-overlay">
         <div class="modal-box" style="max-width:680px; width:95%; max-height:90vh; display:flex; flex-direction:column;">
@@ -334,12 +362,12 @@
                         </div>
                         <ul class="stat-list" id="stat-vendor-list"></ul>
                     </div>
-                    <div class="stat-card">
+                    <div class="stat-card" style="grid-column:1/-1;">
                         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
                             <div class="stat-title" style="margin:0;">📦 상품별 발주 내역</div>
-                            <input type="text" id="stat-product-search" placeholder="상품명 검색..." style="padding:4px 8px; font-size:0.8rem; width:130px;" oninput="window.renderStats()">
+                            <input type="text" id="stat-product-search" placeholder="상품명 또는 도매처 검색..." style="padding:4px 8px; font-size:0.8rem; width:200px;" oninput="window.renderStats()">
                         </div>
-                        <ul class="stat-list" id="stat-product-list"></ul>
+                        <ul class="stat-list" id="stat-product-list" style="max-height:520px;"></ul>
                     </div>
                 </div>
             </div>
