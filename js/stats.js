@@ -2,6 +2,8 @@ import { state } from './state.js';
 import { saveToFirestore } from './firestore.js';
 import { showToast, showConfirm } from './ui.js';
 
+let _lastProductStats = null;
+
 export function renderStats() {
     const vendorQuery  = document.getElementById('stat-vendor-search')?.value.toLowerCase()  || '';
     const productQuery = document.getElementById('stat-product-search')?.value.toLowerCase() || '';
@@ -57,6 +59,8 @@ export function renderStats() {
             productStats[item.name].vendors.add(item.vendorName);
         });
     });
+
+    _lastProductStats = productStats;
 
     const grandTotal = globalProductSum + globalShippingSum;
     totalAmountEl.innerText   = `${grandTotal.toLocaleString()}원`;
@@ -237,10 +241,42 @@ export function deleteOrderHistoryEntry(id) {
     });
 }
 
+function _buildPrintTable() {
+    const tbody = document.getElementById('stats-print-tbody');
+    if (!tbody || !_lastProductStats) return;
+    const rows = Object.entries(_lastProductStats)
+        .sort((a, b) => (b[1].product + b[1].shipping) - (a[1].product + a[1].shipping));
+    tbody.innerHTML = rows.map(([pName, s]) => `
+        <tr>
+            <td>${pName}</td>
+            <td>${[...s.vendors].join(', ')}</td>
+            <td style="text-align:center;">${s.qty.toLocaleString()}개</td>
+            <td style="text-align:right;">${(s.product + s.shipping).toLocaleString()}원</td>
+        </tr>
+    `).join('');
+}
+
 export function printStats() {
+    _buildPrintTable();
     document.body.classList.add('print-stats');
     window.print();
     document.body.classList.remove('print-stats');
+}
+
+export function copyAllStats() {
+    if (!_lastProductStats || Object.keys(_lastProductStats).length === 0) {
+        showToast("복사할 데이터가 없습니다.", "error");
+        return;
+    }
+    const rows = Object.entries(_lastProductStats)
+        .sort((a, b) => (b[1].product + b[1].shipping) - (a[1].product + a[1].shipping));
+    const lines = ['상품명\t도매처\t수량\t금액'];
+    rows.forEach(([pName, s]) => {
+        lines.push(`${pName}\t${[...s.vendors].join(', ')}\t${s.qty}개\t${(s.product + s.shipping).toLocaleString()}원`);
+    });
+    navigator.clipboard.writeText(lines.join('\n'))
+        .then(() => showToast("전체 복사 완료!"))
+        .catch(() => showToast("복사에 실패했습니다.", "error"));
 }
 
 window.renderStats                  = renderStats;
@@ -252,3 +288,4 @@ window.saveOrderHistoryEdits        = saveOrderHistoryEdits;
 window.deleteOrderHistoryEntry      = deleteOrderHistoryEntry;
 window.onVendorSelectChange         = onVendorSelectChange;
 window.printStats                   = printStats;
+window.copyAllStats                 = copyAllStats;

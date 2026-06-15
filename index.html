@@ -368,10 +368,29 @@
                     <div class="stat-card" style="grid-column:1/-1;">
                         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
                             <div class="stat-title" style="margin:0;">📦 상품별 발주 내역</div>
-                            <input type="text" id="stat-product-search" placeholder="상품명 또는 도매처 검색..." style="padding:4px 8px; font-size:0.8rem; width:200px;" oninput="window.renderStats()">
+                            <div class="no-print" style="display:flex; gap:6px; align-items:center;">
+                                <button class="outline" style="font-size:0.8rem; padding:4px 10px;" onclick="window.copyAllStats()">📋 전체 복사</button>
+                                <input type="text" id="stat-product-search" placeholder="상품명 또는 도매처 검색..." style="padding:4px 8px; font-size:0.8rem; width:200px;" oninput="window.renderStats()">
+                            </div>
                         </div>
                         <ul class="stat-list" id="stat-product-list" style="max-height:520px;"></ul>
                     </div>
+                </div>
+
+                <!-- 인쇄 전용 테이블 (화면에서는 숨김) -->
+                <div id="stats-print-table" style="display:none;">
+                    <h2 style="margin:0 0 16px; font-size:1.1rem;">📦 상품별 발주 내역</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="text-align:left;">상품명</th>
+                                <th style="text-align:left;">도매처</th>
+                                <th style="text-align:center;">수량</th>
+                                <th style="text-align:right;">금액</th>
+                            </tr>
+                        </thead>
+                        <tbody id="stats-print-tbody"></tbody>
+                    </table>
                 </div>
             </div>
 
