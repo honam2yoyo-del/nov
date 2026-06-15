@@ -97,7 +97,6 @@ export function renderStats() {
         `;
     });
 
-    productListEl.innerHTML = '';
     const filteredHistory = state.orderHistory
         .filter(entry => {
             if (!productQuery) return true;
@@ -105,36 +104,48 @@ export function renderStats() {
                    (entry.vendorName || '').toLowerCase().includes(productQuery);
         })
         .sort((a, b) => (b.orderDate || '').localeCompare(a.orderDate || ''));
+
     if (filteredHistory.length === 0) {
-        productListEl.innerHTML = '<li style="color:var(--text-muted); padding:20px 0;">조회된 상품 내역이 없습니다.</li>';
+        productListEl.innerHTML = '<li style="color:var(--text-muted); padding:20px 0; text-align:center;">조회된 상품 내역이 없습니다.</li>';
+        return;
     }
-    filteredHistory.forEach(entry => {
+
+    const rows = filteredHistory.map(entry => {
         const orderDate   = _toLocalDate(entry.orderDate);
         const receiveDate = _toLocalDate(entry.receiveDate);
         const amount = ((entry.price || 0) * (entry.qty || 0)).toLocaleString();
-        productListEl.innerHTML += `
-            <li style="gap:12px; align-items:center;">
-                <div style="flex:1; min-width:0;">
-                    <div style="font-weight:600; color:var(--text-main);">${entry.name}</div>
-                </div>
-                <div style="text-align:center; flex-shrink:0; min-width:52px;">
-                    <div style="font-weight:600;">${(entry.qty || 0).toLocaleString()}개</div>
-                </div>
-                <div style="text-align:right; flex-shrink:0; min-width:90px;">
-                    <div style="font-weight:700; color:var(--primary);">${amount}원</div>
-                </div>
-                <div style="text-align:center; flex-shrink:0; min-width:80px;">
-                    <div style="font-size:0.85rem; color:var(--text-muted);">${entry.vendorName || '-'}</div>
-                </div>
-                <div style="flex-shrink:0; font-size:0.78rem; color:var(--text-muted); line-height:1.6; min-width:110px;">
-                    <div>발주 ${orderDate}</div>
-                    <div>입고 ${receiveDate}</div>
-                </div>
-                <button onclick='window.openOrderHistoryEditModal(${JSON.stringify(entry.name)})'
-                        style="flex-shrink:0; background:transparent; border:1px solid var(--primary); color:var(--primary); padding:4px 10px; border-radius:6px; font-size:0.8rem; cursor:pointer;">수정</button>
-            </li>
-        `;
-    });
+        return `
+            <tr style="border-bottom:1px solid var(--border-color);">
+                <td style="padding:10px 10px; font-weight:600; color:var(--text-main);">${entry.name}</td>
+                <td style="padding:10px 10px; text-align:center; white-space:nowrap;">${(entry.qty || 0).toLocaleString()}개</td>
+                <td style="padding:10px 10px; text-align:right; font-weight:700; color:var(--primary); white-space:nowrap;">${amount}원</td>
+                <td style="padding:10px 10px; text-align:center; color:var(--text-muted);">${entry.vendorName || '-'}</td>
+                <td style="padding:10px 10px; text-align:center; color:var(--text-muted); font-size:0.82rem; white-space:nowrap;">${orderDate}</td>
+                <td style="padding:10px 10px; text-align:center; color:var(--text-muted); font-size:0.82rem; white-space:nowrap;">${receiveDate}</td>
+                <td style="padding:10px 8px; text-align:center;">
+                    <button onclick='window.openOrderHistoryEditModal(${JSON.stringify(entry.name)})'
+                            style="background:transparent; border:1px solid var(--primary); color:var(--primary); padding:3px 9px; border-radius:5px; font-size:0.78rem; cursor:pointer; white-space:nowrap;">수정</button>
+                </td>
+            </tr>`;
+    }).join('');
+
+    productListEl.innerHTML = `
+        <li style="padding:0; border:none; display:block;">
+            <table style="width:100%; border-collapse:collapse; font-size:0.88rem;">
+                <thead>
+                    <tr style="background:var(--bg-hover); border-bottom:2px solid var(--border-color);">
+                        <th style="padding:9px 10px; text-align:left; font-weight:600; color:var(--text-muted); font-size:0.8rem;">상품명</th>
+                        <th style="padding:9px 10px; text-align:center; font-weight:600; color:var(--text-muted); font-size:0.8rem; width:64px;">수량</th>
+                        <th style="padding:9px 10px; text-align:right; font-weight:600; color:var(--text-muted); font-size:0.8rem; width:110px;">금액</th>
+                        <th style="padding:9px 10px; text-align:center; font-weight:600; color:var(--text-muted); font-size:0.8rem; width:90px;">도매처</th>
+                        <th style="padding:9px 10px; text-align:center; font-weight:600; color:var(--text-muted); font-size:0.8rem; width:95px;">발주일</th>
+                        <th style="padding:9px 10px; text-align:center; font-weight:600; color:var(--text-muted); font-size:0.8rem; width:95px;">입고일</th>
+                        <th style="width:52px;"></th>
+                    </tr>
+                </thead>
+                <tbody>${rows}</tbody>
+            </table>
+        </li>`;
 }
 
 export function resetOrderHistory() {
