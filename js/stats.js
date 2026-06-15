@@ -265,6 +265,7 @@ export function saveOrderHistoryEdits() {
             : vendorSelect.value;
         entry.qty   = parseInt(row.querySelector('[data-field="qty"]').value)   || entry.qty;
         entry.price = parseInt(row.querySelector('[data-field="price"]').value) || entry.price;
+        delete entry.totalAmount;
     });
     saveToFirestore();
     showToast("발주 내역이 수정되었습니다.");
@@ -308,7 +309,8 @@ export function inlineEditStatAmount(entryId, tdElement, currentAmount) {
         const newAmount = parseInt(input.value.replace(/,/g, ''), 10) || 0;
         const entry = state.orderHistory.find(x => x.id === entryId);
         if (entry && newAmount !== currentAmount) {
-            entry.totalAmount = newAmount;
+            entry.price = Math.round(newAmount / (entry.qty || 1));
+            delete entry.totalAmount;
             saveToFirestore();
             showToast("금액이 수정되었습니다.");
         }
