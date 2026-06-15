@@ -116,7 +116,7 @@ export function renderStats() {
         const amount = ((entry.price || 0) * (entry.qty || 0)).toLocaleString();
         return `
             <tr>
-                <td style="padding:12px 16px; font-weight:600; color:var(--text-main); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${entry.name}</td>
+                <td style="padding:12px 16px; font-weight:600; color:var(--text-main); text-align:center; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${entry.name}</td>
                 <td style="padding:12px 8px; text-align:center; color:var(--text-main);">${(entry.qty || 0).toLocaleString()}개</td>
                 <td style="padding:12px 12px; text-align:center; font-weight:700; color:var(--primary);">${amount}원</td>
                 <td style="padding:12px 8px; text-align:center; color:var(--text-muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${entry.vendorName || '-'}</td>
@@ -124,7 +124,9 @@ export function renderStats() {
                 <td style="padding:12px 8px; text-align:center; color:var(--text-muted); font-size:0.82rem;">${receiveDate}</td>
                 <td style="padding:12px 8px; text-align:center;">
                     <button onclick='window.openOrderHistoryEditModal(${JSON.stringify(entry.name)})'
-                            style="background:transparent; border:1px solid var(--primary); color:var(--primary); padding:3px 8px; border-radius:5px; font-size:0.78rem; cursor:pointer;">수정</button>
+                            style="background:transparent; border:1px solid var(--primary); color:var(--primary); padding:3px 7px; border-radius:5px; font-size:0.78rem; cursor:pointer;">수정</button>
+                    <button onclick='window.deleteOrderHistoryEntry(${JSON.stringify(entry.id)})'
+                            style="background:transparent; border:1px solid var(--danger); color:var(--danger); padding:3px 7px; border-radius:5px; font-size:0.78rem; cursor:pointer; margin-left:4px;">삭제</button>
                 </td>
             </tr>`;
     }).join('');
@@ -133,17 +135,17 @@ export function renderStats() {
     productListEl.innerHTML = `
         <table style="width:100%; border-collapse:collapse; font-size:0.875rem; table-layout:fixed;">
             <colgroup>
-                <col style="width:30%">
+                <col style="width:27%">
                 <col style="width:8%">
                 <col style="width:13%">
                 <col style="width:13%">
                 <col style="width:11%">
                 <col style="width:11%">
-                <col style="width:7%">
+                <col style="width:13%">
             </colgroup>
             <thead>
                 <tr style="border-bottom:2px solid var(--border-color); position:sticky; top:0;">
-                    <th style="${thStyle} text-align:left; padding-left:16px;">상품명</th>
+                    <th style="${thStyle}">상품명</th>
                     <th style="${thStyle}">수량</th>
                     <th style="${thStyle}">금액</th>
                     <th style="${thStyle}">도매처</th>

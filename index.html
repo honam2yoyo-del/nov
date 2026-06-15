@@ -367,11 +367,13 @@
                         <ul class="stat-list" id="stat-vendor-list"></ul>
                     </div>
                     <div class="stat-card" style="grid-column:1/-1; padding-bottom:0;">
-                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-                            <div class="stat-title" style="margin:0;">📦 상품별 발주 내역</div>
-                            <div class="no-print" style="display:flex; gap:6px; align-items:center;">
-                                <button class="outline" style="font-size:0.8rem; padding:4px 10px;" onclick="window.copyAllStats()">📋 전체 복사</button>
-                                <input type="text" id="stat-product-search" placeholder="상품명 또는 도매처 검색..." style="padding:4px 8px; font-size:0.8rem; width:200px;" oninput="window.renderStats()">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+                            <div style="display:flex; align-items:center; gap:14px;">
+                                <div class="stat-title" style="margin:0; font-size:1.05rem; white-space:nowrap;">📦 상품별 발주 내역</div>
+                                <input type="text" id="stat-product-search" placeholder="상품명 또는 도매처 검색..." style="padding:8px 14px; font-size:0.9rem; width:280px; border-radius:7px;" oninput="window.renderStats()">
+                            </div>
+                            <div class="no-print">
+                                <button class="outline" style="font-size:0.875rem; padding:8px 18px;" onclick="window.copyAllStats()">📋 전체 복사</button>
                             </div>
                         </div>
                         <div id="stat-product-list" style="max-height:520px; overflow-y:auto; margin:0 -24px; border-top:1px solid var(--border-color); border-radius:0 0 var(--radius-md) var(--radius-md);"></div>
