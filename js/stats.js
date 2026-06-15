@@ -101,13 +101,17 @@ export function renderStats() {
         `;
     });
 
-    const filteredHistory = state.orderHistory
-        .filter(entry => {
-            if (!productQuery) return true;
-            return (entry.name || '').toLowerCase().includes(productQuery) ||
-                   (entry.vendorName || '').toLowerCase().includes(productQuery);
-        })
-        .sort((a, b) => (b.orderDate || '').localeCompare(a.orderDate || ''));
+    // 도매처 필터 드롭다운 갱신
+    const vendorFilterEl = document.getElementById('stat-vendor-filter');
+    const vendorFilter   = vendorFilterEl?.value || '';
+    if (vendorFilterEl) {
+        const allVendors = [...new Set(state.orderHistory.map(e => e.vendorName).filter(Boolean))]
+            .sort((a, b) => a.localeCompare(b, 'ko'));
+        vendorFilterEl.innerHTML = '<option value="">전체 도매처</option>' +
+            allVendors.map(v => `<option value="${v}"${v === vendorFilter ? ' selected' : ''}>${v}</option>`).join('');
+    }
+
+    const filteredHistory = _getFilteredHistory();
 
     if (filteredHistory.length === 0) {
         productListEl.innerHTML = '<p style="color:var(--text-muted); padding:28px; text-align:center; margin:0;">조회된 상품 내역이 없습니다.</p>';
@@ -295,6 +299,20 @@ export function deleteOrderHistoryEntry(id) {
     });
 }
 
+function _getFilteredHistory() {
+    const productQuery = document.getElementById('stat-product-search')?.value.toLowerCase() || '';
+    const vendorFilter = document.getElementById('stat-vendor-filter')?.value || '';
+    return state.orderHistory
+        .filter(entry => {
+            const matchesText = !productQuery ||
+                (entry.name || '').toLowerCase().includes(productQuery) ||
+                (entry.vendorName || '').toLowerCase().includes(productQuery);
+            const matchesVendor = !vendorFilter || entry.vendorName === vendorFilter;
+            return matchesText && matchesVendor;
+        })
+        .sort((a, b) => (b.orderDate || '').localeCompare(a.orderDate || ''));
+}
+
 export function inlineEditStatAmount(entryId, tdElement, currentAmount) {
     if (tdElement.querySelector('input')) return;
     const input = document.createElement('input');
@@ -328,10 +346,10 @@ export function inlineEditStatAmount(entryId, tdElement, currentAmount) {
     input.select();
 }
 
-function _buildPrintTable() {
+function _buildPrintTable(entries) {
     const tbody = document.getElementById('stats-print-tbody');
     if (!tbody) return;
-    const rows = [...state.orderHistory].sort((a, b) =>
+    const rows = [...entries].sort((a, b) =>
         (a.orderDate || '').localeCompare(b.orderDate || '')
     );
     tbody.innerHTML = rows.map(entry => {
@@ -352,18 +370,19 @@ function _buildPrintTable() {
 }
 
 export function printStats() {
-    _buildPrintTable();
+    _buildPrintTable(_getFilteredHistory());
     document.body.classList.add('print-stats');
     window.print();
     document.body.classList.remove('print-stats');
 }
 
 export function copyAllStats() {
-    if (!state.orderHistory.length) {
+    const filtered = _getFilteredHistory();
+    if (!filtered.length) {
         showToast("복사할 데이터가 없습니다.", "error");
         return;
     }
-    const rows = [...state.orderHistory].sort((a, b) =>
+    const rows = [...filtered].sort((a, b) =>
         (a.orderDate || '').localeCompare(b.orderDate || '')
     );
     const lines = ['상품명\t수량\t금액\t도매처\t발주일\t입고일'];

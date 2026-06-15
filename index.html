@@ -370,7 +370,10 @@
                         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
                             <div style="display:flex; align-items:center; gap:14px;">
                                 <div class="stat-title" style="margin:0; font-size:1.25rem; white-space:nowrap;">📦 상품별 발주 내역</div>
-                                <input type="text" id="stat-product-search" placeholder="상품명 또는 도매처 검색..." style="padding:11px 18px; font-size:1rem; width:320px; border-radius:7px;" oninput="window.renderStats()">
+                                <input type="text" id="stat-product-search" placeholder="상품명 또는 도매처 검색..." style="padding:11px 18px; font-size:1rem; width:280px; border-radius:7px;" oninput="window.renderStats()">
+                                <select id="stat-vendor-filter" style="padding:11px 14px; font-size:1rem; border-radius:7px; width:160px;" onchange="window.renderStats()">
+                                    <option value="">전체 도매처</option>
+                                </select>
                             </div>
                             <div class="no-print">
                                 <button class="outline" style="font-size:0.875rem; padding:8px 18px;" onclick="window.copyAllStats()">📋 전체 복사</button>
