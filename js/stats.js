@@ -14,6 +14,10 @@ function _toLocalDate(isoStr) {
     return `${y}-${m}-${day}`;
 }
 
+function _entryAmount(entry) {
+    return entry.totalAmount !== undefined ? entry.totalAmount : (entry.price || 0) * (entry.qty || 0);
+}
+
 export function renderStats() {
     const vendorQuery  = document.getElementById('stat-vendor-search')?.value.toLowerCase()  || '';
     const productQuery = document.getElementById('stat-product-search')?.value.toLowerCase() || '';
@@ -31,7 +35,7 @@ export function renderStats() {
         const key = `${dateKey}_${order.vendorName}`;
         if (!groups[key]) groups[key] = { vendorName: order.vendorName, items: [], totalProduct: 0 };
         groups[key].items.push(order);
-        groups[key].totalProduct += order.price * order.qty;
+        groups[key].totalProduct += _entryAmount(order);
     });
 
     let globalProductSum = 0;
@@ -51,8 +55,8 @@ export function renderStats() {
 
         let remainingShipping = groupShipping;
         g.items.forEach((item, index) => {
-            globalProductSum += item.price * item.qty;
-            const itemProductAmt = item.price * item.qty;
+            globalProductSum += _entryAmount(item);
+            const itemProductAmt = _entryAmount(item);
             let itemShippingAmt = 0;
             if (g.totalProduct > 0) {
                 if (index === g.items.length - 1) {
@@ -113,12 +117,16 @@ export function renderStats() {
     const rows = filteredHistory.map(entry => {
         const orderDate   = _toLocalDate(entry.orderDate);
         const receiveDate = _toLocalDate(entry.receiveDate);
-        const amount = ((entry.price || 0) * (entry.qty || 0)).toLocaleString();
+        const amount = _entryAmount(entry).toLocaleString();
+        const rawAmount = _entryAmount(entry);
         return `
             <tr>
                 <td style="padding:12px 16px; font-weight:600; color:var(--text-main); text-align:center; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${entry.name}</td>
                 <td style="padding:12px 8px; text-align:center; color:var(--text-main);">${(entry.qty || 0).toLocaleString()}개</td>
-                <td style="padding:12px 12px; text-align:center; font-weight:700; color:var(--primary);">${amount}원</td>
+                <td style="padding:12px 12px; text-align:center; font-weight:700; color:var(--primary); cursor:pointer;" title="클릭하여 금액 수정"
+                    onclick='window.inlineEditStatAmount(${JSON.stringify(entry.id)}, this, ${rawAmount})'>
+                    <span style="border-bottom:1px dashed var(--primary); padding-bottom:1px;">${amount}원</span>
+                </td>
                 <td style="padding:12px 8px; text-align:center; color:var(--text-muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${entry.vendorName || '-'}</td>
                 <td style="padding:12px 8px; text-align:center; color:var(--text-muted); font-size:0.82rem;">${orderDate}</td>
                 <td style="padding:12px 8px; text-align:center; color:var(--text-muted); font-size:0.82rem;">${receiveDate}</td>
@@ -286,6 +294,38 @@ export function deleteOrderHistoryEntry(id) {
     });
 }
 
+export function inlineEditStatAmount(entryId, tdElement, currentAmount) {
+    if (tdElement.querySelector('input')) return;
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.value = currentAmount.toLocaleString();
+    input.style.cssText = 'width:100px; text-align:center; padding:4px 8px; font-size:0.875rem; font-weight:700; color:var(--primary); border:1px solid var(--primary); border-radius:4px; outline:none;';
+    input.oninput = function() {
+        this.value = this.value.replace(/[^0-9]/g, '').replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    };
+
+    const finishEdit = () => {
+        const newAmount = parseInt(input.value.replace(/,/g, ''), 10) || 0;
+        const entry = state.orderHistory.find(x => x.id === entryId);
+        if (entry && newAmount !== currentAmount) {
+            entry.totalAmount = newAmount;
+            saveToFirestore();
+            showToast("금액이 수정되었습니다.");
+        }
+        renderStats();
+    };
+
+    input.onblur = finishEdit;
+    input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') { input.onblur = null; finishEdit(); }
+        if (e.key === 'Escape') { input.onblur = null; renderStats(); }
+    });
+    tdElement.innerHTML = '';
+    tdElement.appendChild(input);
+    input.focus();
+    input.select();
+}
+
 function _buildPrintTable() {
     const tbody = document.getElementById('stats-print-tbody');
     if (!tbody) return;
@@ -295,7 +335,7 @@ function _buildPrintTable() {
     tbody.innerHTML = rows.map(entry => {
         const orderDate   = _toLocalDate(entry.orderDate);
         const receiveDate = _toLocalDate(entry.receiveDate);
-        const amount = ((entry.price || 0) * (entry.qty || 0)).toLocaleString();
+        const amount = _entryAmount(entry).toLocaleString();
         return `
             <tr>
                 <td style="text-align:center;">${entry.name}</td>
@@ -328,7 +368,7 @@ export function copyAllStats() {
     rows.forEach(entry => {
         const orderDate   = _toLocalDate(entry.orderDate);
         const receiveDate = _toLocalDate(entry.receiveDate);
-        const amount = ((entry.price || 0) * (entry.qty || 0)).toLocaleString();
+        const amount = _entryAmount(entry).toLocaleString();
         lines.push(`${entry.name}\t${entry.qty || 0}개\t${amount}원\t${entry.vendorName || '-'}\t${orderDate}\t${receiveDate}`);
     });
     navigator.clipboard.writeText(lines.join('\n'))
@@ -344,5 +384,6 @@ window.updateOrderHistoryRowTotal   = updateOrderHistoryRowTotal;
 window.saveOrderHistoryEdits        = saveOrderHistoryEdits;
 window.deleteOrderHistoryEntry      = deleteOrderHistoryEntry;
 window.onVendorSelectChange         = onVendorSelectChange;
+window.inlineEditStatAmount         = inlineEditStatAmount;
 window.printStats                   = printStats;
 window.copyAllStats                 = copyAllStats;
