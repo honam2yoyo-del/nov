@@ -104,7 +104,7 @@ export function renderStats() {
                     <div style="font-weight:700; color:var(--primary);">${(s.product + s.shipping).toLocaleString()}원</div>
                     <div style="font-size:0.75rem; color:var(--text-muted);">상품 ${s.product.toLocaleString()} + 배송 ${s.shipping.toLocaleString()}</div>
                 </div>
-                <button onclick="window.openOrderHistoryEditModal(${JSON.stringify(pName)})"
+                <button onclick='window.openOrderHistoryEditModal(${JSON.stringify(pName)})'
                         style="flex-shrink:0; background:transparent; border:1px solid var(--primary); color:var(--primary); padding:4px 10px; border-radius:6px; font-size:0.8rem; cursor:pointer;">수정</button>
             </li>
         `;
@@ -165,7 +165,7 @@ function _renderOrderHistoryEditTable(productName) {
                     ${subtotal}원
                 </td>
                 <td style="padding:10px 8px; text-align:center;">
-                    <button onclick="window.deleteOrderHistoryEntry(${JSON.stringify(entry.id)})"
+                    <button onclick='window.deleteOrderHistoryEntry(${JSON.stringify(entry.id)})'
                             style="background:transparent; border:1px solid #fca5a5; color:var(--danger); padding:4px 9px; border-radius:5px; font-size:0.8rem; cursor:pointer;">삭제</button>
                 </td>
             </tr>
