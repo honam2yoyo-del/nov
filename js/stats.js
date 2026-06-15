@@ -106,7 +106,7 @@ export function renderStats() {
         .sort((a, b) => (b.orderDate || '').localeCompare(a.orderDate || ''));
 
     if (filteredHistory.length === 0) {
-        productListEl.innerHTML = '<li style="color:var(--text-muted); padding:20px 0; text-align:center;">조회된 상품 내역이 없습니다.</li>';
+        productListEl.innerHTML = '<p style="color:var(--text-muted); padding:28px; text-align:center; margin:0;">조회된 상품 내역이 없습니다.</p>';
         return;
     }
 
@@ -115,14 +115,14 @@ export function renderStats() {
         const receiveDate = _toLocalDate(entry.receiveDate);
         const amount = ((entry.price || 0) * (entry.qty || 0)).toLocaleString();
         return `
-            <tr style="border-bottom:1px solid var(--border-color);">
-                <td style="padding:10px 10px; font-weight:600; color:var(--text-main);">${entry.name}</td>
-                <td style="padding:10px 10px; text-align:center; white-space:nowrap;">${(entry.qty || 0).toLocaleString()}개</td>
-                <td style="padding:10px 10px; text-align:right; font-weight:700; color:var(--primary); white-space:nowrap;">${amount}원</td>
-                <td style="padding:10px 10px; text-align:center; color:var(--text-muted);">${entry.vendorName || '-'}</td>
-                <td style="padding:10px 10px; text-align:center; color:var(--text-muted); font-size:0.82rem; white-space:nowrap;">${orderDate}</td>
-                <td style="padding:10px 10px; text-align:center; color:var(--text-muted); font-size:0.82rem; white-space:nowrap;">${receiveDate}</td>
-                <td style="padding:10px 8px; text-align:center;">
+            <tr>
+                <td style="padding:12px 16px; font-weight:600; color:var(--text-main);">${entry.name}</td>
+                <td style="padding:12px 8px; text-align:center; white-space:nowrap; color:var(--text-main);">${(entry.qty || 0).toLocaleString()}개</td>
+                <td style="padding:12px 16px; text-align:right; font-weight:700; color:var(--primary); white-space:nowrap;">${amount}원</td>
+                <td style="padding:12px 8px; text-align:center; color:var(--text-muted);">${entry.vendorName || '-'}</td>
+                <td style="padding:12px 8px; text-align:center; color:var(--text-muted); font-size:0.82rem; white-space:nowrap;">${orderDate}</td>
+                <td style="padding:12px 8px; text-align:center; color:var(--text-muted); font-size:0.82rem; white-space:nowrap;">${receiveDate}</td>
+                <td style="padding:12px 12px; text-align:center;">
                     <button onclick='window.openOrderHistoryEditModal(${JSON.stringify(entry.name)})'
                             style="background:transparent; border:1px solid var(--primary); color:var(--primary); padding:3px 9px; border-radius:5px; font-size:0.78rem; cursor:pointer; white-space:nowrap;">수정</button>
                 </td>
@@ -130,22 +130,20 @@ export function renderStats() {
     }).join('');
 
     productListEl.innerHTML = `
-        <li style="padding:0; border:none; display:block;">
-            <table style="width:100%; border-collapse:collapse; font-size:0.88rem;">
-                <thead>
-                    <tr style="background:var(--bg-hover); border-bottom:2px solid var(--border-color);">
-                        <th style="padding:9px 10px; text-align:left; font-weight:600; color:var(--text-muted); font-size:0.8rem;">상품명</th>
-                        <th style="padding:9px 10px; text-align:center; font-weight:600; color:var(--text-muted); font-size:0.8rem; width:64px;">수량</th>
-                        <th style="padding:9px 10px; text-align:right; font-weight:600; color:var(--text-muted); font-size:0.8rem; width:110px;">금액</th>
-                        <th style="padding:9px 10px; text-align:center; font-weight:600; color:var(--text-muted); font-size:0.8rem; width:90px;">도매처</th>
-                        <th style="padding:9px 10px; text-align:center; font-weight:600; color:var(--text-muted); font-size:0.8rem; width:95px;">발주일</th>
-                        <th style="padding:9px 10px; text-align:center; font-weight:600; color:var(--text-muted); font-size:0.8rem; width:95px;">입고일</th>
-                        <th style="width:52px;"></th>
-                    </tr>
-                </thead>
-                <tbody>${rows}</tbody>
-            </table>
-        </li>`;
+        <table style="width:100%; border-collapse:collapse; font-size:0.875rem;">
+            <thead>
+                <tr style="background:#f8fafc; border-bottom:2px solid var(--border-color); position:sticky; top:0;">
+                    <th style="padding:10px 16px; text-align:left; font-weight:600; color:var(--text-muted); font-size:0.75rem; letter-spacing:0.04em; text-transform:uppercase;">상품명</th>
+                    <th style="padding:10px 8px; text-align:center; font-weight:600; color:var(--text-muted); font-size:0.75rem; letter-spacing:0.04em; text-transform:uppercase; width:60px;">수량</th>
+                    <th style="padding:10px 16px; text-align:right; font-weight:600; color:var(--text-muted); font-size:0.75rem; letter-spacing:0.04em; text-transform:uppercase; width:110px;">금액</th>
+                    <th style="padding:10px 8px; text-align:center; font-weight:600; color:var(--text-muted); font-size:0.75rem; letter-spacing:0.04em; text-transform:uppercase; width:90px;">도매처</th>
+                    <th style="padding:10px 8px; text-align:center; font-weight:600; color:var(--text-muted); font-size:0.75rem; letter-spacing:0.04em; text-transform:uppercase; width:95px;">발주일</th>
+                    <th style="padding:10px 8px; text-align:center; font-weight:600; color:var(--text-muted); font-size:0.75rem; letter-spacing:0.04em; text-transform:uppercase; width:95px;">입고일</th>
+                    <th style="width:54px;"></th>
+                </tr>
+            </thead>
+            <tbody style="divide-y:var(--border-color);">${rows}</tbody>
+        </table>`;
 }
 
 export function resetOrderHistory() {

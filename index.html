@@ -366,7 +366,7 @@
                         </div>
                         <ul class="stat-list" id="stat-vendor-list"></ul>
                     </div>
-                    <div class="stat-card" style="grid-column:1/-1;">
+                    <div class="stat-card" style="grid-column:1/-1; padding-bottom:0;">
                         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
                             <div class="stat-title" style="margin:0;">📦 상품별 발주 내역</div>
                             <div class="no-print" style="display:flex; gap:6px; align-items:center;">
@@ -374,7 +374,7 @@
                                 <input type="text" id="stat-product-search" placeholder="상품명 또는 도매처 검색..." style="padding:4px 8px; font-size:0.8rem; width:200px;" oninput="window.renderStats()">
                             </div>
                         </div>
-                        <ul class="stat-list" id="stat-product-list" style="max-height:520px;"></ul>
+                        <div id="stat-product-list" style="max-height:520px; overflow-y:auto; margin:0 -24px; border-top:1px solid var(--border-color); border-radius:0 0 var(--radius-md) var(--radius-md);"></div>
                     </div>
                 </div>
 
