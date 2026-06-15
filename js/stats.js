@@ -98,27 +98,37 @@ export function renderStats() {
     });
 
     productListEl.innerHTML = '';
-    const sortedProducts = Object.entries(productStats)
-        .filter(([n, s]) => {
+    const filteredHistory = state.orderHistory
+        .filter(entry => {
             if (!productQuery) return true;
-            return n.toLowerCase().includes(productQuery) ||
-                [...s.vendors].some(v => v.toLowerCase().includes(productQuery));
+            return (entry.name || '').toLowerCase().includes(productQuery) ||
+                   (entry.vendorName || '').toLowerCase().includes(productQuery);
         })
-        .sort((a, b) => (b[1].product + b[1].shipping) - (a[1].product + a[1].shipping));
-    if (sortedProducts.length === 0) productListEl.innerHTML = '<li style="color:var(--text-muted); padding:20px 0;">조회된 상품 내역이 없습니다.</li>';
-    sortedProducts.forEach(([pName, s]) => {
-        const vendorLabel = [...s.vendors].join(', ');
+        .sort((a, b) => (b.orderDate || '').localeCompare(a.orderDate || ''));
+    if (filteredHistory.length === 0) {
+        productListEl.innerHTML = '<li style="color:var(--text-muted); padding:20px 0;">조회된 상품 내역이 없습니다.</li>';
+    }
+    filteredHistory.forEach(entry => {
+        const orderDate   = _toLocalDate(entry.orderDate);
+        const receiveDate = _toLocalDate(entry.receiveDate);
+        const amount = ((entry.price || 0) * (entry.qty || 0)).toLocaleString();
         productListEl.innerHTML += `
-            <li style="gap:12px;">
+            <li style="gap:12px; align-items:center;">
                 <div style="flex:1; min-width:0;">
-                    <div style="font-weight:600; color:var(--text-main);">${pName}</div>
-                    <div style="font-size:0.8rem; color:var(--text-muted); margin-top:2px;">총 ${s.qty.toLocaleString()}개 입고 · ${vendorLabel}</div>
+                    <div style="font-weight:600; color:var(--text-main);">${entry.name}</div>
+                    <div style="font-size:0.8rem; color:var(--text-muted); margin-top:2px;">${entry.vendorName || '-'}</div>
                 </div>
-                <div style="text-align:right; flex-shrink:0;">
-                    <div style="font-weight:700; color:var(--primary);">${(s.product + s.shipping).toLocaleString()}원</div>
-                    <div style="font-size:0.75rem; color:var(--text-muted);">상품 ${s.product.toLocaleString()} + 배송 ${s.shipping.toLocaleString()}</div>
+                <div style="text-align:center; flex-shrink:0; min-width:52px;">
+                    <div style="font-weight:600;">${(entry.qty || 0).toLocaleString()}개</div>
                 </div>
-                <button onclick='window.openOrderHistoryEditModal(${JSON.stringify(pName)})'
+                <div style="text-align:right; flex-shrink:0; min-width:90px;">
+                    <div style="font-weight:700; color:var(--primary);">${amount}원</div>
+                </div>
+                <div style="flex-shrink:0; font-size:0.78rem; color:var(--text-muted); line-height:1.6; min-width:110px;">
+                    <div>발주 ${orderDate}</div>
+                    <div>입고 ${receiveDate}</div>
+                </div>
+                <button onclick='window.openOrderHistoryEditModal(${JSON.stringify(entry.name)})'
                         style="flex-shrink:0; background:transparent; border:1px solid var(--primary); color:var(--primary); padding:4px 10px; border-radius:6px; font-size:0.8rem; cursor:pointer;">수정</button>
             </li>
         `;
