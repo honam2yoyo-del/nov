@@ -179,7 +179,8 @@ export function confirmReceive(inspectId) {
             vendorName: item.vendorName,
             qty: item.qty,
             price: item.price,
-            orderDate: item.orderDateISO || new Date().toISOString()
+            orderDate: item.orderDateISO || '',
+            receiveDate: new Date().toISOString()
         });
 
         state.inspectList.splice(itemIndex, 1);
@@ -213,7 +214,8 @@ export function receiveAllNormalItems() {
                 vendorName: item.vendorName,
                 qty: item.qty,
                 price: item.price,
-                orderDate: item.orderDateISO || new Date().toISOString()
+                orderDate: item.orderDateISO || '',
+                receiveDate: new Date().toISOString()
             });
         });
         state.inspectList = state.inspectList.filter(x => x.status === '반품' || x.status === '미도착');
@@ -274,7 +276,8 @@ export function receiveSelectedInspectItems() {
                 vendorName: item.vendorName,
                 qty: item.qty,
                 price: item.price,
-                orderDate: item.orderDateISO || new Date().toISOString()
+                orderDate: item.orderDateISO || '',
+                receiveDate: new Date().toISOString()
             });
         });
         const targetIds = new Set(targets.map(x => x.id));

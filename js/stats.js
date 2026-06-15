@@ -141,7 +141,7 @@ function _renderOrderHistoryEditTable(productName) {
     const entries = state.orderHistory.filter(o => o.name === productName);
 
     if (entries.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px; color:var(--text-muted);">내역이 없습니다.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:20px; color:var(--text-muted);">내역이 없습니다.</td></tr>';
         return;
     }
 
@@ -149,7 +149,8 @@ function _renderOrderHistoryEditTable(productName) {
     const selectStyle  = 'width:100%; border:1px solid var(--border-color); padding:5px 7px; border-radius:5px; font-size:0.85rem; background:var(--bg-main);';
 
     tbody.innerHTML = entries.map(entry => {
-        const date      = entry.orderDate ? entry.orderDate.split('T')[0] : '-';
+        const orderDate   = entry.orderDate   ? entry.orderDate.split('T')[0]   : '-';
+        const receiveDate = entry.receiveDate ? entry.receiveDate.split('T')[0] : '-';
         const subtotal  = (entry.price * entry.qty).toLocaleString();
         const isCustom  = entry.vendorName && !knownVendors.includes(entry.vendorName);
         const vendorOpts = knownVendors.map(v =>
@@ -158,7 +159,8 @@ function _renderOrderHistoryEditTable(productName) {
         const customVal  = isCustom ? (entry.vendorName || '').replace(/"/g, '&quot;') : '';
         return `
             <tr data-id="${entry.id}" style="border-bottom:1px solid var(--border-color);">
-                <td style="padding:10px 8px; color:var(--text-muted); font-size:0.85rem; white-space:nowrap;">${date}</td>
+                <td style="padding:10px 8px; color:var(--text-muted); font-size:0.85rem; white-space:nowrap; text-align:center;">${orderDate}</td>
+                <td style="padding:10px 8px; color:var(--text-muted); font-size:0.85rem; white-space:nowrap; text-align:center;">${receiveDate}</td>
                 <td style="padding:10px 8px; min-width:150px;">
                     <select data-field="vendorSelect" onchange="window.onVendorSelectChange(this)" style="${selectStyle}">
                         ${vendorOpts}
@@ -243,17 +245,25 @@ export function deleteOrderHistoryEntry(id) {
 
 function _buildPrintTable() {
     const tbody = document.getElementById('stats-print-tbody');
-    if (!tbody || !_lastProductStats) return;
-    const rows = Object.entries(_lastProductStats)
-        .sort((a, b) => (b[1].product + b[1].shipping) - (a[1].product + a[1].shipping));
-    tbody.innerHTML = rows.map(([pName, s]) => `
-        <tr>
-            <td style="text-align:center;">${pName}</td>
-            <td style="text-align:center;">${s.qty.toLocaleString()}개</td>
-            <td style="text-align:center;">${(s.product + s.shipping).toLocaleString()}원</td>
-            <td style="text-align:center;">${[...s.vendors].join(', ')}</td>
-        </tr>
-    `).join('');
+    if (!tbody) return;
+    const rows = [...state.orderHistory].sort((a, b) =>
+        (a.orderDate || '').localeCompare(b.orderDate || '')
+    );
+    tbody.innerHTML = rows.map(entry => {
+        const orderDate   = entry.orderDate   ? entry.orderDate.split('T')[0]   : '-';
+        const receiveDate = entry.receiveDate ? entry.receiveDate.split('T')[0] : '-';
+        const amount = ((entry.price || 0) * (entry.qty || 0)).toLocaleString();
+        return `
+            <tr>
+                <td style="text-align:center;">${entry.name}</td>
+                <td style="text-align:center;">${(entry.qty || 0).toLocaleString()}개</td>
+                <td style="text-align:center;">${amount}원</td>
+                <td style="text-align:center;">${entry.vendorName || '-'}</td>
+                <td style="text-align:center;">${orderDate}</td>
+                <td style="text-align:center;">${receiveDate}</td>
+            </tr>
+        `;
+    }).join('');
 }
 
 export function printStats() {
@@ -264,15 +274,19 @@ export function printStats() {
 }
 
 export function copyAllStats() {
-    if (!_lastProductStats || Object.keys(_lastProductStats).length === 0) {
+    if (!state.orderHistory.length) {
         showToast("복사할 데이터가 없습니다.", "error");
         return;
     }
-    const rows = Object.entries(_lastProductStats)
-        .sort((a, b) => (b[1].product + b[1].shipping) - (a[1].product + a[1].shipping));
-    const lines = ['상품명\t도매처\t수량\t금액'];
-    rows.forEach(([pName, s]) => {
-        lines.push(`${pName}\t${[...s.vendors].join(', ')}\t${s.qty}개\t${(s.product + s.shipping).toLocaleString()}원`);
+    const rows = [...state.orderHistory].sort((a, b) =>
+        (a.orderDate || '').localeCompare(b.orderDate || '')
+    );
+    const lines = ['상품명\t수량\t금액\t도매처\t발주일\t입고일'];
+    rows.forEach(entry => {
+        const orderDate   = entry.orderDate   ? entry.orderDate.split('T')[0]   : '-';
+        const receiveDate = entry.receiveDate ? entry.receiveDate.split('T')[0] : '-';
+        const amount = ((entry.price || 0) * (entry.qty || 0)).toLocaleString();
+        lines.push(`${entry.name}\t${entry.qty || 0}개\t${amount}원\t${entry.vendorName || '-'}\t${orderDate}\t${receiveDate}`);
     });
     navigator.clipboard.writeText(lines.join('\n'))
         .then(() => showToast("전체 복사 완료!"))

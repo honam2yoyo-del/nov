@@ -84,7 +84,7 @@
 
     <!-- 발주 내역 수정 모달 -->
     <div id="order-history-edit-modal" class="modal-overlay">
-        <div class="modal-box" style="max-width:740px; width:95%; max-height:85vh; display:flex; flex-direction:column;">
+        <div class="modal-box" style="max-width:900px; width:95%; max-height:85vh; display:flex; flex-direction:column;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-shrink:0;">
                 <h3 id="order-history-edit-title" style="margin:0;">발주 내역 수정</h3>
             </div>
@@ -92,7 +92,8 @@
                 <table style="width:100%; border-collapse:collapse; font-size:0.9rem;">
                     <thead>
                         <tr style="border-bottom:2px solid var(--border-color); background:var(--bg-hover);">
-                            <th style="text-align:left; padding:10px 8px; color:var(--text-muted); font-weight:600; font-size:0.82rem;">입고일</th>
+                            <th style="text-align:center; padding:10px 8px; color:var(--text-muted); font-weight:600; font-size:0.82rem;">발주일</th>
+                            <th style="text-align:center; padding:10px 8px; color:var(--text-muted); font-weight:600; font-size:0.82rem;">입고일</th>
                             <th style="text-align:left; padding:10px 8px; color:var(--text-muted); font-weight:600; font-size:0.82rem;">도매처</th>
                             <th style="text-align:center; padding:10px 8px; color:var(--text-muted); font-weight:600; font-size:0.82rem;">수량</th>
                             <th style="text-align:center; padding:10px 8px; color:var(--text-muted); font-weight:600; font-size:0.82rem;">단가</th>
@@ -387,6 +388,8 @@
                                 <th style="text-align:center;">수량</th>
                                 <th style="text-align:center;">금액</th>
                                 <th style="text-align:center;">도매처</th>
+                                <th style="text-align:center;">발주일</th>
+                                <th style="text-align:center;">입고일</th>
                             </tr>
                         </thead>
                         <tbody id="stats-print-tbody"></tbody>
