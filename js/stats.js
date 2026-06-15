@@ -2,7 +2,8 @@ import { state } from './state.js';
 import { saveToFirestore } from './firestore.js';
 import { showToast, showConfirm } from './ui.js';
 
-let _lastProductStats = null;
+let _lastProductStats  = null;
+let _selectedVendors   = new Set();
 
 function _toLocalDate(isoStr) {
     if (!isoStr) return '-';
@@ -100,16 +101,6 @@ export function renderStats() {
             </li>
         `;
     });
-
-    // 도매처 필터 드롭다운 갱신
-    const vendorFilterEl = document.getElementById('stat-vendor-filter');
-    const vendorFilter   = vendorFilterEl?.value || '';
-    if (vendorFilterEl) {
-        const allVendors = [...new Set(state.orderHistory.map(e => e.vendorName).filter(Boolean))]
-            .sort((a, b) => a.localeCompare(b, 'ko'));
-        vendorFilterEl.innerHTML = '<option value="">전체 도매처</option>' +
-            allVendors.map(v => `<option value="${v}"${v === vendorFilter ? ' selected' : ''}>${v}</option>`).join('');
-    }
 
     const filteredHistory = _getFilteredHistory();
 
@@ -301,16 +292,76 @@ export function deleteOrderHistoryEntry(id) {
 
 function _getFilteredHistory() {
     const productQuery = document.getElementById('stat-product-search')?.value.toLowerCase() || '';
-    const vendorFilter = document.getElementById('stat-vendor-filter')?.value || '';
     return state.orderHistory
         .filter(entry => {
             const matchesText = !productQuery ||
                 (entry.name || '').toLowerCase().includes(productQuery) ||
                 (entry.vendorName || '').toLowerCase().includes(productQuery);
-            const matchesVendor = !vendorFilter || entry.vendorName === vendorFilter;
+            const matchesVendor = _selectedVendors.size === 0 || _selectedVendors.has(entry.vendorName);
             return matchesText && matchesVendor;
         })
         .sort((a, b) => (b.orderDate || '').localeCompare(a.orderDate || ''));
+}
+
+export function toggleVendorFilterDropdown(e) {
+    e?.stopPropagation();
+    const dd = document.getElementById('stat-vendor-filter-dropdown');
+    if (!dd) return;
+    const isOpen = dd.style.display !== 'none';
+    if (isOpen) {
+        dd.style.display = 'none';
+    } else {
+        _renderVendorFilterDropdown();
+        dd.style.display = 'block';
+        setTimeout(() => document.addEventListener('click', _closeVendorFilterOnce, { once: true }), 0);
+    }
+}
+
+function _closeVendorFilterOnce() {
+    const dd = document.getElementById('stat-vendor-filter-dropdown');
+    if (dd) dd.style.display = 'none';
+}
+
+function _renderVendorFilterDropdown() {
+    const dd = document.getElementById('stat-vendor-filter-dropdown');
+    if (!dd) return;
+    const allVendors = [...new Set(state.orderHistory.map(e => e.vendorName).filter(Boolean))]
+        .sort((a, b) => a.localeCompare(b, 'ko'));
+    dd.innerHTML = allVendors.map(v => {
+        const esc = v.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+        return `<label style="display:flex; align-items:center; gap:8px; padding:8px 14px; cursor:pointer; font-size:0.9rem; color:var(--text-main); user-select:none;">
+            <input type="checkbox" ${_selectedVendors.has(v) ? 'checked' : ''}
+                   onchange="window.toggleVendorFilter('${esc}', this)"
+                   style="width:15px; height:15px; accent-color:var(--primary); cursor:pointer;">
+            ${v}
+        </label>`;
+    }).join('') + (allVendors.length ? `
+        <div style="border-top:1px solid var(--border-color); padding:6px 14px;">
+            <button onclick="window.clearVendorFilter()"
+                    style="font-size:0.8rem; color:var(--text-muted); background:none; border:none; cursor:pointer; padding:0; font-family:inherit;">전체 선택 해제</button>
+        </div>` : '');
+}
+
+function _updateVendorFilterLabel() {
+    const label = document.getElementById('stat-vendor-filter-label');
+    if (!label) return;
+    if (_selectedVendors.size === 0)      label.textContent = '전체 도매처';
+    else if (_selectedVendors.size === 1) label.textContent = [..._selectedVendors][0];
+    else                                   label.textContent = `${_selectedVendors.size}개 도매처 선택`;
+}
+
+export function toggleVendorFilter(vendorName, checkbox) {
+    if (checkbox.checked) _selectedVendors.add(vendorName);
+    else                  _selectedVendors.delete(vendorName);
+    _updateVendorFilterLabel();
+    renderStats();
+}
+
+export function clearVendorFilter() {
+    _selectedVendors.clear();
+    _updateVendorFilterLabel();
+    _renderVendorFilterDropdown();
+    renderStats();
 }
 
 export function inlineEditStatAmount(entryId, tdElement, currentAmount) {
@@ -405,6 +456,9 @@ window.updateOrderHistoryRowTotal   = updateOrderHistoryRowTotal;
 window.saveOrderHistoryEdits        = saveOrderHistoryEdits;
 window.deleteOrderHistoryEntry      = deleteOrderHistoryEntry;
 window.onVendorSelectChange         = onVendorSelectChange;
+window.toggleVendorFilterDropdown   = toggleVendorFilterDropdown;
+window.toggleVendorFilter           = toggleVendorFilter;
+window.clearVendorFilter            = clearVendorFilter;
 window.inlineEditStatAmount         = inlineEditStatAmount;
 window.printStats                   = printStats;
 window.copyAllStats                 = copyAllStats;
