@@ -116,13 +116,15 @@ export function renderStats() {
             <li style="gap:12px; align-items:center;">
                 <div style="flex:1; min-width:0;">
                     <div style="font-weight:600; color:var(--text-main);">${entry.name}</div>
-                    <div style="font-size:0.8rem; color:var(--text-muted); margin-top:2px;">${entry.vendorName || '-'}</div>
                 </div>
                 <div style="text-align:center; flex-shrink:0; min-width:52px;">
                     <div style="font-weight:600;">${(entry.qty || 0).toLocaleString()}개</div>
                 </div>
                 <div style="text-align:right; flex-shrink:0; min-width:90px;">
                     <div style="font-weight:700; color:var(--primary);">${amount}원</div>
+                </div>
+                <div style="text-align:center; flex-shrink:0; min-width:80px;">
+                    <div style="font-size:0.85rem; color:var(--text-muted);">${entry.vendorName || '-'}</div>
                 </div>
                 <div style="flex-shrink:0; font-size:0.78rem; color:var(--text-muted); line-height:1.6; min-width:110px;">
                     <div>발주 ${orderDate}</div>
