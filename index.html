@@ -346,7 +346,10 @@
             <div id="tab-stats" class="tab-content">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
                     <h2 style="margin:0;">통계 및 정산</h2>
-                    <button class="outline" style="color:var(--danger); border-color:#fca5a5; font-size:0.8rem;" onclick="window.resetOrderHistory()">내역 초기화</button>
+                    <div class="no-print" style="display:flex; gap:8px; align-items:center;">
+                        <button class="outline" style="font-size:0.8rem;" onclick="window.printStats()">🖨️ 인쇄</button>
+                        <button class="outline" style="color:var(--danger); border-color:#fca5a5; font-size:0.8rem;" onclick="window.resetOrderHistory()">내역 초기화</button>
+                    </div>
                 </div>
                 <div class="stats-grid">
                     <div class="stat-card" style="background:linear-gradient(135deg,#4f46e5 0%,#3b82f6 100%); color:white; border:none;">

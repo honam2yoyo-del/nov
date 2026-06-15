@@ -237,6 +237,12 @@ export function deleteOrderHistoryEntry(id) {
     });
 }
 
+export function printStats() {
+    document.body.classList.add('print-stats');
+    window.print();
+    document.body.classList.remove('print-stats');
+}
+
 window.renderStats                  = renderStats;
 window.resetOrderHistory            = resetOrderHistory;
 window.openOrderHistoryEditModal    = openOrderHistoryEditModal;
@@ -245,3 +251,4 @@ window.updateOrderHistoryRowTotal   = updateOrderHistoryRowTotal;
 window.saveOrderHistoryEdits        = saveOrderHistoryEdits;
 window.deleteOrderHistoryEntry      = deleteOrderHistoryEntry;
 window.onVendorSelectChange         = onVendorSelectChange;
+window.printStats                   = printStats;

@@ -163,6 +163,16 @@ tbody tr:last-child td { border-bottom: none; }
     .app-body { display: block !important; min-height: unset !important; }
     .main-content { display: block !important; }
 
+    /* 통계 인쇄 */
+    body.print-stats #tab-stats  { display: block !important; }
+    body.print-stats #tab-inspect { display: none !important; }
+    body.print-stats .stats-grid { display: block; }
+    body.print-stats .stat-card  { margin-bottom: 20px; break-inside: avoid; box-shadow: none; border: 1px solid #e2e8f0; border-radius: 6px; }
+    body.print-stats .stat-list  { max-height: none !important; overflow: visible !important; }
+    body.print-stats .stat-list li button    { display: none !important; }
+    body.print-stats .stat-card input[type="text"] { display: none !important; }
+    body.print-stats .stat-list li { border-bottom: 1px solid #e2e8f0; }
+
     /* 입고 검수 테이블 인쇄 컬럼 너비 최적화 */
     #tab-inspect table { table-layout: fixed; width: 100%; }
     .ip-name   { width: 52% !important; text-align: center !important; font-size: 11pt !important; word-break: break-word; }
