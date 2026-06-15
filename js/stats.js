@@ -4,6 +4,16 @@ import { showToast, showConfirm } from './ui.js';
 
 let _lastProductStats = null;
 
+function _toLocalDate(isoStr) {
+    if (!isoStr) return '-';
+    const d = new Date(isoStr);
+    if (isNaN(d)) return '-';
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+}
+
 export function renderStats() {
     const vendorQuery  = document.getElementById('stat-vendor-search')?.value.toLowerCase()  || '';
     const productQuery = document.getElementById('stat-product-search')?.value.toLowerCase() || '';
@@ -149,8 +159,8 @@ function _renderOrderHistoryEditTable(productName) {
     const selectStyle  = 'width:100%; border:1px solid var(--border-color); padding:5px 7px; border-radius:5px; font-size:0.85rem; background:var(--bg-main);';
 
     tbody.innerHTML = entries.map(entry => {
-        const orderDate   = entry.orderDate   ? entry.orderDate.split('T')[0]   : '-';
-        const receiveDate = entry.receiveDate ? entry.receiveDate.split('T')[0] : '-';
+        const orderDate   = _toLocalDate(entry.orderDate);
+        const receiveDate = _toLocalDate(entry.receiveDate);
         const subtotal  = (entry.price * entry.qty).toLocaleString();
         const isCustom  = entry.vendorName && !knownVendors.includes(entry.vendorName);
         const vendorOpts = knownVendors.map(v =>
@@ -250,8 +260,8 @@ function _buildPrintTable() {
         (a.orderDate || '').localeCompare(b.orderDate || '')
     );
     tbody.innerHTML = rows.map(entry => {
-        const orderDate   = entry.orderDate   ? entry.orderDate.split('T')[0]   : '-';
-        const receiveDate = entry.receiveDate ? entry.receiveDate.split('T')[0] : '-';
+        const orderDate   = _toLocalDate(entry.orderDate);
+        const receiveDate = _toLocalDate(entry.receiveDate);
         const amount = ((entry.price || 0) * (entry.qty || 0)).toLocaleString();
         return `
             <tr>
@@ -283,8 +293,8 @@ export function copyAllStats() {
     );
     const lines = ['상품명\t수량\t금액\t도매처\t발주일\t입고일'];
     rows.forEach(entry => {
-        const orderDate   = entry.orderDate   ? entry.orderDate.split('T')[0]   : '-';
-        const receiveDate = entry.receiveDate ? entry.receiveDate.split('T')[0] : '-';
+        const orderDate   = _toLocalDate(entry.orderDate);
+        const receiveDate = _toLocalDate(entry.receiveDate);
         const amount = ((entry.price || 0) * (entry.qty || 0)).toLocaleString();
         lines.push(`${entry.name}\t${entry.qty || 0}개\t${amount}원\t${entry.vendorName || '-'}\t${orderDate}\t${receiveDate}`);
     });
