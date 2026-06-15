@@ -9,6 +9,8 @@ import { renderOrderProductList } from './orders.js';
 import { renderInspectList } from './inspect.js';
 import { renderStats } from './stats.js';
 
+let _tabRestored = false;
+
 function loadDataFromFirestore() {
     const dataRef = doc(db, "inventory_system", "company_data");
     state.unsubscribeData = onSnapshot(dataRef, (docSnap) => {
@@ -58,10 +60,19 @@ function loadDataFromFirestore() {
             state.currentOrderProductId = null;
             document.getElementById('order-detail-panel').style.display = 'none';
         }
+
+        if (!_tabRestored) {
+            _tabRestored = true;
+            const savedTab = localStorage.getItem('activeTab');
+            if (savedTab && document.getElementById(savedTab)) {
+                switchTab(savedTab);
+            }
+        }
     });
 }
 
 function onLogout() {
+    _tabRestored = false;
     if (state.unsubscribeData) {
         state.unsubscribeData();
         state.unsubscribeData = null;
@@ -75,6 +86,7 @@ function switchTab(tabId) {
     document.querySelector(`.sidebar-btn[data-tab="${tabId}"]`)?.classList.add('active');
     if (tabId === 'tab-order') renderOrderProductList();
     if (tabId === 'tab-stats') renderStats();
+    localStorage.setItem('activeTab', tabId);
 }
 
 window.switchTab = switchTab;

@@ -136,30 +136,31 @@ function _renderOrderHistoryEditTable(productName) {
     const tbody = document.getElementById('order-history-edit-tbody');
     const entries = state.orderHistory.filter(o => o.name === productName);
 
-    // 도매처 datalist 동기화
-    let datalist = document.getElementById('oh-vendor-datalist');
-    if (!datalist) {
-        datalist = document.createElement('datalist');
-        datalist.id = 'oh-vendor-datalist';
-        document.body.appendChild(datalist);
-    }
-    datalist.innerHTML = state.vendorOrder.map(v => `<option value="${v.replace(/"/g, '&quot;')}"></option>`).join('');
-
     if (entries.length === 0) {
         tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px; color:var(--text-muted);">내역이 없습니다.</td></tr>';
         return;
     }
 
+    const knownVendors = state.vendorOrder;
+    const selectStyle  = 'width:100%; border:1px solid var(--border-color); padding:5px 7px; border-radius:5px; font-size:0.85rem; background:var(--bg-main);';
+
     tbody.innerHTML = entries.map(entry => {
-        const date = entry.orderDate ? entry.orderDate.split('T')[0] : '-';
-        const subtotal = (entry.price * entry.qty).toLocaleString();
+        const date      = entry.orderDate ? entry.orderDate.split('T')[0] : '-';
+        const subtotal  = (entry.price * entry.qty).toLocaleString();
+        const isCustom  = entry.vendorName && !knownVendors.includes(entry.vendorName);
+        const vendorOpts = knownVendors.map(v =>
+            `<option value="${v.replace(/"/g, '&quot;')}"${v === entry.vendorName ? ' selected' : ''}>${v}</option>`
+        ).join('') + `<option value="__custom__"${isCustom ? ' selected' : ''}>직접 입력</option>`;
+        const customVal  = isCustom ? (entry.vendorName || '').replace(/"/g, '&quot;') : '';
         return `
             <tr data-id="${entry.id}" style="border-bottom:1px solid var(--border-color);">
                 <td style="padding:10px 8px; color:var(--text-muted); font-size:0.85rem; white-space:nowrap;">${date}</td>
-                <td style="padding:10px 8px;">
-                    <input type="text" value="${(entry.vendorName || '').replace(/"/g, '&quot;')}" data-field="vendorName"
-                           list="oh-vendor-datalist"
-                           style="width:100%; border:1px solid var(--border-color); padding:5px 7px; border-radius:5px; font-size:0.85rem; background:var(--bg-main);">
+                <td style="padding:10px 8px; min-width:150px;">
+                    <select data-field="vendorSelect" onchange="window.onVendorSelectChange(this)" style="${selectStyle}">
+                        ${vendorOpts}
+                    </select>
+                    <input type="text" data-field="vendorCustom" value="${customVal}" placeholder="도매처명 직접 입력"
+                           style="${selectStyle} display:${isCustom ? 'block' : 'none'}; margin-top:4px;">
                 </td>
                 <td style="padding:10px 8px; text-align:center;">
                     <input type="number" value="${entry.qty}" data-field="qty" min="1"
@@ -190,12 +191,21 @@ export function updateOrderHistoryRowTotal(input) {
     row.querySelector('[data-subtotal]').textContent = `${(qty * price).toLocaleString()}원`;
 }
 
+export function onVendorSelectChange(select) {
+    const customInput = select.parentElement.querySelector('[data-field="vendorCustom"]');
+    customInput.style.display = select.value === '__custom__' ? 'block' : 'none';
+}
+
 export function saveOrderHistoryEdits() {
     const tbody = document.getElementById('order-history-edit-tbody');
     tbody.querySelectorAll('tr[data-id]').forEach(row => {
         const entry = state.orderHistory.find(o => o.id === row.dataset.id);
         if (!entry) return;
-        entry.vendorName = row.querySelector('[data-field="vendorName"]').value.trim();
+        const vendorSelect = row.querySelector('[data-field="vendorSelect"]');
+        const vendorCustom = row.querySelector('[data-field="vendorCustom"]');
+        entry.vendorName = vendorSelect.value === '__custom__'
+            ? vendorCustom.value.trim()
+            : vendorSelect.value;
         entry.qty   = parseInt(row.querySelector('[data-field="qty"]').value)   || entry.qty;
         entry.price = parseInt(row.querySelector('[data-field="price"]').value) || entry.price;
     });
@@ -234,3 +244,4 @@ window.closeOrderHistoryEditModal   = closeOrderHistoryEditModal;
 window.updateOrderHistoryRowTotal   = updateOrderHistoryRowTotal;
 window.saveOrderHistoryEdits        = saveOrderHistoryEdits;
 window.deleteOrderHistoryEntry      = deleteOrderHistoryEntry;
+window.onVendorSelectChange         = onVendorSelectChange;
