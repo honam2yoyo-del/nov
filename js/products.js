@@ -359,6 +359,7 @@ export function inlineEditPrice(productId, vendorName, tdElement, currentPrice) 
     tdElement.innerHTML = '';
     tdElement.appendChild(input);
     input.focus();
+    input.select();
 }
 
 export function deleteProduct(id) {
