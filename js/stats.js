@@ -248,10 +248,10 @@ function _buildPrintTable() {
         .sort((a, b) => (b[1].product + b[1].shipping) - (a[1].product + a[1].shipping));
     tbody.innerHTML = rows.map(([pName, s]) => `
         <tr>
-            <td>${pName}</td>
-            <td>${[...s.vendors].join(', ')}</td>
+            <td style="text-align:center;">${pName}</td>
             <td style="text-align:center;">${s.qty.toLocaleString()}개</td>
-            <td style="text-align:right;">${(s.product + s.shipping).toLocaleString()}원</td>
+            <td style="text-align:center;">${(s.product + s.shipping).toLocaleString()}원</td>
+            <td style="text-align:center;">${[...s.vendors].join(', ')}</td>
         </tr>
     `).join('');
 }
