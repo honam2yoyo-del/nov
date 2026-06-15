@@ -136,6 +136,15 @@ function _renderOrderHistoryEditTable(productName) {
     const tbody = document.getElementById('order-history-edit-tbody');
     const entries = state.orderHistory.filter(o => o.name === productName);
 
+    // 도매처 datalist 동기화
+    let datalist = document.getElementById('oh-vendor-datalist');
+    if (!datalist) {
+        datalist = document.createElement('datalist');
+        datalist.id = 'oh-vendor-datalist';
+        document.body.appendChild(datalist);
+    }
+    datalist.innerHTML = state.vendorOrder.map(v => `<option value="${v.replace(/"/g, '&quot;')}"></option>`).join('');
+
     if (entries.length === 0) {
         tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px; color:var(--text-muted);">내역이 없습니다.</td></tr>';
         return;
@@ -149,6 +158,7 @@ function _renderOrderHistoryEditTable(productName) {
                 <td style="padding:10px 8px; color:var(--text-muted); font-size:0.85rem; white-space:nowrap;">${date}</td>
                 <td style="padding:10px 8px;">
                     <input type="text" value="${(entry.vendorName || '').replace(/"/g, '&quot;')}" data-field="vendorName"
+                           list="oh-vendor-datalist"
                            style="width:100%; border:1px solid var(--border-color); padding:5px 7px; border-radius:5px; font-size:0.85rem; background:var(--bg-main);">
                 </td>
                 <td style="padding:10px 8px; text-align:center;">
