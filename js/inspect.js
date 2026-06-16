@@ -48,19 +48,37 @@ export function toggleInspectSelectAll(source) {
 }
 
 export function updateInspectActions() {
-    const checked = document.querySelectorAll('.inspect-checkbox:checked').length;
-    const bar = document.getElementById('inspect-selection-actions');
+    const checkedBoxes = [...document.querySelectorAll('.inspect-checkbox:checked')];
+    const checked = checkedBoxes.length;
+    const bar    = document.getElementById('inspect-selection-actions');
     const btnDel = document.getElementById('btn-delete-selected');
     const btnRcv = document.getElementById('btn-receive-selected');
+    const btnCpy = document.getElementById('btn-copy-selected');
+
+    // 총 금액 (항상 표시)
+    const totalAmount = state.inspectList.reduce((s, i) => s + i.price * i.qty, 0);
+    const totalEl = document.getElementById('inspect-total-amount');
+    if (totalEl) totalEl.textContent = `총 ${totalAmount.toLocaleString()}원`;
+
     if (checked > 0) {
         bar.style.display = 'flex';
         document.getElementById('inspect-checked-count').innerText = `${checked}개 선택됨`;
+
+        const checkedIds = new Set(checkedBoxes.map(cb => cb.value));
+        const selAmount  = state.inspectList
+            .filter(i => checkedIds.has(i.id))
+            .reduce((s, i) => s + i.price * i.qty, 0);
+        const selAmtEl = document.getElementById('inspect-selected-amount');
+        if (selAmtEl) selAmtEl.textContent = `/ 선택 ${selAmount.toLocaleString()}원`;
+
         if (btnDel) btnDel.style.display = '';
         if (btnRcv) btnRcv.style.display = '';
+        if (btnCpy) btnCpy.style.display = '';
     } else {
         bar.style.display = 'none';
         if (btnDel) btnDel.style.display = 'none';
         if (btnRcv) btnRcv.style.display = 'none';
+        if (btnCpy) btnCpy.style.display = 'none';
     }
 }
 
@@ -331,6 +349,32 @@ export function printAllInspectItems() {
     renderInspectList();
 }
 
+function _inspectCopyLines(items) {
+    const lines = ['상품명\t수량\t단가\t금액\t도매처\t발주일'];
+    items.forEach(item => {
+        const orderDate = item.orderDateISO ? item.orderDateISO.split('T')[0] : (item.orderDate || '-');
+        const amount    = (item.price * item.qty).toLocaleString();
+        lines.push(`${item.name}\t${item.qty}개\t${item.price.toLocaleString()}원\t${amount}원\t${item.vendorName}\t${orderDate}`);
+    });
+    return lines.join('\n');
+}
+
+export function copyAllInspectItems() {
+    if (!state.inspectList.length) { showToast("복사할 데이터가 없습니다.", "error"); return; }
+    navigator.clipboard.writeText(_inspectCopyLines(state.inspectList))
+        .then(() => showToast("전체 복사 완료!"))
+        .catch(() => showToast("복사에 실패했습니다.", "error"));
+}
+
+export function copySelectedInspectItems() {
+    const checkedIds = new Set([...document.querySelectorAll('.inspect-checkbox:checked')].map(cb => cb.value));
+    if (!checkedIds.size) { showToast("선택된 항목이 없습니다.", "error"); return; }
+    const items = state.inspectList.filter(i => checkedIds.has(i.id));
+    navigator.clipboard.writeText(_inspectCopyLines(items))
+        .then(() => showToast("선택 복사 완료!"))
+        .catch(() => showToast("복사에 실패했습니다.", "error"));
+}
+
 window.setInspectDateFilter   = setInspectDateFilter;
 window.toggleInspectSelectAll = toggleInspectSelectAll;
 window.updateInspectActions   = updateInspectActions;
@@ -344,3 +388,5 @@ window.printAllInspectItems       = printAllInspectItems;
 window.deleteSelectedInspectItems  = deleteSelectedInspectItems;
 window.deleteAllInspectItems       = deleteAllInspectItems;
 window.receiveSelectedInspectItems = receiveSelectedInspectItems;
+window.copyAllInspectItems         = copyAllInspectItems;
+window.copySelectedInspectItems    = copySelectedInspectItems;

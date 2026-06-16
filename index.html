@@ -298,13 +298,16 @@
                     </div>
                     <div style="display:flex; gap:10px; align-items:center;">
                         <div id="inspect-selection-actions" style="display:none; gap:8px; margin-right:15px; padding-right:15px; border-right:2px solid var(--border-color); align-items:center;">
-                            <span id="inspect-checked-count" style="font-size:0.85rem; font-weight:600; margin-right:10px; color:var(--primary);">0개 선택됨</span>
+                            <span id="inspect-checked-count" style="font-size:0.85rem; font-weight:600; color:var(--primary);">0개 선택됨</span>
+                            <span id="inspect-selected-amount" style="font-size:0.85rem; font-weight:700; color:var(--primary);"></span>
                             <button class="danger"  style="padding:6px 10px; font-size:0.8rem;" onclick="window.markSelected('반품')">반품</button>
                             <button class="warning" style="padding:6px 10px; font-size:0.8rem;" onclick="window.markSelected('미도착')">미도착</button>
                             <button class="outline" style="padding:6px 10px; font-size:0.8rem;" onclick="window.markSelected('대기')">정상</button>
+                            <button id="btn-copy-selected" class="outline" style="padding:6px 10px; font-size:0.8rem; display:none;" onclick="window.copySelectedInspectItems()">📋 선택 복사</button>
                         </div>
                         <button class="outline"  onclick="window.printSelectedInspectItems()">🖨️ 선택 인쇄</button>
                         <button class="outline"  onclick="window.printAllInspectItems()">🖨️ 전체 인쇄</button>
+                        <button class="outline"  onclick="window.copyAllInspectItems()">📋 전체 복사</button>
                         <div style="display:flex; flex-direction:column; gap:4px;">
                             <button class="danger" style="background:transparent; border:1px solid #fca5a5; color:var(--danger); padding:6px 12px; font-size:0.85rem;" onclick="window.deleteAllInspectItems()">🗑️ 전체 삭제</button>
                             <button id="btn-delete-selected" class="danger" style="background:transparent; border:1px solid #fca5a5; color:var(--danger); padding:6px 12px; font-size:0.85rem; display:none;" onclick="window.deleteSelectedInspectItems()">🗑️ 선택 삭제</button>
@@ -321,6 +324,7 @@
                         <input type="text" id="inspect-search" placeholder="상품명 또는 도매처 검색..." style="width:100%; padding:9px 12px 9px 36px; font-size:0.875rem;" oninput="window.renderInspectList()">
                     </div>
                     <div id="inspect-date-filter-bar" style="display:flex; gap:6px; flex-wrap:wrap;"></div>
+                    <span id="inspect-total-amount" style="font-size:0.875rem; font-weight:600; color:var(--text-muted); white-space:nowrap; margin-left:auto;"></span>
                 </div>
 
                 <div class="table-wrapper">
