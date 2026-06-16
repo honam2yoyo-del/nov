@@ -353,12 +353,8 @@
 
             <!-- 탭 4: 통계 -->
             <div id="tab-stats" class="tab-content">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                <div style="margin-bottom:20px;">
                     <h2 style="margin:0;">통계 및 정산</h2>
-                    <div class="no-print" style="display:flex; gap:8px; align-items:center;">
-                        <button class="outline" style="font-size:0.8rem;" onclick="window.printStats()">🖨️ 인쇄</button>
-                        <button class="outline" style="color:var(--danger); border-color:#fca5a5; font-size:0.8rem;" onclick="window.resetOrderHistory()">내역 초기화</button>
-                    </div>
                 </div>
                 <div class="stats-grid">
                     <div class="stat-card" style="background:linear-gradient(135deg,#4f46e5 0%,#3b82f6 100%); color:white; border:none;">
@@ -390,8 +386,26 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="no-print">
-                                <button class="outline" style="font-size:0.875rem; padding:8px 18px;" onclick="window.copyAllStats()">📋 전체 복사</button>
+                        </div>
+                        <!-- 버튼 바 -->
+                        <div class="no-print" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap:wrap; gap:6px;">
+                            <div id="stat-selection-actions" style="display:none; gap:10px; align-items:center;">
+                                <span id="stat-checked-count" style="font-size:0.85rem; font-weight:600; color:var(--primary);"></span>
+                                <span id="stat-selected-amount" style="font-size:0.85rem; font-weight:700; color:var(--primary);"></span>
+                            </div>
+                            <div style="display:flex; gap:6px; margin-left:auto;">
+                                <div style="display:flex; flex-direction:column; gap:4px;">
+                                    <button style="background:#eff6ff; border:1px solid var(--primary); color:var(--primary); padding:6px 14px; border-radius:var(--radius-sm); font-size:0.85rem; cursor:pointer; font-weight:600;" onclick="window.printAllStats()">🖨️ 전체 인쇄</button>
+                                    <button id="btn-stat-print-selected" class="outline" style="display:none; padding:6px 14px; font-size:0.85rem;" onclick="window.printSelectedStats()">🖨️ 선택 인쇄</button>
+                                </div>
+                                <div style="display:flex; flex-direction:column; gap:4px;">
+                                    <button style="background:#fffbeb; border:1px solid var(--warning); color:var(--warning); padding:6px 14px; border-radius:var(--radius-sm); font-size:0.85rem; cursor:pointer; font-weight:600;" onclick="window.copyAllStats()">📋 전체 복사</button>
+                                    <button id="btn-stat-copy-selected" class="outline" style="display:none; padding:6px 14px; font-size:0.85rem;" onclick="window.copySelectedStats()">📋 선택 복사</button>
+                                </div>
+                                <div style="display:flex; flex-direction:column; gap:4px;">
+                                    <button style="background:transparent; border:1px solid #fca5a5; color:var(--danger); padding:6px 14px; border-radius:var(--radius-sm); font-size:0.85rem; cursor:pointer; font-weight:600;" onclick="window.deleteAllStats()">🗑️ 전체 삭제</button>
+                                    <button id="btn-stat-delete-selected" class="outline" style="display:none; padding:6px 14px; font-size:0.85rem;" onclick="window.deleteSelectedStats()">🗑️ 선택 삭제</button>
+                                </div>
                             </div>
                         </div>
                         <div id="stat-product-list" style="max-height:520px; overflow-y:auto; margin:0 -24px; border-top:1px solid var(--border-color); border-radius:0 0 var(--radius-md) var(--radius-md);"></div>

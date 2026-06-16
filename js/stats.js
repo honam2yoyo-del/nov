@@ -116,6 +116,9 @@ export function renderStats() {
         const rawAmount = _entryAmount(entry);
         return `
             <tr>
+                <td style="padding:12px 8px; text-align:center;">
+                    <input type="checkbox" class="stat-checkbox real-checkbox" value="${entry.id}" onchange="window.updateStatsActions()">
+                </td>
                 <td style="padding:12px 16px; font-weight:600; color:var(--text-main); text-align:center; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${entry.name}</td>
                 <td style="padding:12px 8px; text-align:center; color:var(--text-main);">${(entry.qty || 0).toLocaleString()}개</td>
                 <td style="padding:12px 12px; text-align:center; font-weight:700; color:var(--primary); cursor:pointer;" title="클릭하여 금액 수정"
@@ -138,16 +141,18 @@ export function renderStats() {
     productListEl.innerHTML = `
         <table style="width:100%; border-collapse:collapse; font-size:0.875rem; table-layout:fixed;">
             <colgroup>
-                <col style="width:27%">
+                <col style="width:4%">
+                <col style="width:23%">
                 <col style="width:8%">
-                <col style="width:13%">
-                <col style="width:13%">
-                <col style="width:11%">
-                <col style="width:11%">
+                <col style="width:12%">
+                <col style="width:12%">
+                <col style="width:10%">
+                <col style="width:10%">
                 <col style="width:13%">
             </colgroup>
             <thead>
-                <tr style="border-bottom:2px solid var(--border-color); position:sticky; top:0;">
+                <tr style="border-bottom:2px solid var(--border-color); position:sticky; top:0; background:#f8fafc;">
+                    <th style="${thStyle}"><input type="checkbox" id="stat-select-all" class="real-checkbox" onclick="window.toggleStatsSelectAll(this)"></th>
                     <th style="${thStyle}">상품명</th>
                     <th style="${thStyle}">수량</th>
                     <th style="${thStyle}">금액</th>
@@ -159,6 +164,90 @@ export function renderStats() {
             </thead>
             <tbody>${rows}</tbody>
         </table>`;
+    updateStatsActions();
+}
+
+export function toggleStatsSelectAll(source) {
+    document.querySelectorAll('.stat-checkbox').forEach(cb => cb.checked = source.checked);
+    updateStatsActions();
+}
+
+export function updateStatsActions() {
+    const checkedBoxes = [...document.querySelectorAll('.stat-checkbox:checked')];
+    const checked = checkedBoxes.length;
+    const bar     = document.getElementById('stat-selection-actions');
+    const btnPrt  = document.getElementById('btn-stat-print-selected');
+    const btnCpy  = document.getElementById('btn-stat-copy-selected');
+    const btnDel  = document.getElementById('btn-stat-delete-selected');
+
+    if (checked > 0) {
+        bar.style.display = 'flex';
+        document.getElementById('stat-checked-count').textContent = `${checked}개 선택됨`;
+        const checkedIds = new Set(checkedBoxes.map(cb => cb.value));
+        const selAmount  = state.orderHistory
+            .filter(e => checkedIds.has(e.id))
+            .reduce((s, e) => s + _entryAmount(e), 0);
+        document.getElementById('stat-selected-amount').textContent = `/ 선택 ${selAmount.toLocaleString()}원`;
+        if (btnPrt) btnPrt.style.display = '';
+        if (btnCpy) btnCpy.style.display = '';
+        if (btnDel) btnDel.style.display = '';
+    } else {
+        if (bar) bar.style.display = 'none';
+        if (btnPrt) btnPrt.style.display = 'none';
+        if (btnCpy) btnCpy.style.display = 'none';
+        if (btnDel) btnDel.style.display = 'none';
+    }
+}
+
+export function printAllStats() {
+    _buildPrintTable(_getFilteredHistory());
+    document.body.classList.add('print-stats');
+    window.print();
+    document.body.classList.remove('print-stats');
+}
+
+export function printSelectedStats() {
+    const checkedIds = new Set([...document.querySelectorAll('.stat-checkbox:checked')].map(cb => cb.value));
+    if (!checkedIds.size) { showToast("선택된 항목이 없습니다.", "error"); return; }
+    _buildPrintTable(state.orderHistory.filter(e => checkedIds.has(e.id)));
+    document.body.classList.add('print-stats');
+    window.print();
+    document.body.classList.remove('print-stats');
+}
+
+export function copySelectedStats() {
+    const checkedIds = new Set([...document.querySelectorAll('.stat-checkbox:checked')].map(cb => cb.value));
+    if (!checkedIds.size) { showToast("선택된 항목이 없습니다.", "error"); return; }
+    const rows = [...state.orderHistory.filter(e => checkedIds.has(e.id))]
+        .sort((a, b) => (a.orderDate || '').localeCompare(b.orderDate || ''));
+    const lines = ['상품명\t수량\t금액\t도매처\t발주일\t입고일'];
+    rows.forEach(entry => {
+        lines.push(`${entry.name}\t${entry.qty || 0}개\t${_entryAmount(entry).toLocaleString()}원\t${entry.vendorName || '-'}\t${_toLocalDate(entry.orderDate)}\t${_toLocalDate(entry.receiveDate)}`);
+    });
+    navigator.clipboard.writeText(lines.join('\n'))
+        .then(() => showToast("선택 복사 완료!"))
+        .catch(() => showToast("복사에 실패했습니다.", "error"));
+}
+
+export function deleteAllStats() {
+    const filtered = _getFilteredHistory();
+    if (!filtered.length) { showToast("삭제할 내역이 없습니다.", "error"); return; }
+    showConfirm(`현재 표시된 ${filtered.length}건의 발주 내역을 모두 삭제하시겠습니까?`, () => {
+        const ids = new Set(filtered.map(e => e.id));
+        state.orderHistory = state.orderHistory.filter(e => !ids.has(e.id));
+        saveToFirestore();
+        showToast("삭제되었습니다.");
+    });
+}
+
+export function deleteSelectedStats() {
+    const checkedIds = new Set([...document.querySelectorAll('.stat-checkbox:checked')].map(cb => cb.value));
+    if (!checkedIds.size) { showToast("선택된 항목이 없습니다.", "error"); return; }
+    showConfirm(`선택한 ${checkedIds.size}건의 발주 내역을 삭제하시겠습니까?`, () => {
+        state.orderHistory = state.orderHistory.filter(e => !checkedIds.has(e.id));
+        saveToFirestore();
+        showToast("삭제되었습니다.");
+    });
 }
 
 export function resetOrderHistory() {
@@ -456,6 +545,13 @@ window.updateOrderHistoryRowTotal   = updateOrderHistoryRowTotal;
 window.saveOrderHistoryEdits        = saveOrderHistoryEdits;
 window.deleteOrderHistoryEntry      = deleteOrderHistoryEntry;
 window.onVendorSelectChange         = onVendorSelectChange;
+window.toggleStatsSelectAll         = toggleStatsSelectAll;
+window.updateStatsActions           = updateStatsActions;
+window.printAllStats                = printAllStats;
+window.printSelectedStats           = printSelectedStats;
+window.copySelectedStats            = copySelectedStats;
+window.deleteAllStats               = deleteAllStats;
+window.deleteSelectedStats          = deleteSelectedStats;
 window.toggleVendorFilterDropdown   = toggleVendorFilterDropdown;
 window.toggleVendorFilter           = toggleVendorFilter;
 window.clearVendorFilter            = clearVendorFilter;
