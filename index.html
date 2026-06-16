@@ -305,12 +305,12 @@
                             <button class="outline" style="padding:6px 10px; font-size:0.8rem;" onclick="window.markSelected('대기')">정상</button>
                         </div>
                         <div style="display:flex; flex-direction:column; gap:4px;">
-                            <button style="background:#eff6ff; border:1px solid var(--primary); color:var(--primary); padding:8px 16px; border-radius:var(--radius-sm); font-size:0.875rem; cursor:pointer; font-weight:600;" onclick="window.printAllInspectItems()">🖨️ 전체 인쇄</button>
-                            <button id="btn-print-selected" class="outline" style="display:none;" onclick="window.printSelectedInspectItems()">🖨️ 선택 인쇄</button>
+                            <button style="background:#f0fdf4; border:1px solid var(--success); color:var(--success); padding:8px 16px; border-radius:var(--radius-sm); font-size:0.875rem; cursor:pointer; font-weight:600;" onclick="window.copyAllInspectItems()">📋 전체 복사</button>
+                            <button id="btn-copy-selected" class="outline" style="display:none;" onclick="window.copySelectedInspectItems()">📋 선택 복사</button>
                         </div>
                         <div style="display:flex; flex-direction:column; gap:4px;">
-                            <button style="background:#eff6ff; border:1px solid var(--primary); color:var(--primary); padding:8px 16px; border-radius:var(--radius-sm); font-size:0.875rem; cursor:pointer; font-weight:600;" onclick="window.copyAllInspectItems()">📋 전체 복사</button>
-                            <button id="btn-copy-selected" class="outline" style="display:none;" onclick="window.copySelectedInspectItems()">📋 선택 복사</button>
+                            <button style="background:#eff6ff; border:1px solid var(--primary); color:var(--primary); padding:8px 16px; border-radius:var(--radius-sm); font-size:0.875rem; cursor:pointer; font-weight:600;" onclick="window.printAllInspectItems()">🖨️ 전체 인쇄</button>
+                            <button id="btn-print-selected" class="outline" style="display:none;" onclick="window.printSelectedInspectItems()">🖨️ 선택 인쇄</button>
                         </div>
                         <div style="display:flex; flex-direction:column; gap:4px;">
                             <button class="danger" onclick="window.deleteAllInspectItems()">🗑️ 전체 삭제</button>
