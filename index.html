@@ -291,44 +291,40 @@
 
             <!-- 탭 3: 입고 검수 -->
             <div id="tab-inspect" class="tab-content">
-                <div class="no-print" style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:15px;">
-                    <div>
-                        <h2 style="margin:0 0 5px;">입고 검수 리스트</h2>
-                        <p style="color:var(--text-muted); font-size:0.85rem; margin:0;">발주 완료한 상품들이 표시됩니다. 체크박스로 문제를 표시하고 '입고'를 처리하세요.</p>
-                    </div>
-                    <div style="display:flex; gap:10px; align-items:center;">
-                        <div id="inspect-selection-actions" style="display:none; gap:8px; margin-right:15px; padding-right:15px; border-right:2px solid var(--border-color); align-items:center;">
-                            <span id="inspect-checked-count" style="font-size:0.85rem; font-weight:600; color:var(--primary);">0개 선택됨</span>
-                            <span id="inspect-selected-amount" style="font-size:0.85rem; font-weight:700; color:var(--primary);"></span>
-                            <button class="danger"  style="padding:6px 10px; font-size:0.8rem;" onclick="window.markSelected('반품')">반품</button>
-                            <button class="warning" style="padding:6px 10px; font-size:0.8rem;" onclick="window.markSelected('미도착')">미도착</button>
-                            <button class="outline" style="padding:6px 10px; font-size:0.8rem;" onclick="window.markSelected('대기')">정상</button>
-                        </div>
-                        <div style="display:flex; flex-direction:column; gap:4px;">
-                            <button style="background:#fffbeb; border:1px solid var(--warning); color:var(--warning); padding:8px 16px; border-radius:var(--radius-sm); font-size:0.875rem; cursor:pointer; font-weight:600;" onclick="window.copyAllInspectItems()">📋 전체 복사</button>
-                            <button id="btn-copy-selected" class="outline" style="display:none;" onclick="window.copySelectedInspectItems()">📋 선택 복사</button>
-                        </div>
-                        <div style="display:flex; flex-direction:column; gap:4px;">
-                            <button style="background:#eff6ff; border:1px solid var(--primary); color:var(--primary); padding:8px 16px; border-radius:var(--radius-sm); font-size:0.875rem; cursor:pointer; font-weight:600;" onclick="window.printAllInspectItems()">🖨️ 전체 인쇄</button>
-                            <button id="btn-print-selected" class="outline" style="display:none;" onclick="window.printSelectedInspectItems()">🖨️ 선택 인쇄</button>
-                        </div>
-                        <div style="display:flex; flex-direction:column; gap:4px;">
-                            <button style="background:#ecfdf5; border:1px solid var(--success); color:var(--success); padding:8px 16px; border-radius:var(--radius-sm); font-size:0.875rem; cursor:pointer; font-weight:600;" onclick="window.receiveAllNormalItems()">📦 전체 입고</button>
-                            <button id="btn-receive-selected" class="outline" style="display:none;" onclick="window.receiveSelectedInspectItems()">📦 선택 입고</button>
-                        </div>
-                        <div style="display:flex; flex-direction:column; gap:4px;">
-                            <button style="background:transparent; border:1px solid #fca5a5; color:var(--danger); padding:8px 16px; border-radius:var(--radius-sm); font-size:0.875rem; cursor:pointer; font-weight:600;" onclick="window.deleteAllInspectItems()">🗑️ 전체 삭제</button>
-                            <button id="btn-delete-selected" class="outline" style="display:none;" onclick="window.deleteSelectedInspectItems()">🗑️ 선택 삭제</button>
-                        </div>
-                    </div>
+                <div class="no-print" style="margin-bottom:12px;">
+                    <h2 style="margin:0 0 4px;">입고 검수 리스트</h2>
+                    <p style="color:var(--text-muted); font-size:0.85rem; margin:0;">발주 완료한 상품들이 표시됩니다. 체크박스로 문제를 표시하고 '입고'를 처리하세요.</p>
                 </div>
-                <div class="no-print" style="display:flex; gap:10px; align-items:center; margin-bottom:10px; flex-wrap:wrap;">
-                    <div style="position:relative; flex:1; max-width:340px;">
+                <!-- 검색 + 필터 + 총금액 + 전체 버튼 -->
+                <div class="no-print" style="display:flex; gap:8px; align-items:center; margin-bottom:8px; flex-wrap:wrap;">
+                    <div style="position:relative; flex:1; max-width:280px;">
                         <svg style="position:absolute; left:12px; top:50%; transform:translateY(-50%); width:16px; height:16px; color:var(--text-muted); pointer-events:none;" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
                         <input type="text" id="inspect-search" placeholder="상품명 또는 도매처 검색..." style="width:100%; padding:9px 12px 9px 36px; font-size:0.875rem;" oninput="window.renderInspectList()">
                     </div>
                     <div id="inspect-date-filter-bar" style="display:flex; gap:6px; flex-wrap:wrap;"></div>
-                    <span id="inspect-total-amount" style="font-size:0.875rem; font-weight:600; color:var(--text-muted); white-space:nowrap; margin-left:auto;"></span>
+                    <span id="inspect-total-amount" style="font-size:0.875rem; font-weight:600; color:var(--text-muted); white-space:nowrap;"></span>
+                    <div style="display:flex; gap:6px; margin-left:auto; flex-shrink:0;">
+                        <button style="background:#fffbeb; border:1px solid var(--warning); color:var(--warning); padding:6px 14px; border-radius:var(--radius-sm); font-size:0.85rem; cursor:pointer; font-weight:600;" onclick="window.copyAllInspectItems()">📋 전체 복사</button>
+                        <button style="background:#eff6ff; border:1px solid var(--primary); color:var(--primary); padding:6px 14px; border-radius:var(--radius-sm); font-size:0.85rem; cursor:pointer; font-weight:600;" onclick="window.printAllInspectItems()">🖨️ 전체 인쇄</button>
+                        <button style="background:#ecfdf5; border:1px solid var(--success); color:var(--success); padding:6px 14px; border-radius:var(--radius-sm); font-size:0.85rem; cursor:pointer; font-weight:600;" onclick="window.receiveAllNormalItems()">📦 전체 입고</button>
+                        <button style="background:transparent; border:1px solid #fca5a5; color:var(--danger); padding:6px 14px; border-radius:var(--radius-sm); font-size:0.85rem; cursor:pointer; font-weight:600;" onclick="window.deleteAllInspectItems()">🗑️ 전체 삭제</button>
+                    </div>
+                </div>
+                <!-- 선택 액션 바 (체크 시 표시) -->
+                <div class="no-print" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; min-height:0;">
+                    <div id="inspect-selection-actions" style="display:none; gap:8px; align-items:center;">
+                        <span id="inspect-checked-count" style="font-size:0.85rem; font-weight:600; color:var(--primary);">0개 선택됨</span>
+                        <span id="inspect-selected-amount" style="font-size:0.85rem; font-weight:700; color:var(--primary);"></span>
+                        <button class="danger"  style="padding:5px 10px; font-size:0.8rem;" onclick="window.markSelected('반품')">반품</button>
+                        <button class="warning" style="padding:5px 10px; font-size:0.8rem;" onclick="window.markSelected('미도착')">미도착</button>
+                        <button class="outline" style="padding:5px 10px; font-size:0.8rem;" onclick="window.markSelected('대기')">정상</button>
+                    </div>
+                    <div style="display:flex; gap:6px; margin-left:auto;">
+                        <button id="btn-copy-selected"    class="outline" style="display:none; padding:6px 14px; font-size:0.85rem;" onclick="window.copySelectedInspectItems()">📋 선택 복사</button>
+                        <button id="btn-print-selected"   class="outline" style="display:none; padding:6px 14px; font-size:0.85rem;" onclick="window.printSelectedInspectItems()">🖨️ 선택 인쇄</button>
+                        <button id="btn-receive-selected" class="outline" style="display:none; padding:6px 14px; font-size:0.85rem;" onclick="window.receiveSelectedInspectItems()">📦 선택 입고</button>
+                        <button id="btn-delete-selected"  class="outline" style="display:none; padding:6px 14px; font-size:0.85rem;" onclick="window.deleteSelectedInspectItems()">🗑️ 선택 삭제</button>
+                    </div>
                 </div>
 
                 <div class="table-wrapper">
@@ -388,8 +384,8 @@
                                 </div>
                             </div>
                             <div class="no-print" style="display:flex; gap:6px; flex-shrink:0;">
-                                <button style="background:#eff6ff; border:1px solid var(--primary); color:var(--primary); padding:6px 14px; border-radius:var(--radius-sm); font-size:0.85rem; cursor:pointer; font-weight:600;" onclick="window.printAllStats()">🖨️ 전체 인쇄</button>
                                 <button style="background:#fffbeb; border:1px solid var(--warning); color:var(--warning); padding:6px 14px; border-radius:var(--radius-sm); font-size:0.85rem; cursor:pointer; font-weight:600;" onclick="window.copyAllStats()">📋 전체 복사</button>
+                                <button style="background:#eff6ff; border:1px solid var(--primary); color:var(--primary); padding:6px 14px; border-radius:var(--radius-sm); font-size:0.85rem; cursor:pointer; font-weight:600;" onclick="window.printAllStats()">🖨️ 전체 인쇄</button>
                                 <button style="background:transparent; border:1px solid #fca5a5; color:var(--danger); padding:6px 14px; border-radius:var(--radius-sm); font-size:0.85rem; cursor:pointer; font-weight:600;" onclick="window.deleteAllStats()">🗑️ 전체 삭제</button>
                             </div>
                         </div>
