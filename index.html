@@ -313,12 +313,12 @@
                             <button id="btn-print-selected" class="outline" style="display:none;" onclick="window.printSelectedInspectItems()">🖨️ 선택 인쇄</button>
                         </div>
                         <div style="display:flex; flex-direction:column; gap:4px;">
-                            <button class="danger" onclick="window.deleteAllInspectItems()">🗑️ 전체 삭제</button>
-                            <button id="btn-delete-selected" style="display:none; background:transparent; border:1px solid #fca5a5; color:var(--danger); padding:8px 16px; border-radius:var(--radius-sm); font-size:0.875rem; cursor:pointer; font-weight:600;" onclick="window.deleteSelectedInspectItems()">🗑️ 선택 삭제</button>
+                            <button style="background:transparent; border:1px solid #fca5a5; color:var(--danger); padding:8px 16px; border-radius:var(--radius-sm); font-size:0.875rem; cursor:pointer; font-weight:600;" onclick="window.deleteAllInspectItems()">🗑️ 전체 삭제</button>
+                            <button id="btn-delete-selected" class="outline" style="display:none;" onclick="window.deleteSelectedInspectItems()">🗑️ 선택 삭제</button>
                         </div>
                         <div style="display:flex; flex-direction:column; gap:4px;">
-                            <button class="success" onclick="window.receiveAllNormalItems()">📦 전체 입고</button>
-                            <button id="btn-receive-selected" style="display:none; background:#ecfdf5; border:1px solid var(--success); color:var(--success); padding:8px 16px; border-radius:var(--radius-sm); font-size:0.875rem; cursor:pointer; font-weight:600;" onclick="window.receiveSelectedInspectItems()">📦 선택 입고</button>
+                            <button style="background:#ecfdf5; border:1px solid var(--success); color:var(--success); padding:8px 16px; border-radius:var(--radius-sm); font-size:0.875rem; cursor:pointer; font-weight:600;" onclick="window.receiveAllNormalItems()">📦 전체 입고</button>
+                            <button id="btn-receive-selected" class="outline" style="display:none;" onclick="window.receiveSelectedInspectItems()">📦 선택 입고</button>
                         </div>
                     </div>
                 </div>
