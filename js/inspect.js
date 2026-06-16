@@ -54,6 +54,7 @@ export function updateInspectActions() {
     const btnDel = document.getElementById('btn-delete-selected');
     const btnRcv = document.getElementById('btn-receive-selected');
     const btnCpy = document.getElementById('btn-copy-selected');
+    const btnPrt = document.getElementById('btn-print-selected');
 
     // 총 금액 (항상 표시)
     const totalAmount = state.inspectList.reduce((s, i) => s + i.price * i.qty, 0);
@@ -74,11 +75,13 @@ export function updateInspectActions() {
         if (btnDel) btnDel.style.display = '';
         if (btnRcv) btnRcv.style.display = '';
         if (btnCpy) btnCpy.style.display = '';
+        if (btnPrt) btnPrt.style.display = '';
     } else {
         bar.style.display = 'none';
         if (btnDel) btnDel.style.display = 'none';
         if (btnRcv) btnRcv.style.display = 'none';
         if (btnCpy) btnCpy.style.display = 'none';
+        if (btnPrt) btnPrt.style.display = 'none';
     }
 }
 
