@@ -371,13 +371,14 @@
                         <ul class="stat-list" id="stat-vendor-list"></ul>
                     </div>
                     <div class="stat-card" style="grid-column:1/-1; padding-bottom:0;">
-                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
-                            <div style="display:flex; align-items:center; gap:14px;">
+                        <!-- 헤더 행: 제목, 검색, 필터, 전체 버튼 -->
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; gap:10px;">
+                            <div style="display:flex; align-items:center; gap:14px; flex-wrap:wrap;">
                                 <div class="stat-title" style="margin:0; font-size:1.25rem; white-space:nowrap;">📦 상품별 발주 내역</div>
-                                <input type="text" id="stat-product-search" placeholder="상품명 또는 도매처 검색..." style="padding:11px 18px; font-size:1rem; width:280px; border-radius:7px;" oninput="window.renderStats()">
+                                <input type="text" id="stat-product-search" placeholder="상품명 또는 도매처 검색..." style="padding:11px 18px; font-size:1rem; width:240px; border-radius:7px;" oninput="window.renderStats()">
                                 <div id="stat-vendor-filter-wrap" class="no-print" style="position:relative; display:inline-block;">
                                     <button id="stat-vendor-filter-btn" type="button" onclick="window.toggleVendorFilterDropdown(event)"
-                                            style="padding:11px 14px; font-size:1rem; border-radius:7px; min-width:160px; border:1px solid var(--border-color); background:var(--bg-card); color:var(--text-main); font-weight:normal; display:flex; justify-content:space-between; align-items:center; gap:8px; cursor:pointer; white-space:nowrap;">
+                                            style="padding:11px 14px; font-size:1rem; border-radius:7px; min-width:150px; border:1px solid var(--border-color); background:var(--bg-card); color:var(--text-main); font-weight:normal; display:flex; justify-content:space-between; align-items:center; gap:8px; cursor:pointer; white-space:nowrap;">
                                         <span id="stat-vendor-filter-label">전체 도매처</span>
                                         <span style="font-size:0.7rem; opacity:0.5;">▾</span>
                                     </button>
@@ -386,26 +387,22 @@
                                     </div>
                                 </div>
                             </div>
+                            <div class="no-print" style="display:flex; gap:6px; flex-shrink:0;">
+                                <button style="background:#eff6ff; border:1px solid var(--primary); color:var(--primary); padding:6px 14px; border-radius:var(--radius-sm); font-size:0.85rem; cursor:pointer; font-weight:600;" onclick="window.printAllStats()">🖨️ 전체 인쇄</button>
+                                <button style="background:#fffbeb; border:1px solid var(--warning); color:var(--warning); padding:6px 14px; border-radius:var(--radius-sm); font-size:0.85rem; cursor:pointer; font-weight:600;" onclick="window.copyAllStats()">📋 전체 복사</button>
+                                <button style="background:transparent; border:1px solid #fca5a5; color:var(--danger); padding:6px 14px; border-radius:var(--radius-sm); font-size:0.85rem; cursor:pointer; font-weight:600;" onclick="window.deleteAllStats()">🗑️ 전체 삭제</button>
+                            </div>
                         </div>
-                        <!-- 버튼 바 -->
-                        <div class="no-print" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap:wrap; gap:6px;">
+                        <!-- 선택 액션 바 (체크 시 표시) -->
+                        <div class="no-print" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; min-height:0;">
                             <div id="stat-selection-actions" style="display:none; gap:10px; align-items:center;">
                                 <span id="stat-checked-count" style="font-size:0.85rem; font-weight:600; color:var(--primary);"></span>
                                 <span id="stat-selected-amount" style="font-size:0.85rem; font-weight:700; color:var(--primary);"></span>
                             </div>
                             <div style="display:flex; gap:6px; margin-left:auto;">
-                                <div style="display:flex; flex-direction:column; gap:4px;">
-                                    <button style="background:#eff6ff; border:1px solid var(--primary); color:var(--primary); padding:6px 14px; border-radius:var(--radius-sm); font-size:0.85rem; cursor:pointer; font-weight:600;" onclick="window.printAllStats()">🖨️ 전체 인쇄</button>
-                                    <button id="btn-stat-print-selected" class="outline" style="display:none; padding:6px 14px; font-size:0.85rem;" onclick="window.printSelectedStats()">🖨️ 선택 인쇄</button>
-                                </div>
-                                <div style="display:flex; flex-direction:column; gap:4px;">
-                                    <button style="background:#fffbeb; border:1px solid var(--warning); color:var(--warning); padding:6px 14px; border-radius:var(--radius-sm); font-size:0.85rem; cursor:pointer; font-weight:600;" onclick="window.copyAllStats()">📋 전체 복사</button>
-                                    <button id="btn-stat-copy-selected" class="outline" style="display:none; padding:6px 14px; font-size:0.85rem;" onclick="window.copySelectedStats()">📋 선택 복사</button>
-                                </div>
-                                <div style="display:flex; flex-direction:column; gap:4px;">
-                                    <button style="background:transparent; border:1px solid #fca5a5; color:var(--danger); padding:6px 14px; border-radius:var(--radius-sm); font-size:0.85rem; cursor:pointer; font-weight:600;" onclick="window.deleteAllStats()">🗑️ 전체 삭제</button>
-                                    <button id="btn-stat-delete-selected" class="outline" style="display:none; padding:6px 14px; font-size:0.85rem;" onclick="window.deleteSelectedStats()">🗑️ 선택 삭제</button>
-                                </div>
+                                <button id="btn-stat-print-selected" class="outline" style="display:none; padding:6px 14px; font-size:0.85rem;" onclick="window.printSelectedStats()">🖨️ 선택 인쇄</button>
+                                <button id="btn-stat-copy-selected" class="outline" style="display:none; padding:6px 14px; font-size:0.85rem;" onclick="window.copySelectedStats()">📋 선택 복사</button>
+                                <button id="btn-stat-delete-selected" class="outline" style="display:none; padding:6px 14px; font-size:0.85rem;" onclick="window.deleteSelectedStats()">🗑️ 선택 삭제</button>
                             </div>
                         </div>
                         <div id="stat-product-list" style="max-height:520px; overflow-y:auto; margin:0 -24px; border-top:1px solid var(--border-color); border-radius:0 0 var(--radius-md) var(--radius-md);"></div>
