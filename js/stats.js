@@ -495,7 +495,7 @@ function _buildPrintTable(entries) {
     const tbody = document.getElementById('stats-print-tbody');
     if (!tbody) return;
     const rows = [...entries].sort((a, b) =>
-        (a.orderDate || '').localeCompare(b.orderDate || '')
+        (a.name || '').localeCompare(b.name || '', 'ko')
     );
     tbody.innerHTML = rows.map(entry => {
         const orderDate   = _toLocalDate(entry.orderDate);
@@ -528,7 +528,7 @@ export function copyAllStats() {
         return;
     }
     const rows = [...filtered].sort((a, b) =>
-        (a.orderDate || '').localeCompare(b.orderDate || '')
+        (a.name || '').localeCompare(b.name || '', 'ko')
     );
     const lines = ['상품명\t수량\t금액\t도매처\t발주일\t입고일'];
     rows.forEach(entry => {
