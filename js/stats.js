@@ -381,15 +381,17 @@ export function deleteOrderHistoryEntry(id) {
 
 function _getFilteredHistory() {
     const productQuery = document.getElementById('stat-product-search')?.value.toLowerCase() || '';
-    return state.orderHistory
-        .filter(entry => {
-            const matchesText = !productQuery ||
-                (entry.name || '').toLowerCase().includes(productQuery) ||
-                (entry.vendorName || '').toLowerCase().includes(productQuery);
-            const matchesVendor = _selectedVendors.size === 0 || _selectedVendors.has(entry.vendorName);
-            return matchesText && matchesVendor;
-        })
-        .sort((a, b) => (b.orderDate || '').localeCompare(a.orderDate || ''));
+    const filtered = state.orderHistory.filter(entry => {
+        const matchesText = !productQuery ||
+            (entry.name || '').toLowerCase().includes(productQuery) ||
+            (entry.vendorName || '').toLowerCase().includes(productQuery);
+        const matchesVendor = _selectedVendors.size === 0 || _selectedVendors.has(entry.vendorName);
+        return matchesText && matchesVendor;
+    });
+    if (productQuery) {
+        return filtered.sort((a, b) => (a.name || '').localeCompare(b.name || '', 'ko'));
+    }
+    return filtered.sort((a, b) => (b.orderDate || '').localeCompare(a.orderDate || ''));
 }
 
 export function toggleVendorFilterDropdown(e) {
