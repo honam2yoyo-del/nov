@@ -117,7 +117,7 @@ export function renderInspectList() {
             return true;
         });
 
-    if (state.isPrintMode) {
+    if (state.isPrintMode || searchQuery) {
         displayList = [...displayList].sort((a, b) => a.name.localeCompare(b.name, 'ko'));
     }
 
