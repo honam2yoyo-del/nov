@@ -4,6 +4,10 @@ import { showToast, showConfirm } from './ui.js';
 
 let _lastProductStats  = null;
 let _selectedVendors   = new Set();
+let _statPageSize      = 10;
+let _statCurrentPage   = 1;
+let _statKeepPage      = false;
+let _selectedStatIds   = new Set();
 
 function _toLocalDate(isoStr) {
     if (!isoStr) return '-';
@@ -103,21 +107,31 @@ export function renderStats() {
     });
 
     const filteredHistory = _getFilteredHistory();
+    const totalItems  = filteredHistory.length;
+    const totalPages  = Math.max(1, Math.ceil(totalItems / _statPageSize));
+    if (!_statKeepPage) _statCurrentPage = 1;
+    _statKeepPage = false;
+    _statCurrentPage = Math.min(_statCurrentPage, totalPages);
 
     if (filteredHistory.length === 0) {
         productListEl.innerHTML = '<p style="color:var(--text-muted); padding:28px; text-align:center; margin:0;">조회된 상품 내역이 없습니다.</p>';
+        _renderStatPagination(0);
         return;
     }
 
-    const rows = filteredHistory.map(entry => {
+    const startIdx = (_statCurrentPage - 1) * _statPageSize;
+    const pageItems = filteredHistory.slice(startIdx, startIdx + _statPageSize);
+
+    const rows = pageItems.map(entry => {
         const orderDate   = _toLocalDate(entry.orderDate);
         const receiveDate = _toLocalDate(entry.receiveDate);
         const amount = _entryAmount(entry).toLocaleString();
         const rawAmount = _entryAmount(entry);
+        const isChecked = _selectedStatIds.has(entry.id) ? 'checked' : '';
         return `
             <tr>
                 <td style="padding:12px 8px; text-align:center;">
-                    <input type="checkbox" class="stat-checkbox real-checkbox" value="${entry.id}" onchange="window.updateStatsActions()">
+                    <input type="checkbox" class="stat-checkbox real-checkbox" value="${entry.id}" ${isChecked} onchange="window.updateStatsActions()">
                 </td>
                 <td style="padding:12px 16px; font-weight:600; color:var(--text-main); text-align:center; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${entry.name}</td>
                 <td style="padding:12px 8px; text-align:center; color:var(--text-main);">${(entry.qty || 0).toLocaleString()}개</td>
@@ -164,28 +178,80 @@ export function renderStats() {
             </thead>
             <tbody>${rows}</tbody>
         </table>`;
+    _renderStatPagination(totalPages);
     updateStatsActions();
 }
 
+function _renderStatPagination(totalPages) {
+    const el = document.getElementById('stat-pagination');
+    if (!el) return;
+    if (totalPages <= 1) { el.innerHTML = ''; return; }
+
+    const cur = _statCurrentPage;
+    const btnBase = 'padding:5px 11px; border-radius:5px; font-size:0.85rem; cursor:pointer; border:1px solid var(--border-color); background:var(--bg-card); color:var(--text-main);';
+    const btnActive = 'padding:5px 11px; border-radius:5px; font-size:0.85rem; cursor:pointer; border:1px solid var(--primary); background:var(--primary); color:#fff; font-weight:700;';
+    const btnDisabled = 'padding:5px 11px; border-radius:5px; font-size:0.85rem; border:1px solid var(--border-color); background:var(--bg-card); color:var(--text-muted); opacity:0.4; cursor:default;';
+
+    let html = '';
+    html += cur === 1
+        ? `<button style="${btnDisabled}" disabled>‹ 이전</button>`
+        : `<button style="${btnBase}" onclick="window.goToStatPage(${cur - 1})">‹ 이전</button>`;
+
+    const winStart = Math.max(1, cur - 2);
+    const winEnd   = Math.min(totalPages, winStart + 4);
+    if (winStart > 1)  html += `<button style="${btnBase}" onclick="window.goToStatPage(1)">1</button>`;
+    if (winStart > 2)  html += `<span style="padding:0 4px; color:var(--text-muted); font-size:0.85rem;">…</span>`;
+    for (let i = winStart; i <= winEnd; i++) {
+        html += `<button style="${i === cur ? btnActive : btnBase}" onclick="window.goToStatPage(${i})">${i}</button>`;
+    }
+    if (winEnd < totalPages - 1) html += `<span style="padding:0 4px; color:var(--text-muted); font-size:0.85rem;">…</span>`;
+    if (winEnd < totalPages)     html += `<button style="${btnBase}" onclick="window.goToStatPage(${totalPages})">${totalPages}</button>`;
+
+    html += cur === totalPages
+        ? `<button style="${btnDisabled}" disabled>다음 ›</button>`
+        : `<button style="${btnBase}" onclick="window.goToStatPage(${cur + 1})">다음 ›</button>`;
+
+    html += `<span style="font-size:0.8rem; color:var(--text-muted); margin-left:6px;">${cur} / ${totalPages} 페이지</span>`;
+    el.innerHTML = html;
+}
+
+export function setStatPageSize(size) {
+    _statPageSize = parseInt(size) || 10;
+    renderStats();
+}
+
+export function goToStatPage(page) {
+    _statCurrentPage = page;
+    _statKeepPage = true;
+    renderStats();
+}
+
 export function toggleStatsSelectAll(source) {
-    document.querySelectorAll('.stat-checkbox').forEach(cb => cb.checked = source.checked);
+    document.querySelectorAll('.stat-checkbox').forEach(cb => {
+        cb.checked = source.checked;
+        if (source.checked) _selectedStatIds.add(cb.value);
+        else                _selectedStatIds.delete(cb.value);
+    });
     updateStatsActions();
 }
 
 export function updateStatsActions() {
-    const checkedBoxes = [...document.querySelectorAll('.stat-checkbox:checked')];
-    const checked = checkedBoxes.length;
-    const bar     = document.getElementById('stat-selection-actions');
-    const btnPrt  = document.getElementById('btn-stat-print-selected');
-    const btnCpy  = document.getElementById('btn-stat-copy-selected');
-    const btnDel  = document.getElementById('btn-stat-delete-selected');
+    document.querySelectorAll('.stat-checkbox').forEach(cb => {
+        if (cb.checked) _selectedStatIds.add(cb.value);
+        else            _selectedStatIds.delete(cb.value);
+    });
 
-    if (checked > 0) {
+    const count  = _selectedStatIds.size;
+    const bar    = document.getElementById('stat-selection-actions');
+    const btnPrt = document.getElementById('btn-stat-print-selected');
+    const btnCpy = document.getElementById('btn-stat-copy-selected');
+    const btnDel = document.getElementById('btn-stat-delete-selected');
+
+    if (count > 0) {
         bar.style.display = 'flex';
-        document.getElementById('stat-checked-count').textContent = `${checked}개 선택됨`;
-        const checkedIds = new Set(checkedBoxes.map(cb => cb.value));
-        const selAmount  = state.orderHistory
-            .filter(e => checkedIds.has(e.id))
+        document.getElementById('stat-checked-count').textContent = `${count}개 선택됨`;
+        const selAmount = state.orderHistory
+            .filter(e => _selectedStatIds.has(e.id))
             .reduce((s, e) => s + _entryAmount(e), 0);
         document.getElementById('stat-selected-amount').textContent = `/ 선택 ${selAmount.toLocaleString()}원`;
         if (btnPrt) btnPrt.style.display = '';
@@ -208,9 +274,8 @@ export function printAllStats() {
 }
 
 export function printSelectedStats() {
-    const checkedIds = new Set([...document.querySelectorAll('.stat-checkbox:checked')].map(cb => cb.value));
-    if (!checkedIds.size) { showToast("선택된 항목이 없습니다.", "error"); return; }
-    const sorted = state.orderHistory.filter(e => checkedIds.has(e.id))
+    if (!_selectedStatIds.size) { showToast("선택된 항목이 없습니다.", "error"); return; }
+    const sorted = state.orderHistory.filter(e => _selectedStatIds.has(e.id))
         .sort((a, b) => (a.name || '').localeCompare(b.name || '', 'ko'));
     _buildPrintTable(sorted);
     document.body.classList.add('print-stats');
@@ -219,10 +284,9 @@ export function printSelectedStats() {
 }
 
 export function copySelectedStats() {
-    const checkedIds = new Set([...document.querySelectorAll('.stat-checkbox:checked')].map(cb => cb.value));
-    if (!checkedIds.size) { showToast("선택된 항목이 없습니다.", "error"); return; }
-    const rows = [...state.orderHistory.filter(e => checkedIds.has(e.id))]
-        .sort((a, b) => (a.orderDate || '').localeCompare(b.orderDate || ''));
+    if (!_selectedStatIds.size) { showToast("선택된 항목이 없습니다.", "error"); return; }
+    const rows = state.orderHistory.filter(e => _selectedStatIds.has(e.id))
+        .sort((a, b) => (a.name || '').localeCompare(b.name || '', 'ko'));
     const lines = ['상품명\t수량\t금액\t도매처\t발주일\t입고일'];
     rows.forEach(entry => {
         lines.push(`${entry.name}\t${entry.qty || 0}개\t${_entryAmount(entry).toLocaleString()}원\t${entry.vendorName || '-'}\t${_toLocalDate(entry.orderDate)}\t${_toLocalDate(entry.receiveDate)}`);
@@ -244,10 +308,10 @@ export function deleteAllStats() {
 }
 
 export function deleteSelectedStats() {
-    const checkedIds = new Set([...document.querySelectorAll('.stat-checkbox:checked')].map(cb => cb.value));
-    if (!checkedIds.size) { showToast("선택된 항목이 없습니다.", "error"); return; }
-    showConfirm(`선택한 ${checkedIds.size}건의 발주 내역을 삭제하시겠습니까?`, () => {
-        state.orderHistory = state.orderHistory.filter(e => !checkedIds.has(e.id));
+    if (!_selectedStatIds.size) { showToast("선택된 항목이 없습니다.", "error"); return; }
+    showConfirm(`선택한 ${_selectedStatIds.size}건의 발주 내역을 삭제하시겠습니까?`, () => {
+        state.orderHistory = state.orderHistory.filter(e => !_selectedStatIds.has(e.id));
+        _selectedStatIds.clear();
         saveToFirestore();
         showToast("삭제되었습니다.");
     });
@@ -563,3 +627,5 @@ window.clearVendorFilter            = clearVendorFilter;
 window.inlineEditStatAmount         = inlineEditStatAmount;
 window.printStats                   = printStats;
 window.copyAllStats                 = copyAllStats;
+window.setStatPageSize              = setStatPageSize;
+window.goToStatPage                 = goToStatPage;

@@ -382,6 +382,13 @@
                                          style="display:none; position:absolute; top:calc(100% + 4px); left:0; z-index:200; background:var(--bg-card); border:1px solid var(--border-color); border-radius:var(--radius-sm); box-shadow:var(--shadow-md); min-width:180px; max-height:260px; overflow-y:auto; padding:6px 0;">
                                     </div>
                                 </div>
+                                <select id="stat-page-size" class="no-print" onchange="window.setStatPageSize(this.value)" style="padding:10px 10px; font-size:0.9rem; border-radius:7px; border:1px solid var(--border-color); background:var(--bg-card); color:var(--text-main); cursor:pointer;">
+                                    <option value="10">10개</option>
+                                    <option value="20">20개</option>
+                                    <option value="30">30개</option>
+                                    <option value="40">40개</option>
+                                    <option value="50">50개</option>
+                                </select>
                             </div>
                             <div class="no-print" style="display:flex; gap:6px; flex-shrink:0;">
                                 <button style="background:#fffbeb; border:1px solid var(--warning); color:var(--warning); padding:6px 14px; border-radius:var(--radius-sm); font-size:0.85rem; cursor:pointer; font-weight:600;" onclick="window.copyAllStats()">📋 전체 복사</button>
@@ -401,7 +408,8 @@
                                 <button id="btn-stat-delete-selected" class="outline" style="display:none; padding:6px 14px; font-size:0.85rem;" onclick="window.deleteSelectedStats()">🗑️ 선택 삭제</button>
                             </div>
                         </div>
-                        <div id="stat-product-list" style="max-height:520px; overflow-y:auto; margin:0 -24px; border-top:1px solid var(--border-color); border-radius:0 0 var(--radius-md) var(--radius-md);"></div>
+                        <div id="stat-product-list" style="margin:0 -24px; border-top:1px solid var(--border-color); border-radius:0 0 var(--radius-md) var(--radius-md);"></div>
+                        <div id="stat-pagination" class="no-print" style="display:flex; justify-content:center; align-items:center; gap:6px; padding:14px 0 4px; flex-wrap:wrap;"></div>
                     </div>
                 </div>
 
