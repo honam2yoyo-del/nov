@@ -200,7 +200,8 @@ export function updateStatsActions() {
 }
 
 export function printAllStats() {
-    _buildPrintTable(_getFilteredHistory());
+    const sorted = [..._getFilteredHistory()].sort((a, b) => (a.name || '').localeCompare(b.name || '', 'ko'));
+    _buildPrintTable(sorted);
     document.body.classList.add('print-stats');
     window.print();
     document.body.classList.remove('print-stats');
@@ -209,7 +210,9 @@ export function printAllStats() {
 export function printSelectedStats() {
     const checkedIds = new Set([...document.querySelectorAll('.stat-checkbox:checked')].map(cb => cb.value));
     if (!checkedIds.size) { showToast("선택된 항목이 없습니다.", "error"); return; }
-    _buildPrintTable(state.orderHistory.filter(e => checkedIds.has(e.id)));
+    const sorted = state.orderHistory.filter(e => checkedIds.has(e.id))
+        .sort((a, b) => (a.name || '').localeCompare(b.name || '', 'ko'));
+    _buildPrintTable(sorted);
     document.body.classList.add('print-stats');
     window.print();
     document.body.classList.remove('print-stats');
