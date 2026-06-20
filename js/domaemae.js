@@ -400,6 +400,90 @@ export function dmDeleteAllProducts() {
     });
 }
 
+export function dmImportCSV(input) {
+    const file = input.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const lines = e.target.result
+            .split('\n')
+            .map(l => l.replace(/\r$/, '').trim())
+            .filter(l => l);
+
+        if (lines.length < 2) { showToast("CSV 데이터가 없습니다.", "error"); return; }
+
+        const header = lines[0].split(',').map(h => h.trim());
+        const idx = {
+            num:    header.indexOf('상품번호'),
+            name:   header.indexOf('상품명'),
+            vendor: header.indexOf('공급사ID'),
+            option: header.indexOf('상품주문옵션'),
+            price:  header.indexOf('상품비'),
+        };
+
+        if (Object.values(idx).some(i => i === -1)) {
+            showToast("CSV 열 형식이 올바르지 않습니다. (상품번호/상품명/공급사ID/상품주문옵션/상품비 필요)", "error");
+            return;
+        }
+
+        const rows = lines.slice(1).map(line => {
+            const cols = line.split(',');
+            return {
+                num:    (cols[idx.num]    || '').trim(),
+                name:   (cols[idx.name]   || '').trim(),
+                vendor: (cols[idx.vendor] || '').trim(),
+                option: (cols[idx.option] || '').trim(),
+                price:  parseInt((cols[idx.price] || '0').trim()) || 0,
+            };
+        }).filter(r => r.name);
+
+        // 도매처 등록 (없는 것만)
+        let newVendorCount = 0;
+        const uniqueVendors = [...new Set(rows.map(r => r.vendor).filter(v => v))];
+        uniqueVendors.forEach(vName => {
+            if (!state.dmVendorSettings[vName]) {
+                state.dmVendorSettings[vName] = { shipping: 3000, freeThreshold: 0 };
+                state.dmVendorOrder.push(vName);
+                newVendorCount++;
+            }
+        });
+
+        // 상품 등록 (name+option 중복 제외)
+        let newProductCount = 0;
+        let skipCount = 0;
+        let idBase = Date.now();
+        rows.forEach((r, i) => {
+            const isDuplicate = state.dmProducts.some(p =>
+                p.name.trim().toLowerCase() === r.name.toLowerCase() &&
+                (p.option || '') === r.option
+            );
+            if (isDuplicate) { skipCount++; return; }
+
+            const itemNum = r.num.replace(/^[A-Za-z]+/, '');
+            state.dmProducts.push({
+                id: (idBase + i).toString(),
+                name: r.name,
+                option: r.option,
+                itemNum,
+                stock: 0,
+                vendors: r.vendor ? [{ name: r.vendor, price: r.price, shipping: 3000, freeThreshold: 0 }] : [],
+                createdAt: idBase + i,
+            });
+            newProductCount++;
+        });
+
+        saveToFirestore();
+        renderDmProducts();
+        input.value = '';
+
+        let msg = `도매처 ${newVendorCount}개, 상품 ${newProductCount}개 등록 완료`;
+        if (skipCount > 0) msg += ` (중복 ${skipCount}개 스킵)`;
+        showToast(msg);
+    };
+    reader.readAsText(file, 'UTF-8');
+}
+
 window.dmSaveProduct           = dmSaveProduct;
 window.dmSaveProductModal      = dmSaveProductModal;
 window.dmEditProduct           = dmEditProduct;
@@ -418,3 +502,4 @@ window.dmClearProductSelection = dmClearProductSelection;
 window.dmToggleSelectAllProducts = dmToggleSelectAllProducts;
 window.dmDeleteSelectedProducts  = dmDeleteSelectedProducts;
 window.dmDeleteAllProducts       = dmDeleteAllProducts;
+window.dmImportCSV               = dmImportCSV;

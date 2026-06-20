@@ -362,6 +362,10 @@
             <div id="tab-domaemae" class="tab-content">
                 <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:15px;">
                     <h2 style="margin:0;">새 상품 등록</h2>
+                    <div style="display:flex; gap:8px; align-items:center;">
+                        <input type="file" id="dm-csv-upload" accept=".csv" style="display:none;" onchange="window.dmImportCSV(this)">
+                        <button class="outline" style="padding:8px 14px; font-size:0.85rem; color:var(--primary); border-color:#a5b4fc;" onclick="document.getElementById('dm-csv-upload').click()">📥 CSV 일괄 업로드</button>
+                    </div>
                 </div>
                 <div class="card form-section">
                     <div class="form-row">
