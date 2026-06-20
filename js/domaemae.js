@@ -57,6 +57,7 @@ export function dmSaveProductModal() {
 
     const isDuplicateName = state.dmProducts.some(p =>
         p.name.trim().toLowerCase() === name.toLowerCase() &&
+        (p.option || '').trim() === option &&
         p.id !== state.dmEditingProductId
     );
     if (isDuplicateName) { showToast("이미 등록된 상품명입니다.", "error"); return; }
@@ -88,7 +89,8 @@ export function dmSaveProduct() {
     if (!name) { showToast("상품명을 입력해주세요.", "error"); return; }
 
     const isDuplicateName = state.dmProducts.some(p =>
-        p.name.trim().toLowerCase() === name.toLowerCase()
+        p.name.trim().toLowerCase() === name.toLowerCase() &&
+        (p.option || '').trim() === option
     );
     if (isDuplicateName) { showToast("이미 등록된 상품명입니다.", "error"); return; }
 
