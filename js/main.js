@@ -4,6 +4,8 @@ import { state, VENDOR_DEFAULT_SETTINGS } from './state.js';
 import { initAuth } from './auth.js';
 import { addVendorRow, updateVendorDropdowns, renderVendorListModal } from './vendors.js';
 import { renderProducts } from './products.js';
+import { dmAddVendorRow, dmUpdateVendorDropdowns, dmRenderVendorListModal } from './dm-vendors.js';
+import { renderDmProducts } from './domaemae.js';
 import { saveToFirestore } from './firestore.js';
 import { renderOrderProductList } from './orders.js';
 import { renderInspectList } from './inspect.js';
@@ -29,6 +31,15 @@ function loadDataFromFirestore() {
             const existingKeys = Object.keys(state.vendorSettings);
             existingKeys.forEach(k => { if (!state.vendorOrder.includes(k)) state.vendorOrder.push(k); });
             state.vendorOrder = state.vendorOrder.filter(k => state.vendorSettings[k]);
+
+            // 도매매 데이터
+            state.dmProducts      = data.dmProducts      || [];
+            state.dmVendorSettings = data.dmVendorSettings || {};
+            if (data.dmVendorOrder && data.dmVendorOrder.length > 0) {
+                state.dmVendorOrder = data.dmVendorOrder;
+            } else {
+                state.dmVendorOrder = Object.keys(state.dmVendorSettings);
+            }
         } else {
             state.products       = [];
             state.inspectList    = [];
@@ -45,15 +56,21 @@ function loadDataFromFirestore() {
             saveToFirestore();
         }
 
-        if (document.querySelectorAll('.vendor-row').length === 0) addVendorRow();
+        if (document.querySelectorAll('#vendor-container .vendor-row').length === 0) addVendorRow();
+        if (document.querySelectorAll('#dm-vendor-container .vendor-row').length === 0) dmAddVendorRow();
 
         renderProducts();
+        renderDmProducts();
         renderOrderProductList();
         renderInspectList();
         renderStats();
         updateVendorDropdowns();
+        dmUpdateVendorDropdowns();
         if (document.getElementById('vendor-list-modal').classList.contains('active')) {
             renderVendorListModal();
+        }
+        if (document.getElementById('dm-vendor-list-modal').classList.contains('active')) {
+            dmRenderVendorListModal();
         }
 
         if (state.currentOrderProductId && !state.products.find(p => p.id === state.currentOrderProductId)) {

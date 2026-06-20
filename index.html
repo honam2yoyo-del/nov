@@ -17,6 +17,12 @@
         <button class="outline" style="border-radius:999px; padding:8px 18px; background:transparent; border-color:rgba(255,255,255,0.4); color:white; font-size:0.8rem;" onclick="window.clearProductSelection()">선택 해제</button>
     </div>
 
+    <div id="dm-product-float-actions" style="display:none; position:fixed; top:68px; left:50%; transform:translateX(-50%); z-index:5000; background:var(--text-main); color:white; padding:14px 28px; border-radius:999px; box-shadow:var(--shadow-lg); align-items:center; gap:20px; white-space:nowrap;">
+        <span id="dm-product-selected-count" style="font-size:0.95rem; font-weight:600;">0개 선택됨</span>
+        <button class="danger" style="border-radius:999px; padding:8px 22px;" onclick="window.dmDeleteSelectedProducts()">삭제</button>
+        <button class="outline" style="border-radius:999px; padding:8px 18px; background:transparent; border-color:rgba(255,255,255,0.4); color:white; font-size:0.8rem;" onclick="window.dmClearProductSelection()">선택 해제</button>
+    </div>
+
     <!-- 확인 모달 -->
     <div id="confirm-modal" class="modal-overlay">
         <div class="modal-box" style="max-width:400px;">
@@ -138,6 +144,64 @@
         </div>
     </div>
 
+    <!-- 도매매 도매처 리스트 모달 -->
+    <div id="dm-vendor-list-modal" class="modal-overlay">
+        <div class="modal-box">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                <h3 style="margin:0;">도매처 리스트 (도매매)</h3>
+                <button class="primary" style="padding:6px 12px; font-size:0.8rem;" onclick="window.dmOpenAddVendorModal()">+ 새 도매처 등록</button>
+            </div>
+            <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:15px;">화살표 버튼을 눌러 도매처 순서를 변경할 수 있습니다.</p>
+            <ul id="dm-draggable-vendor-list" style="list-style:none; padding:0; margin:0; max-height:400px; overflow-y:auto; display:flex; flex-direction:column; gap:8px;"></ul>
+            <div class="modal-actions" style="margin-top:24px;">
+                <button class="outline" onclick="window.dmCloseVendorListModal()">닫기</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 도매매 새 도매처 추가 모달 -->
+    <div id="dm-add-vendor-modal" class="modal-overlay">
+        <div class="modal-box" style="max-width:400px;">
+            <h3 style="margin-top:0; margin-bottom:20px;">새 도매처 등록 (도매매)</h3>
+            <div style="display:flex; flex-direction:column; gap:12px; margin-bottom:24px;">
+                <input type="text" id="dm-new-vendor-name" placeholder="도매처 이름 입력 (예: ABC상사)">
+                <input type="text" id="dm-new-vendor-ship" placeholder="기본 배송비 숫자 입력 (예: 3000)" oninput="window.formatNumberInput(this)">
+                <input type="text" id="dm-new-vendor-free" placeholder="무료배송 기준액 숫자 입력 (예: 50000)" oninput="window.formatNumberInput(this)" onkeypress="if(event.key==='Enter'){event.preventDefault();window.dmSaveNewVendor();}">
+            </div>
+            <div class="modal-actions">
+                <button class="outline" onclick="window.dmCloseAddVendorModal()">취소</button>
+                <button class="primary" onclick="window.dmSaveNewVendor()">등록</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 도매매 상품 수정 모달 -->
+    <div id="dm-product-edit-modal" class="modal-overlay">
+        <div class="modal-box" style="max-width:680px; width:95%; max-height:90vh; display:flex; flex-direction:column;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-shrink:0;">
+                <h3 id="dm-modal-edit-title" style="margin:0;">상품 수정</h3>
+                <div style="display:flex; align-items:center; gap:6px;">
+                    <span style="font-size:0.78rem; color:#94a3b8;">등록일</span>
+                    <span id="dm-modal-created-at" style="font-size:0.78rem; color:var(--text-muted); font-weight:500;"></span>
+                </div>
+            </div>
+            <div style="overflow-y:auto; flex:1; padding-right:4px;">
+                <div style="display:flex; gap:12px; margin-bottom:16px; flex-wrap:wrap;">
+                    <input type="text" id="dm-modal-prd-name"  placeholder="상품명 (필수)"  style="flex:2; min-width:140px;">
+                    <input type="text" id="dm-modal-prd-num"   placeholder="상품번호"       style="flex:1; min-width:100px;">
+                    <input type="text" id="dm-modal-prd-stock" placeholder="재고 수량"       style="flex:1; min-width:90px;" oninput="window.formatNumberInput(this)">
+                </div>
+                <div style="font-weight:600; font-size:0.9rem; color:var(--text-main); margin-bottom:10px;">도매처 정보</div>
+                <div id="dm-modal-vendor-container"></div>
+                <button class="outline" style="margin-top:8px; font-size:0.85rem;" onclick="window.dmAddVendorRow(null, 'dm-modal-vendor-container')">+ 도매처 칸 추가</button>
+            </div>
+            <div class="modal-actions" style="margin-top:20px; flex-shrink:0; padding-top:16px; border-top:1px solid var(--border-color);">
+                <button class="outline" onclick="window.dmCloseProductEditModal()">취소</button>
+                <button class="primary" onclick="window.dmSaveProductModal()">저장</button>
+            </div>
+        </div>
+    </div>
+
     <!-- 로그인 화면 -->
     <div id="login-screen">
         <div class="login-box">
@@ -178,7 +242,11 @@
         <nav id="sidebar" class="no-print">
             <button class="sidebar-btn active" data-tab="tab-products" onclick="switchTab('tab-products')">
                 <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10"/></svg>
-                <span>상품 & 도매처 관리</span>
+                <span>포장 용품 관리</span>
+            </button>
+            <button class="sidebar-btn" data-tab="tab-domaemae" onclick="switchTab('tab-domaemae')">
+                <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2 9m12-9l2 9M9 21a1 1 0 100-2 1 1 0 000 2zm10 0a1 1 0 100-2 1 1 0 000 2z"/></svg>
+                <span>도매매 관리</span>
             </button>
             <button class="sidebar-btn" data-tab="tab-order" onclick="switchTab('tab-order')">
                 <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2 9m12-9l2 9M9 21a1 1 0 100-2 1 1 0 000 2zm10 0a1 1 0 100-2 1 1 0 000 2z"/></svg>
@@ -287,6 +355,68 @@
                         <div id="ord-vendors-calc" style="display:flex; flex-direction:column; gap:12px;"></div>
                     </div>
                 </div>
+            </div>
+
+            <!-- 탭: 도매매 관리 -->
+            <div id="tab-domaemae" class="tab-content">
+                <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:15px;">
+                    <h2 style="margin:0;">새 상품 등록</h2>
+                </div>
+                <div class="card form-section">
+                    <div class="form-row">
+                        <input type="text" id="dm-prd-name" placeholder="상품명 (필수)" style="flex:2;">
+                        <input type="text" id="dm-prd-num"  placeholder="상품번호" style="flex:1;">
+                        <input type="text" id="dm-prd-stock" placeholder="현재 재고 수량" style="flex:1;" oninput="window.formatNumberInput(this)">
+                    </div>
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin:20px 0 10px;">
+                        <div style="font-weight:600; font-size:0.95rem; color:var(--text-main);">
+                            도매처 정보
+                            <span style="font-size:0.8rem; font-weight:normal; color:var(--text-muted); margin-left:8px;">* 도매처 선택 시 기본 배송비와 무료배송 기준이 자동 입력됩니다.</span>
+                        </div>
+                        <button class="outline" style="padding:4px 10px; font-size:0.8rem; color:var(--primary); border-color:var(--primary);" onclick="window.dmOpenVendorListModal()">도매처 리스트</button>
+                    </div>
+                    <div id="dm-vendor-container"></div>
+                    <div style="margin-top:16px; display:flex; justify-content:space-between; align-items:center;">
+                        <button class="outline" onclick="window.dmAddVendorRow()">+ 판매 도매처 칸 추가</button>
+                        <div style="display:flex; gap:8px;">
+                            <button class="primary" onclick="window.dmSaveProduct()">저장하기</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; margin:40px 0 15px;">
+                    <h2 style="margin:0; white-space:nowrap;">상품 목록</h2>
+                    <div style="position:relative; flex:1;">
+                        <svg style="position:absolute; left:14px; top:50%; transform:translateY(-50%); width:18px; height:18px; color:var(--text-muted); pointer-events:none;" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                        <input type="text" id="dm-prd-search" placeholder="상품명 검색..." style="width:100%; padding:11px 14px 11px 42px; font-size:0.95rem;" oninput="window.dmResetPageAndRender()">
+                    </div>
+                    <select id="dm-prd-page-size" onchange="window.dmResetPageAndRender()" style="padding:10px 14px; font-size:0.875rem; flex-shrink:0;">
+                        <option value="10">10개씩 보기</option>
+                        <option value="20">20개씩 보기</option>
+                        <option value="30">30개씩 보기</option>
+                        <option value="40">40개씩 보기</option>
+                        <option value="50">50개씩 보기</option>
+                    </select>
+                </div>
+
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="width:5%;"><input type="checkbox" id="dm-selectAllCheckbox" class="real-checkbox" onclick="window.dmToggleSelectAllProducts(this)"></th>
+                                <th style="width:22%; cursor:pointer; user-select:none;" onclick="window.dmToggleNameSort()" title="이름순 정렬">상품명 <span id="dm-name-sort-icon" style="color:var(--primary); font-size:1.1em;">↕</span></th>
+                                <th style="width:15%;">상품번호</th>
+                                <th style="width:10%; cursor:pointer; user-select:none;" onclick="window.dmToggleStockSort()" title="재고순 정렬">재고 <span id="dm-sort-icon" style="color:var(--primary); font-size:1.1em;">↕</span></th>
+                                <th style="width:15%;">도매처</th>
+                                <th style="width:12%;">단가</th>
+                                <th style="width:13%;">배송비</th>
+                                <th style="width:8%;">관리</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dm-prd-table-body"></tbody>
+                    </table>
+                </div>
+                <div id="dm-prd-pagination" style="display:flex; justify-content:center; align-items:center; gap:6px; margin-top:16px;"></div>
             </div>
 
             <!-- 탭 3: 입고 검수 -->

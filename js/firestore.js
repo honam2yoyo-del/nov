@@ -12,7 +12,10 @@ export async function saveToFirestore() {
             inspectList: state.inspectList,
             orderHistory: state.orderHistory,
             vendorSettings: state.vendorSettings,
-            vendorOrder: state.vendorOrder
+            vendorOrder: state.vendorOrder,
+            dmProducts: state.dmProducts,
+            dmVendorSettings: state.dmVendorSettings,
+            dmVendorOrder: state.dmVendorOrder,
         });
     } catch (error) {
         showToast("데이터 저장 중 오류가 발생했습니다.", "error");

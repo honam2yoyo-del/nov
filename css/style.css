@@ -141,6 +141,7 @@ tbody tr:last-child td { border-bottom: none; }
 
 .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15,23,42,0.5); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 10000; opacity: 0; transition: opacity 0.2s; pointer-events: none; }
 .modal-overlay.active { opacity: 1; pointer-events: auto; }
+#confirm-modal { z-index: 20000; }
 .modal-box { background: var(--bg-card); padding: 32px; border-radius: var(--radius-lg); width: 90%; max-width: 500px; box-shadow: var(--shadow-lg); transform: scale(0.95); transition: transform 0.2s cubic-bezier(0.16,1,0.3,1); }
 .modal-overlay.active .modal-box { transform: scale(1); }
 .modal-msg { font-size: 1rem; color: var(--text-main); margin-bottom: 24px; font-weight: 500; line-height: 1.5; white-space: pre-wrap; }

@@ -25,4 +25,13 @@ export const state = {
     productFilter: 'all',
     inspectDateFilter: 'all',
     isPrintMode: false,
+    // 도매매 관리 전용
+    dmProducts: [],
+    dmVendorSettings: {},
+    dmVendorOrder: [],
+    dmEditingProductId: null,
+    dmStockSortOrder: 'none',
+    dmNameSortOrder: 'none',
+    dmCurrentPage: 1,
+    dmSelectedIds: new Set(),
 };
