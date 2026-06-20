@@ -49,7 +49,7 @@ export function renderStats() {
     const productStats = {};
 
     Object.values(groups).forEach(g => {
-        const vSetting = state.vendorSettings[g.vendorName] || { shipping: 3000, freeThreshold: 50000 };
+        const vSetting = state.vendorSettings[g.vendorName] || state.dmVendorSettings[g.vendorName] || { shipping: 3000, freeThreshold: 50000 };
         const groupShipping = g.totalProduct >= vSetting.freeThreshold ? 0 : vSetting.shipping;
 
         globalShippingSum += groupShipping;
@@ -347,7 +347,7 @@ function _renderOrderHistoryEditTable(productName) {
         return;
     }
 
-    const knownVendors = state.vendorOrder;
+    const knownVendors = [...new Set([...state.vendorOrder, ...state.dmVendorOrder])];
     const selectStyle  = 'width:100%; border:1px solid var(--border-color); padding:5px 7px; border-radius:5px; font-size:0.85rem; background:var(--bg-main);';
 
     tbody.innerHTML = entries.map(entry => {

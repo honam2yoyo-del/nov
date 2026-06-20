@@ -8,6 +8,7 @@ import { dmAddVendorRow, dmUpdateVendorDropdowns, dmRenderVendorListModal } from
 import { renderDmProducts } from './domaemae.js';
 import { saveToFirestore } from './firestore.js';
 import { renderOrderProductList } from './orders.js';
+import { renderDmOrderProductList } from './dm-orders.js';
 import { renderInspectList } from './inspect.js';
 import { renderStats } from './stats.js';
 
@@ -78,6 +79,12 @@ function loadDataFromFirestore() {
             document.getElementById('order-detail-panel').style.display = 'none';
         }
 
+        if (state.currentDmOrderProductId && !state.dmProducts.find(p => p.id === state.currentDmOrderProductId)) {
+            state.currentDmOrderProductId = null;
+            const dmPanel = document.getElementById('dm-order-detail-panel');
+            if (dmPanel) dmPanel.style.display = 'none';
+        }
+
         if (!_tabRestored) {
             _tabRestored = true;
             const savedTab = localStorage.getItem('activeTab');
@@ -101,8 +108,9 @@ function switchTab(tabId) {
     document.querySelectorAll('.sidebar-btn').forEach(el => el.classList.remove('active'));
     document.getElementById(tabId).classList.add('active');
     document.querySelector(`.sidebar-btn[data-tab="${tabId}"]`)?.classList.add('active');
-    if (tabId === 'tab-order') renderOrderProductList();
-    if (tabId === 'tab-stats') renderStats();
+    if (tabId === 'tab-order')    renderOrderProductList();
+    if (tabId === 'tab-dm-order') renderDmOrderProductList();
+    if (tabId === 'tab-stats')    renderStats();
     localStorage.setItem('activeTab', tabId);
 }
 

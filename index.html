@@ -251,7 +251,11 @@
             </button>
             <button class="sidebar-btn" data-tab="tab-order" onclick="switchTab('tab-order')">
                 <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2 9m12-9l2 9M9 21a1 1 0 100-2 1 1 0 000 2zm10 0a1 1 0 100-2 1 1 0 000 2z"/></svg>
-                <span>발주 신청</span>
+                <span>발주 신청 (포장 용품)</span>
+            </button>
+            <button class="sidebar-btn" data-tab="tab-dm-order" onclick="switchTab('tab-dm-order')">
+                <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
+                <span>발주 신청 (도매매)</span>
             </button>
             <button class="sidebar-btn" data-tab="tab-inspect" onclick="switchTab('tab-inspect')">
                 <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
@@ -332,9 +336,9 @@
                 <div id="prd-pagination" style="display:flex; justify-content:center; align-items:center; gap:6px; margin-top:16px;"></div>
             </div>
 
-            <!-- 탭 2: 발주 신청 -->
+            <!-- 탭 2: 발주 신청 (포장 용품) -->
             <div id="tab-order" class="tab-content">
-                <div style="margin-bottom:20px;"><h2 style="margin:0;">발주 신청</h2></div>
+                <div style="margin-bottom:20px;"><h2 style="margin:0;">발주 신청 (포장 용품)</h2></div>
                 <div class="order-layout">
                     <div class="order-list">
                         <div style="padding:12px 16px; border-bottom:1px solid var(--border-color); background:var(--bg-hover);">
@@ -354,6 +358,32 @@
                         </div>
                         <h4 style="margin:0 0 12px; font-size:0.95rem; color:var(--text-main);">도매처별 예상 비용 비교</h4>
                         <div id="ord-vendors-calc" style="display:flex; flex-direction:column; gap:12px;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 탭: 발주 신청 (도매매) -->
+            <div id="tab-dm-order" class="tab-content">
+                <div style="margin-bottom:20px;"><h2 style="margin:0;">발주 신청 (도매매)</h2></div>
+                <div class="order-layout">
+                    <div class="order-list">
+                        <div style="padding:12px 16px; border-bottom:1px solid var(--border-color); background:var(--bg-hover);">
+                            <input type="text" id="dm-order-search" placeholder="상품명 또는 옵션 검색..." style="width:100%; border:1px solid #cbd5e1; box-shadow:none;" oninput="window.renderDmOrderProductList()">
+                        </div>
+                        <div id="dm-order-prd-list"></div>
+                    </div>
+                    <div class="card order-detail" id="dm-order-detail-panel" style="display:none; margin-bottom:0;">
+                        <div style="border-bottom:1px solid var(--border-color); padding-bottom:16px; margin-bottom:16px;">
+                            <span style="font-size:0.8rem; font-weight:700; color:var(--primary); text-transform:uppercase; letter-spacing:0.05em;">Selected Product</span>
+                            <h3 id="dm-ord-title" style="margin:8px 0 0; font-size:1.4rem;">상품명</h3>
+                        </div>
+                        <div style="display:flex; align-items:center; gap:15px; margin-bottom:24px; background:var(--bg-body); padding:16px; border-radius:var(--radius-sm);">
+                            <label style="font-weight:600; color:var(--text-main);">필요 수량</label>
+                            <input type="number" id="dm-ord-qty" value="1" min="1" style="width:120px; font-size:1.1rem; font-weight:700; text-align:right;" oninput="window.calcDmOrderPrices()">
+                            <span style="font-weight:500;">개</span>
+                        </div>
+                        <h4 style="margin:0 0 12px; font-size:0.95rem; color:var(--text-main);">도매처별 예상 비용 비교</h4>
+                        <div id="dm-ord-vendors-calc" style="display:flex; flex-direction:column; gap:12px;"></div>
                     </div>
                 </div>
             </div>

@@ -34,4 +34,5 @@ export const state = {
     dmNameSortOrder: 'none',
     dmCurrentPage: 1,
     dmSelectedIds: new Set(),
+    currentDmOrderProductId: null,
 };

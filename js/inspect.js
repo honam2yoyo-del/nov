@@ -138,7 +138,7 @@ export function renderInspectList() {
     });
 
     for (const [vName, items] of Object.entries(groups)) {
-        const vSetting = state.vendorSettings[vName] || { shipping: 3000, freeThreshold: 50000 };
+        const vSetting = state.vendorSettings[vName] || state.dmVendorSettings[vName] || { shipping: 3000, freeThreshold: 50000 };
         const totalProductAmount = items.reduce((sum, item) => sum + (item.price * item.qty), 0);
         const isFree = totalProductAmount >= vSetting.freeThreshold;
         const shippingCost = isFree ? 0 : vSetting.shipping;
@@ -149,10 +149,11 @@ export function renderInspectList() {
             if (item.status === '반품')  statusBadge = `<span class="badge badge-danger"  style="margin-left:8px;">반품</span>`;
             if (item.status === '미도착') statusBadge = `<span class="badge badge-warning" style="margin-left:8px;">미도착</span>`;
 
+            const optionSpan = item.option ? ` <span style="font-size:0.82rem; color:var(--primary); font-weight:normal;">(${item.option})</span>` : '';
             tr.innerHTML += `
                 <td style="text-align:center;"><input type="checkbox" class="inspect-checkbox real-checkbox" value="${item.id}" onchange="window.updateInspectActions()"></td>
                 <td class="ip-name" style="font-weight:600; text-align:center; color:var(--text-main);">
-                    ${item.name} ${statusBadge}<br>
+                    ${item.name}${optionSpan} ${statusBadge}<br>
                     <span class="no-print" style="font-size:0.75rem; color:var(--text-muted); font-weight:normal; margin-top:4px; display:inline-block;">발주일: ${item.orderDate}</span>
                 </td>
                 <td class="hide-on-print" style="color:var(--text-muted); text-align:center;">${item.itemNum || '-'}</td>
@@ -189,14 +190,20 @@ export function confirmReceive(inspectId) {
     if (itemIndex === -1) return;
     const item = state.inspectList[itemIndex];
 
-    showConfirm(`[${item.name}] ${item.qty}개가 입고되었습니까?\n재고와 통계에 반영됩니다.`, () => {
-        const prdIndex = state.products.findIndex(x => x.id === item.productId);
-        if (prdIndex !== -1) state.products[prdIndex].stock += item.qty;
+    const displayLabel = item.option ? `${item.name} (${item.option})` : item.name;
+    showConfirm(`[${displayLabel}] ${item.qty}개가 입고되었습니까?\n재고와 통계에 반영됩니다.`, () => {
+        if (item.type === 'domaemae') {
+            const prdIndex = state.dmProducts.findIndex(x => x.id === item.productId);
+            if (prdIndex !== -1) state.dmProducts[prdIndex].stock += item.qty;
+        } else {
+            const prdIndex = state.products.findIndex(x => x.id === item.productId);
+            if (prdIndex !== -1) state.products[prdIndex].stock += item.qty;
+        }
 
         state.orderHistory.push({
             id: Date.now().toString() + Math.random().toString(36).substr(2, 5),
             productId: item.productId,
-            name: item.name,
+            name: item.option ? `${item.name} (${item.option})` : item.name,
             vendorName: item.vendorName,
             qty: item.qty,
             price: item.price,
@@ -226,12 +233,17 @@ export function receiveAllNormalItems() {
     }
     showConfirm(`문제가 발생한 항목(반품/미도착)을 제외한\n정상 항목 ${normalItems.length}개를 모두 입고하시겠습니까?`, () => {
         normalItems.forEach((item, idx) => {
-            const prdIndex = state.products.findIndex(x => x.id === item.productId);
-            if (prdIndex !== -1) state.products[prdIndex].stock += item.qty;
+            if (item.type === 'domaemae') {
+                const prdIndex = state.dmProducts.findIndex(x => x.id === item.productId);
+                if (prdIndex !== -1) state.dmProducts[prdIndex].stock += item.qty;
+            } else {
+                const prdIndex = state.products.findIndex(x => x.id === item.productId);
+                if (prdIndex !== -1) state.products[prdIndex].stock += item.qty;
+            }
             state.orderHistory.push({
                 id: Date.now().toString() + idx,
                 productId: item.productId,
-                name: item.name,
+                name: item.option ? `${item.name} (${item.option})` : item.name,
                 vendorName: item.vendorName,
                 qty: item.qty,
                 price: item.price,
@@ -288,12 +300,17 @@ export function receiveSelectedInspectItems() {
 
     showConfirm(msg, () => {
         targets.forEach((item, idx) => {
-            const prdIndex = state.products.findIndex(x => x.id === item.productId);
-            if (prdIndex !== -1) state.products[prdIndex].stock += item.qty;
+            if (item.type === 'domaemae') {
+                const prdIndex = state.dmProducts.findIndex(x => x.id === item.productId);
+                if (prdIndex !== -1) state.dmProducts[prdIndex].stock += item.qty;
+            } else {
+                const prdIndex = state.products.findIndex(x => x.id === item.productId);
+                if (prdIndex !== -1) state.products[prdIndex].stock += item.qty;
+            }
             state.orderHistory.push({
                 id: Date.now().toString() + idx,
                 productId: item.productId,
-                name: item.name,
+                name: item.option ? `${item.name} (${item.option})` : item.name,
                 vendorName: item.vendorName,
                 qty: item.qty,
                 price: item.price,
@@ -353,11 +370,11 @@ export function printAllInspectItems() {
 }
 
 function _inspectCopyLines(items) {
-    const lines = ['상품명\t수량\t단가\t금액\t도매처\t발주일'];
+    const lines = ['상품명\t옵션\t수량\t단가\t금액\t도매처\t발주일'];
     items.forEach(item => {
         const orderDate = item.orderDateISO ? item.orderDateISO.split('T')[0] : (item.orderDate || '-');
         const amount    = (item.price * item.qty).toLocaleString();
-        lines.push(`${item.name}\t${item.qty}개\t${item.price.toLocaleString()}원\t${amount}원\t${item.vendorName}\t${orderDate}`);
+        lines.push(`${item.name}\t${item.option || '-'}\t${item.qty}개\t${item.price.toLocaleString()}원\t${amount}원\t${item.vendorName}\t${orderDate}`);
     });
     return lines.join('\n');
 }
