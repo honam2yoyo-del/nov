@@ -245,13 +245,13 @@
                 <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10"/></svg>
                 <span>포장 용품 관리</span>
             </button>
-            <button class="sidebar-btn" data-tab="tab-domaemae" onclick="switchTab('tab-domaemae')">
-                <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2 9m12-9l2 9M9 21a1 1 0 100-2 1 1 0 000 2zm10 0a1 1 0 100-2 1 1 0 000 2z"/></svg>
-                <span>도매매 관리</span>
-            </button>
             <button class="sidebar-btn" data-tab="tab-order" onclick="switchTab('tab-order')">
                 <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2 9m12-9l2 9M9 21a1 1 0 100-2 1 1 0 000 2zm10 0a1 1 0 100-2 1 1 0 000 2z"/></svg>
                 <span>발주 신청 (포장 용품)</span>
+            </button>
+            <button class="sidebar-btn" data-tab="tab-domaemae" onclick="switchTab('tab-domaemae')">
+                <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2 9m12-9l2 9M9 21a1 1 0 100-2 1 1 0 000 2zm10 0a1 1 0 100-2 1 1 0 000 2z"/></svg>
+                <span>도매매 관리</span>
             </button>
             <button class="sidebar-btn" data-tab="tab-dm-order" onclick="switchTab('tab-dm-order')">
                 <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
@@ -527,11 +527,12 @@
                         <div style="font-size:0.85rem; color:#c7d2fe;" id="stat-total-orders">총 누적 발주: 0건</div>
                     </div>
                     <div class="stat-card">
-                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-                            <div class="stat-title" style="margin:0;">🏢 도매처별 지출액</div>
-                            <input type="text" id="stat-vendor-search" placeholder="도매처 검색..." style="padding:4px 8px; font-size:0.8rem; width:130px;" oninput="window.renderStats()">
-                        </div>
-                        <ul class="stat-list" id="stat-vendor-list"></ul>
+                        <div class="stat-title" style="margin-bottom:12px;">📦 포장 용품 도매처별 지출액</div>
+                        <ul class="stat-list" id="stat-packaging-vendor-list"></ul>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-title" style="margin-bottom:12px;">🛒 도매매 도매처별 지출액</div>
+                        <ul class="stat-list" id="stat-domaemae-vendor-list"></ul>
                     </div>
                     <div class="stat-card" style="grid-column:1/-1; padding-bottom:0;">
                         <!-- 헤더 행: 제목, 검색, 필터, 전체 버튼 -->

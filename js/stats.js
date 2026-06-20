@@ -24,14 +24,14 @@ function _entryAmount(entry) {
 }
 
 export function renderStats() {
-    const vendorQuery  = document.getElementById('stat-vendor-search')?.value.toLowerCase()  || '';
     const productQuery = document.getElementById('stat-product-search')?.value.toLowerCase() || '';
 
-    const totalAmountEl   = document.getElementById('stat-total-amount');
-    const totalShippingEl = document.getElementById('stat-total-shipping');
-    const totalOrdersEl   = document.getElementById('stat-total-orders');
-    const vendorListEl    = document.getElementById('stat-vendor-list');
-    const productListEl   = document.getElementById('stat-product-list');
+    const totalAmountEl      = document.getElementById('stat-total-amount');
+    const totalShippingEl    = document.getElementById('stat-total-shipping');
+    const totalOrdersEl      = document.getElementById('stat-total-orders');
+    const packagingListEl    = document.getElementById('stat-packaging-vendor-list');
+    const domaemaeListEl     = document.getElementById('stat-domaemae-vendor-list');
+    const productListEl      = document.getElementById('stat-product-list');
     if (!totalAmountEl) return;
 
     const groups = {};
@@ -86,52 +86,32 @@ export function renderStats() {
     totalShippingEl.innerText = `상품 ${globalProductSum.toLocaleString()}원 + 배송비 ${globalShippingSum.toLocaleString()}원`;
     totalOrdersEl.innerText   = `총 누적 입고(발주 완료) 항목: ${state.orderHistory.length}건`;
 
-    vendorListEl.innerHTML = '';
-    const packagingSet  = new Set(state.vendorOrder);
-    const domaemaeSet   = new Set(state.dmVendorOrder);
-    const allVendors    = Object.entries(vendorStats)
-        .filter(([n]) => n.toLowerCase().includes(vendorQuery))
+    const packagingSet     = new Set(state.vendorOrder);
+    const domaemaeSet      = new Set(state.dmVendorOrder);
+    const allVendorEntries = Object.entries(vendorStats)
         .sort((a, b) => (b[1].product + b[1].shipping) - (a[1].product + a[1].shipping));
-    const packagingVendors  = allVendors.filter(([n]) => packagingSet.has(n));
-    const domaemaeVendors   = allVendors.filter(([n]) => domaemaeSet.has(n));
-    const otherVendors      = allVendors.filter(([n]) => !packagingSet.has(n) && !domaemaeSet.has(n));
 
-    if (allVendors.length === 0) {
-        vendorListEl.innerHTML = '<li style="color:var(--text-muted); padding:20px 0;">조회된 도매처 내역이 없습니다.</li>';
-    } else {
-        const vendorRows = (vendors) => vendors.map(([vName, s]) => `
-            <li>
-                <div>
-                    <div style="font-weight:600; color:var(--text-main);">${vName}</div>
-                    <div style="font-size:0.8rem; color:var(--text-muted);">${s.count}번 발주 그룹</div>
-                </div>
-                <div style="text-align:right;">
-                    <div style="font-weight:700; color:var(--primary);">${(s.product + s.shipping).toLocaleString()}원</div>
-                    <div style="font-size:0.75rem; color:var(--text-muted);">상품 ${s.product.toLocaleString()} + 배송 ${s.shipping.toLocaleString()}</div>
-                </div>
-            </li>
-        `).join('');
+    const vendorRow = ([vName, s]) => `
+        <li>
+            <div>
+                <div style="font-weight:600; color:var(--text-main);">${vName}</div>
+                <div style="font-size:0.8rem; color:var(--text-muted);">${s.count}번 발주 그룹</div>
+            </div>
+            <div style="text-align:right;">
+                <div style="font-weight:700; color:var(--primary);">${(s.product + s.shipping).toLocaleString()}원</div>
+                <div style="font-size:0.75rem; color:var(--text-muted);">상품 ${s.product.toLocaleString()} + 배송 ${s.shipping.toLocaleString()}</div>
+            </div>
+        </li>
+    `;
+    const emptyMsg = '<li style="color:var(--text-muted); padding:20px 0; text-align:center; font-size:0.88rem;">내역 없음</li>';
 
-        const groupHeader = (label, vendors, isFirst) => {
-            const total = vendors.reduce((s, [, v]) => s + v.product + v.shipping, 0);
-            return `<li style="display:flex; justify-content:space-between; align-items:center; padding:${isFirst ? '4px' : '12px'} 0 6px; margin-bottom:2px; border-bottom:2px solid var(--border-color);">
-                <span style="font-size:0.75rem; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.05em;">${label}</span>
-                <span style="font-size:0.78rem; font-weight:700; color:var(--text-muted);">${total.toLocaleString()}원</span>
-            </li>`;
-        };
-
-        if (packagingVendors.length > 0) {
-            vendorListEl.innerHTML += groupHeader('📦 포장 용품', packagingVendors, true);
-            vendorListEl.innerHTML += vendorRows(packagingVendors);
-        }
-        if (domaemaeVendors.length > 0) {
-            vendorListEl.innerHTML += groupHeader('🛒 도매매', domaemaeVendors, packagingVendors.length === 0);
-            vendorListEl.innerHTML += vendorRows(domaemaeVendors);
-        }
-        if (otherVendors.length > 0) {
-            vendorListEl.innerHTML += groupHeader('기타', otherVendors, allVendors.length === otherVendors.length);
-            vendorListEl.innerHTML += vendorRows(otherVendors);
-        }
+    if (packagingListEl) {
+        const rows = allVendorEntries.filter(([n]) => packagingSet.has(n));
+        packagingListEl.innerHTML = rows.length ? rows.map(vendorRow).join('') : emptyMsg;
+    }
+    if (domaemaeListEl) {
+        const rows = allVendorEntries.filter(([n]) => domaemaeSet.has(n));
+        domaemaeListEl.innerHTML = rows.length ? rows.map(vendorRow).join('') : emptyMsg;
     }
 
     const filteredHistory = _getFilteredHistory();
