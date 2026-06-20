@@ -5,6 +5,7 @@ import { dmAddVendorRow } from './dm-vendors.js';
 
 export function dmCancelEdit() {
     document.getElementById('dm-prd-name').value = '';
+    document.getElementById('dm-prd-option').value = '';
     document.getElementById('dm-prd-num').value = '';
     document.getElementById('dm-prd-stock').value = '';
     document.getElementById('dm-vendor-container').innerHTML = '';
@@ -29,9 +30,10 @@ export function dmEditProduct(id) {
         }
     }
 
-    document.getElementById('dm-modal-prd-name').value  = p.name;
-    document.getElementById('dm-modal-prd-num').value   = p.itemNum || '';
-    document.getElementById('dm-modal-prd-stock').value = p.stock ? p.stock.toLocaleString() : '0';
+    document.getElementById('dm-modal-prd-name').value   = p.name;
+    document.getElementById('dm-modal-prd-option').value = p.option || '';
+    document.getElementById('dm-modal-prd-num').value    = p.itemNum || '';
+    document.getElementById('dm-modal-prd-stock').value  = p.stock ? p.stock.toLocaleString() : '0';
 
     const container = document.getElementById('dm-modal-vendor-container');
     container.innerHTML = '';
@@ -46,9 +48,10 @@ export function dmCloseProductEditModal() {
 }
 
 export function dmSaveProductModal() {
-    const name  = document.getElementById('dm-modal-prd-name').value.trim();
-    const num   = document.getElementById('dm-modal-prd-num').value.trim();
-    const stock = parseInt(document.getElementById('dm-modal-prd-stock').value.replace(/,/g, '')) || 0;
+    const name   = document.getElementById('dm-modal-prd-name').value.trim();
+    const option = document.getElementById('dm-modal-prd-option').value.trim();
+    const num    = document.getElementById('dm-modal-prd-num').value.trim();
+    const stock  = parseInt(document.getElementById('dm-modal-prd-stock').value.replace(/,/g, '')) || 0;
 
     if (!name) { showToast("상품명을 입력해주세요.", "error"); return; }
 
@@ -69,7 +72,7 @@ export function dmSaveProductModal() {
     if (vendors.length === 0) { showToast("최소 1개의 도매처를 선택해주세요.", "error"); return; }
 
     const idx = state.dmProducts.findIndex(p => p.id === state.dmEditingProductId);
-    if (idx !== -1) state.dmProducts[idx] = { ...state.dmProducts[idx], name, itemNum: num, stock, vendors };
+    if (idx !== -1) state.dmProducts[idx] = { ...state.dmProducts[idx], name, option, itemNum: num, stock, vendors };
 
     saveToFirestore();
     showToast("상품 정보가 수정되었습니다.");
@@ -77,9 +80,10 @@ export function dmSaveProductModal() {
 }
 
 export function dmSaveProduct() {
-    const name  = document.getElementById('dm-prd-name').value.trim();
-    const num   = document.getElementById('dm-prd-num').value.trim();
-    const stock = parseInt(document.getElementById('dm-prd-stock').value.replace(/,/g, '')) || 0;
+    const name   = document.getElementById('dm-prd-name').value.trim();
+    const option = document.getElementById('dm-prd-option').value.trim();
+    const num    = document.getElementById('dm-prd-num').value.trim();
+    const stock  = parseInt(document.getElementById('dm-prd-stock').value.replace(/,/g, '')) || 0;
 
     if (!name) { showToast("상품명을 입력해주세요.", "error"); return; }
 
@@ -98,7 +102,7 @@ export function dmSaveProduct() {
     });
     if (vendors.length === 0) { showToast("최소 1개의 도매처를 선택해주세요.", "error"); return; }
 
-    state.dmProducts.push({ id: Date.now().toString(), name, itemNum: num, stock, vendors, createdAt: Date.now() });
+    state.dmProducts.push({ id: Date.now().toString(), name, option, itemNum: num, stock, vendors, createdAt: Date.now() });
     saveToFirestore();
     showToast("새 상품이 저장되었습니다.");
     dmCancelEdit();
@@ -165,7 +169,7 @@ export function renderDmProducts() {
     if (stockSortIconEl) stockSortIconEl.innerText = state.dmStockSortOrder === 'asc' ? '↑' : state.dmStockSortOrder === 'desc' ? '↓' : '↕';
 
     if (display.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="8" style="padding:40px; text-align:center; color:var(--text-muted);">${state.dmProducts.length > 0 ? '검색 결과가 없습니다.' : '등록된 상품이 없습니다.'}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="9" style="padding:40px; text-align:center; color:var(--text-muted);">${state.dmProducts.length > 0 ? '검색 결과가 없습니다.' : '등록된 상품이 없습니다.'}</td></tr>`;
         if (paginationEl) paginationEl.innerHTML = '';
         return;
     }
@@ -188,6 +192,7 @@ export function renderDmProducts() {
                         <input type="checkbox" class="dm-product-checkbox real-checkbox" value="${p.id}" ${state.dmSelectedIds.has(p.id) ? 'checked' : ''} onclick="window.dmToggleProductCheckbox('${p.id}', this)">
                     </td>
                     <td rowspan="${rowCount}" style="text-align:center; font-weight:600; color:var(--text-main); border-right:1px solid var(--border-color);">${p.name}</td>
+                    <td rowspan="${rowCount}" style="text-align:center; color:var(--text-muted); border-right:1px solid var(--border-color);">${p.option || '-'}</td>
                     <td rowspan="${rowCount}" style="text-align:center; color:var(--text-muted); border-right:1px solid var(--border-color);">${p.itemNum || '-'}</td>
                     <td rowspan="${rowCount}" style="text-align:center; border-right:1px solid var(--border-color); cursor:pointer;" title="클릭하여 재고 수정" onclick="window.dmInlineEditStock('${p.id}', this, ${p.stock})">
                         <span style="font-weight:700; font-size:1.05rem; color:${p.stock <= 5 ? 'var(--danger)' : 'var(--text-main)'}; border-bottom:1px dashed ${p.stock <= 5 ? 'var(--danger)' : 'var(--text-muted)'}; padding-bottom:1px;">${p.stock.toLocaleString()}</span>

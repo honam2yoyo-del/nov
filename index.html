@@ -187,8 +187,9 @@
             </div>
             <div style="overflow-y:auto; flex:1; padding-right:4px;">
                 <div style="display:flex; gap:12px; margin-bottom:16px; flex-wrap:wrap;">
-                    <input type="text" id="dm-modal-prd-name"  placeholder="상품명 (필수)"  style="flex:2; min-width:140px;">
-                    <input type="text" id="dm-modal-prd-num"   placeholder="상품번호"       style="flex:1; min-width:100px;">
+                    <input type="text" id="dm-modal-prd-name"   placeholder="상품명 (필수)"  style="flex:2; min-width:140px;">
+                    <input type="text" id="dm-modal-prd-option" placeholder="옵션"           style="flex:1.5; min-width:110px;">
+                    <input type="text" id="dm-modal-prd-num"   placeholder="상품번호"        style="flex:1; min-width:100px;">
                     <input type="text" id="dm-modal-prd-stock" placeholder="재고 수량"       style="flex:1; min-width:90px;" oninput="window.formatNumberInput(this)">
                 </div>
                 <div style="font-weight:600; font-size:0.9rem; color:var(--text-main); margin-bottom:10px;">도매처 정보</div>
@@ -364,8 +365,9 @@
                 </div>
                 <div class="card form-section">
                     <div class="form-row">
-                        <input type="text" id="dm-prd-name" placeholder="상품명 (필수)" style="flex:2;">
-                        <input type="text" id="dm-prd-num"  placeholder="상품번호" style="flex:1;">
+                        <input type="text" id="dm-prd-name"   placeholder="상품명 (필수)" style="flex:2;">
+                        <input type="text" id="dm-prd-option" placeholder="옵션" style="flex:1.5;">
+                        <input type="text" id="dm-prd-num"   placeholder="상품번호" style="flex:1;">
                         <input type="text" id="dm-prd-stock" placeholder="현재 재고 수량" style="flex:1;" oninput="window.formatNumberInput(this)">
                     </div>
                     <div style="display:flex; justify-content:space-between; align-items:center; margin:20px 0 10px;">
@@ -404,13 +406,14 @@
                         <thead>
                             <tr>
                                 <th style="width:5%;"><input type="checkbox" id="dm-selectAllCheckbox" class="real-checkbox" onclick="window.dmToggleSelectAllProducts(this)"></th>
-                                <th style="width:22%; cursor:pointer; user-select:none;" onclick="window.dmToggleNameSort()" title="이름순 정렬">상품명 <span id="dm-name-sort-icon" style="color:var(--primary); font-size:1.1em;">↕</span></th>
-                                <th style="width:15%;">상품번호</th>
-                                <th style="width:10%; cursor:pointer; user-select:none;" onclick="window.dmToggleStockSort()" title="재고순 정렬">재고 <span id="dm-sort-icon" style="color:var(--primary); font-size:1.1em;">↕</span></th>
-                                <th style="width:15%;">도매처</th>
-                                <th style="width:12%;">단가</th>
-                                <th style="width:13%;">배송비</th>
-                                <th style="width:8%;">관리</th>
+                                <th style="width:18%; cursor:pointer; user-select:none;" onclick="window.dmToggleNameSort()" title="이름순 정렬">상품명 <span id="dm-name-sort-icon" style="color:var(--primary); font-size:1.1em;">↕</span></th>
+                                <th style="width:10%;">옵션</th>
+                                <th style="width:12%;">상품번호</th>
+                                <th style="width:8%; cursor:pointer; user-select:none;" onclick="window.dmToggleStockSort()" title="재고순 정렬">재고 <span id="dm-sort-icon" style="color:var(--primary); font-size:1.1em;">↕</span></th>
+                                <th style="width:14%;">도매처</th>
+                                <th style="width:11%;">단가</th>
+                                <th style="width:12%;">배송비</th>
+                                <th style="width:10%;">관리</th>
                             </tr>
                         </thead>
                         <tbody id="dm-prd-table-body"></tbody>
