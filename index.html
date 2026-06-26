@@ -314,10 +314,17 @@
                 </div>
                 <div class="home-layout">
                     <div class="card home-calendar-col">
-                        <div style="display:flex; justify-content:center; align-items:center; gap:16px; margin-bottom:16px;">
-                            <button class="outline" style="padding:4px 12px; font-size:1rem; line-height:1;" onclick="window.calPrevMonth()">‹</button>
-                            <h3 id="cal-month-label" style="margin:0; cursor:pointer;" onclick="window.openMonthPicker()" title="클릭하여 년/월 선택"></h3>
-                            <button class="outline" style="padding:4px 12px; font-size:1rem; line-height:1;" onclick="window.calNextMonth()">›</button>
+                        <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:16px;">
+                            <div style="position:relative; flex:0 0 150px;">
+                                <input type="text" id="home-search-input" placeholder="🔍 일정 검색" style="width:100%; padding:6px 10px; font-size:0.82rem;" oninput="window.searchSchedule()" onfocus="window.searchSchedule()" onblur="setTimeout(() => { const r = document.getElementById('home-search-results'); if (r) r.style.display = 'none'; }, 150)">
+                                <div id="home-search-results" style="display:none; position:absolute; top:100%; left:0; margin-top:4px; width:260px; background:var(--bg-card); border:1px solid var(--border-color); border-radius:8px; box-shadow:var(--shadow-md); max-height:260px; overflow-y:auto; z-index:50;"></div>
+                            </div>
+                            <div style="display:flex; align-items:center; gap:16px; flex-shrink:0;">
+                                <button class="outline" style="padding:4px 12px; font-size:1rem; line-height:1;" onclick="window.calPrevMonth()">‹</button>
+                                <h3 id="cal-month-label" style="margin:0; cursor:pointer; white-space:nowrap;" onclick="window.openMonthPicker()" title="클릭하여 년/월 선택"></h3>
+                                <button class="outline" style="padding:4px 12px; font-size:1rem; line-height:1;" onclick="window.calNextMonth()">›</button>
+                            </div>
+                            <div style="flex:0 0 150px;"></div>
                         </div>
                         <div id="calendar-grid" class="calendar-grid"></div>
                         <div style="margin-top:10px; font-size:0.78rem; color:var(--text-muted);">날짜를 클릭하면 일정을 추가하거나 확인할 수 있습니다. 상단 월 표시를 클릭하면 년/월을 바로 선택할 수 있습니다.</div>

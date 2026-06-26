@@ -211,6 +211,56 @@ export function renderCalendar() {
     }
 }
 
+export function searchSchedule() {
+    const input = document.getElementById('home-search-input');
+    const resultsEl = document.getElementById('home-search-results');
+    if (!input || !resultsEl) return;
+    const query = input.value.trim().toLowerCase();
+
+    if (!query) {
+        resultsEl.style.display = 'none';
+        resultsEl.innerHTML = '';
+        return;
+    }
+
+    const matches = state.scheduleEvents
+        .filter(e => e.title.toLowerCase().includes(query) || (e.memo || '').toLowerCase().includes(query))
+        .sort((a, b) => a.date.localeCompare(b.date));
+
+    if (matches.length === 0) {
+        resultsEl.innerHTML = '<div style="padding:12px; font-size:0.8rem; color:var(--text-muted); text-align:center;">일치하는 일정이 없습니다.</div>';
+        resultsEl.style.display = 'block';
+        return;
+    }
+
+    resultsEl.innerHTML = matches.map(e => {
+        const [y, m, d] = e.date.split('-');
+        return `
+            <div style="padding:9px 12px; border-bottom:1px solid var(--border-color); cursor:pointer;" onmousedown="window.goToSearchResult('${e.date}')">
+                <div style="font-size:0.78rem; font-weight:700; color:var(--primary);">${y}년 ${parseInt(m)}월 ${parseInt(d)}일</div>
+                <div style="font-size:0.85rem; color:var(--text-main); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${e.important ? '⭐ ' : ''}${e.title}</div>
+            </div>
+        `;
+    }).join('');
+    resultsEl.style.display = 'block';
+}
+
+export function goToSearchResult(dateStr) {
+    const [y, m] = dateStr.split('-').map(Number);
+    _calViewYear = y;
+    _calViewMonth = m - 1;
+    renderCalendar();
+    renderImportantTasks();
+    renderMonthlyTasks();
+
+    const resultsEl = document.getElementById('home-search-results');
+    const input = document.getElementById('home-search-input');
+    if (resultsEl) resultsEl.style.display = 'none';
+    if (input) input.value = '';
+
+    openScheduleModal(dateStr);
+}
+
 export function openMonthPicker() {
     const yearSelect = document.getElementById('month-picker-year');
     yearSelect.innerHTML = '';
@@ -353,6 +403,8 @@ window.toggleMonthlyTaskDone = toggleMonthlyTaskDone;
 window.deleteMonthlyTask = deleteMonthlyTask;
 window.calPrevMonth = calPrevMonth;
 window.calNextMonth = calNextMonth;
+window.searchSchedule = searchSchedule;
+window.goToSearchResult = goToSearchResult;
 window.openMonthPicker = openMonthPicker;
 window.closeMonthPicker = closeMonthPicker;
 window.goToMonthPicker = goToMonthPicker;
