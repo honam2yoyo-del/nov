@@ -30,13 +30,8 @@ export function renderHome() {
 
 function renderTodayTasks() {
     const listEl = document.getElementById('home-today-list');
-    const dateEl = document.getElementById('home-today-date');
     if (!listEl) return;
     const today = _todayStr();
-    if (dateEl) {
-        const d = new Date();
-        dateEl.innerText = `${d.getMonth() + 1}월 ${d.getDate()}일`;
-    }
 
     const items = state.scheduleEvents
         .filter(e => e.date === today)
@@ -99,8 +94,6 @@ function renderMonthlyTasks() {
     const listEl = document.getElementById('home-monthly-task-list');
     if (!listEl) return;
     const monthKey = _viewMonthKey();
-    const monthLabelEl = document.getElementById('home-monthly-task-month');
-    if (monthLabelEl) monthLabelEl.innerText = `${_calViewMonth + 1}월 기준`;
 
     if (state.monthlyTasks.length === 0) {
         listEl.innerHTML = '<li style="color:var(--text-muted); padding:20px 0; justify-content:center;">등록된 정기 일정이 없습니다.</li>';
@@ -121,6 +114,16 @@ function renderMonthlyTasks() {
     }).join('');
 }
 
+export function openMonthlyTaskModal() {
+    document.getElementById('monthly-task-input').value = '';
+    document.getElementById('monthly-task-modal').classList.add('active');
+    setTimeout(() => document.getElementById('monthly-task-input').focus(), 50);
+}
+
+export function closeMonthlyTaskModal() {
+    document.getElementById('monthly-task-modal').classList.remove('active');
+}
+
 export function addMonthlyTask() {
     const input = document.getElementById('monthly-task-input');
     const title = input.value.trim();
@@ -134,7 +137,8 @@ export function addMonthlyTask() {
     saveToFirestore();
     input.value = '';
     renderMonthlyTasks();
-    input.focus();
+    closeMonthlyTaskModal();
+    showToast('정기 일정이 추가되었습니다.');
 }
 
 export function toggleMonthlyTaskDone(id) {
@@ -312,6 +316,22 @@ export function calNextMonth() {
     renderMonthlyTasks();
 }
 
+export function openAddScheduleModal() {
+    document.getElementById('add-schedule-date-input').value = _todayStr();
+    document.getElementById('add-schedule-date-modal').classList.add('active');
+}
+
+export function closeAddScheduleDateModal() {
+    document.getElementById('add-schedule-date-modal').classList.remove('active');
+}
+
+export function confirmAddScheduleDate() {
+    const dateStr = document.getElementById('add-schedule-date-input').value;
+    if (!dateStr) { showToast('날짜를 선택해주세요.', 'error'); return; }
+    closeAddScheduleDateModal();
+    openScheduleModal(dateStr);
+}
+
 export function openScheduleModal(dateStr) {
     _selectedDate = dateStr;
     _editingScheduleId = null;
@@ -438,6 +458,8 @@ export function deleteSchedule(id) {
 }
 
 window.renderHome = renderHome;
+window.openMonthlyTaskModal = openMonthlyTaskModal;
+window.closeMonthlyTaskModal = closeMonthlyTaskModal;
 window.addMonthlyTask = addMonthlyTask;
 window.toggleMonthlyTaskDone = toggleMonthlyTaskDone;
 window.deleteMonthlyTask = deleteMonthlyTask;
@@ -448,6 +470,9 @@ window.goToSearchResult = goToSearchResult;
 window.openMonthPicker = openMonthPicker;
 window.closeMonthPicker = closeMonthPicker;
 window.goToMonthPicker = goToMonthPicker;
+window.openAddScheduleModal = openAddScheduleModal;
+window.closeAddScheduleDateModal = closeAddScheduleDateModal;
+window.confirmAddScheduleDate = confirmAddScheduleDate;
 window.openScheduleModal = openScheduleModal;
 window.closeScheduleModal = closeScheduleModal;
 window.editSchedule = editSchedule;

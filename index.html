@@ -324,17 +324,16 @@
                                 <h3 id="cal-month-label" style="margin:0; cursor:pointer; white-space:nowrap;" onclick="window.openMonthPicker()" title="클릭하여 년/월 선택"></h3>
                                 <button class="outline" style="padding:4px 12px; font-size:1rem; line-height:1;" onclick="window.calNextMonth()">›</button>
                             </div>
-                            <div style="flex:0 0 150px;"></div>
+                            <div style="flex:0 0 150px; display:flex; justify-content:flex-end;">
+                                <button class="outline" style="padding:4px 12px; font-size:1rem; line-height:1;" onclick="window.openAddScheduleModal()" title="날짜를 선택해 일정 추가">+</button>
+                            </div>
                         </div>
                         <div id="calendar-grid" class="calendar-grid"></div>
                         <div style="margin-top:10px; font-size:0.78rem; color:var(--text-muted);">날짜를 클릭하면 일정을 추가하거나 확인할 수 있습니다. 상단 월 표시를 클릭하면 년/월을 바로 선택할 수 있습니다.</div>
                     </div>
                     <div class="home-right-col home-schedule-col">
                         <div class="stat-card">
-                            <div class="stat-title" style="display:flex; justify-content:space-between; align-items:center;">
-                                <span>📌 오늘 일정</span>
-                                <span id="home-today-date" style="font-size:0.78rem; color:var(--text-muted); font-weight:normal;"></span>
-                            </div>
+                            <div class="stat-title">📌 오늘 일정</div>
                             <ul class="stat-list" id="home-today-list"></ul>
                         </div>
                         <div class="stat-card">
@@ -344,14 +343,38 @@
                         <div class="stat-card">
                             <div class="stat-title" style="display:flex; justify-content:space-between; align-items:center;">
                                 <span>🔁 정기 일정</span>
-                                <span id="home-monthly-task-month" style="font-size:0.78rem; color:var(--text-muted); font-weight:normal;"></span>
-                            </div>
-                            <div style="display:flex; gap:8px; margin-bottom:12px;">
-                                <input type="text" id="monthly-task-input" placeholder="정기 일정 입력" style="flex:1;" onkeydown="if(event.key==='Enter') window.addMonthlyTask()">
-                                <button class="primary" style="padding:8px 14px; flex-shrink:0;" onclick="window.addMonthlyTask()">추가</button>
+                                <button class="outline" style="padding:2px 11px; font-size:0.95rem; line-height:1.4;" onclick="window.openMonthlyTaskModal()">+</button>
                             </div>
                             <ul class="stat-list" id="home-monthly-task-list"></ul>
                         </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 정기 일정 추가 모달 -->
+            <div id="monthly-task-modal" class="modal-overlay">
+                <div class="modal-box" style="max-width:380px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+                        <h3 style="margin:0;">정기 일정 추가</h3>
+                        <button class="outline" style="padding:4px 10px; font-size:0.8rem;" onclick="window.closeMonthlyTaskModal()">닫기</button>
+                    </div>
+                    <div style="display:flex; flex-direction:column; gap:10px;">
+                        <input type="text" id="monthly-task-input" placeholder="매달 해야할 일 입력" onkeydown="if(event.key==='Enter') window.addMonthlyTask()">
+                        <button class="primary" onclick="window.addMonthlyTask()">추가하기</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 날짜 선택 후 일정 추가 모달 -->
+            <div id="add-schedule-date-modal" class="modal-overlay">
+                <div class="modal-box" style="max-width:320px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+                        <h3 style="margin:0;">날짜 선택</h3>
+                        <button class="outline" style="padding:4px 10px; font-size:0.8rem;" onclick="window.closeAddScheduleDateModal()">닫기</button>
+                    </div>
+                    <div style="display:flex; flex-direction:column; gap:10px;">
+                        <input type="date" id="add-schedule-date-input">
+                        <button class="primary" onclick="window.confirmAddScheduleDate()">다음</button>
                     </div>
                 </div>
             </div>
