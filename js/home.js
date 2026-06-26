@@ -108,37 +108,66 @@ function renderMonthlyTasks() {
                 <input type="checkbox" ${done ? 'checked' : ''} onclick="window.toggleMonthlyTaskDone('${t.id}')" style="width:17px; height:17px; accent-color:var(--primary); flex-shrink:0;">
                 <span style="${done ? 'text-decoration:line-through; color:var(--text-muted);' : 'color:var(--text-main); font-weight:500;'} overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${t.title}</span>
             </label>
+            <button class="outline" style="padding:3px 9px; font-size:0.75rem; flex-shrink:0;" onclick="window.editMonthlyTask('${t.id}')">수정</button>
             <button class="outline" style="padding:3px 9px; font-size:0.75rem; color:var(--danger); border-color:#fca5a5; flex-shrink:0;" onclick="window.deleteMonthlyTask('${t.id}')">삭제</button>
         </li>
     `;
     }).join('');
 }
 
+let _editingMonthlyTaskId = null;
+
 export function openMonthlyTaskModal() {
+    _editingMonthlyTaskId = null;
+    document.getElementById('monthly-task-modal-title').innerText = '정기 일정 추가';
+    document.getElementById('monthly-task-save-btn').innerText = '추가하기';
     document.getElementById('monthly-task-input').value = '';
+    document.getElementById('monthly-task-modal').classList.add('active');
+    setTimeout(() => document.getElementById('monthly-task-input').focus(), 50);
+}
+
+export function editMonthlyTask(id) {
+    const t = state.monthlyTasks.find(x => x.id === id);
+    if (!t) return;
+    _editingMonthlyTaskId = id;
+    document.getElementById('monthly-task-modal-title').innerText = '정기 일정 수정';
+    document.getElementById('monthly-task-save-btn').innerText = '수정하기';
+    document.getElementById('monthly-task-input').value = t.title;
     document.getElementById('monthly-task-modal').classList.add('active');
     setTimeout(() => document.getElementById('monthly-task-input').focus(), 50);
 }
 
 export function closeMonthlyTaskModal() {
     document.getElementById('monthly-task-modal').classList.remove('active');
+    _editingMonthlyTaskId = null;
 }
 
-export function addMonthlyTask() {
+export function saveMonthlyTask() {
     const input = document.getElementById('monthly-task-input');
     const title = input.value.trim();
     if (!title) { showToast('할 일을 입력해주세요.', 'error'); return; }
-    state.monthlyTasks.push({
-        id: Date.now().toString(),
-        title,
-        completedMonths: [],
-        createdAt: Date.now(),
-    });
-    saveToFirestore();
-    input.value = '';
-    renderMonthlyTasks();
-    closeMonthlyTaskModal();
-    showToast('정기 일정이 추가되었습니다.');
+
+    if (_editingMonthlyTaskId) {
+        const t = state.monthlyTasks.find(x => x.id === _editingMonthlyTaskId);
+        if (t) t.title = title;
+        saveToFirestore();
+        input.value = '';
+        renderMonthlyTasks();
+        closeMonthlyTaskModal();
+        showToast('정기 일정이 수정되었습니다.');
+    } else {
+        state.monthlyTasks.push({
+            id: Date.now().toString(),
+            title,
+            completedMonths: [],
+            createdAt: Date.now(),
+        });
+        saveToFirestore();
+        input.value = '';
+        renderMonthlyTasks();
+        closeMonthlyTaskModal();
+        showToast('정기 일정이 추가되었습니다.');
+    }
 }
 
 export function toggleMonthlyTaskDone(id) {
@@ -467,8 +496,9 @@ export function deleteSchedule(id) {
 
 window.renderHome = renderHome;
 window.openMonthlyTaskModal = openMonthlyTaskModal;
+window.editMonthlyTask = editMonthlyTask;
 window.closeMonthlyTaskModal = closeMonthlyTaskModal;
-window.addMonthlyTask = addMonthlyTask;
+window.saveMonthlyTask = saveMonthlyTask;
 window.toggleMonthlyTaskDone = toggleMonthlyTaskDone;
 window.deleteMonthlyTask = deleteMonthlyTask;
 window.calPrevMonth = calPrevMonth;

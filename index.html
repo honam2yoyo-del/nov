@@ -361,12 +361,12 @@
             <div id="monthly-task-modal" class="modal-overlay">
                 <div class="modal-box" style="max-width:380px;">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-                        <h3 style="margin:0;">정기 일정 추가</h3>
+                        <h3 id="monthly-task-modal-title" style="margin:0;">정기 일정 추가</h3>
                         <button class="outline" style="padding:4px 10px; font-size:0.8rem;" onclick="window.closeMonthlyTaskModal()">닫기</button>
                     </div>
                     <div style="display:flex; flex-direction:column; gap:10px;">
-                        <input type="text" id="monthly-task-input" placeholder="매달 해야할 일 입력" onkeydown="if(event.key==='Enter') window.addMonthlyTask()">
-                        <button class="primary" onclick="window.addMonthlyTask()">추가하기</button>
+                        <input type="text" id="monthly-task-input" placeholder="매달 해야할 일 입력" onkeydown="if(event.key==='Enter') window.saveMonthlyTask()">
+                        <button class="primary" id="monthly-task-save-btn" onclick="window.saveMonthlyTask()">추가하기</button>
                     </div>
                 </div>
             </div>
