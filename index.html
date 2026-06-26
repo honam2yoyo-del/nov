@@ -312,38 +312,40 @@
                 <div style="margin-bottom:18px;">
                     <h2 style="margin:0;">홈</h2>
                 </div>
-                <div class="home-grid">
-                    <div class="stat-card">
-                        <div class="stat-title" style="display:flex; justify-content:space-between; align-items:center;">
-                            <span>📌 오늘 일정</span>
-                            <span id="home-today-date" style="font-size:0.78rem; color:var(--text-muted); font-weight:normal;"></span>
+                <div class="home-layout">
+                    <div class="card home-calendar-col">
+                        <div style="display:flex; justify-content:center; align-items:center; gap:16px; margin-bottom:16px;">
+                            <button class="outline" style="padding:4px 12px; font-size:1rem; line-height:1;" onclick="window.calPrevMonth()">‹</button>
+                            <h3 id="cal-month-label" style="margin:0; cursor:pointer;" onclick="window.openMonthPicker()" title="클릭하여 년/월 선택"></h3>
+                            <button class="outline" style="padding:4px 12px; font-size:1rem; line-height:1;" onclick="window.calNextMonth()">›</button>
                         </div>
-                        <ul class="stat-list" id="home-today-list"></ul>
+                        <div id="calendar-grid" class="calendar-grid"></div>
+                        <div style="margin-top:10px; font-size:0.78rem; color:var(--text-muted);">날짜를 클릭하면 일정을 추가하거나 확인할 수 있습니다. 상단 월 표시를 클릭하면 년/월을 바로 선택할 수 있습니다.</div>
                     </div>
-                    <div class="stat-card">
-                        <div class="stat-title">⭐ 주요 일정</div>
-                        <ul class="stat-list" id="home-important-list"></ul>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-title" style="display:flex; justify-content:space-between; align-items:center;">
-                            <span>🔁 정기 일정</span>
-                            <span id="home-monthly-task-month" style="font-size:0.78rem; color:var(--text-muted); font-weight:normal;"></span>
+                    <div class="home-right-col">
+                        <div class="stat-card">
+                            <div class="stat-title" style="display:flex; justify-content:space-between; align-items:center;">
+                                <span>📌 오늘 일정</span>
+                                <span id="home-today-date" style="font-size:0.78rem; color:var(--text-muted); font-weight:normal;"></span>
+                            </div>
+                            <ul class="stat-list" id="home-today-list"></ul>
                         </div>
-                        <div style="display:flex; gap:8px; margin-bottom:12px;">
-                            <input type="text" id="monthly-task-input" placeholder="정기 일정 입력" style="flex:1;" onkeydown="if(event.key==='Enter') window.addMonthlyTask()">
-                            <button class="primary" style="padding:8px 14px; flex-shrink:0;" onclick="window.addMonthlyTask()">추가</button>
+                        <div class="stat-card">
+                            <div class="stat-title">⭐ 주요 일정</div>
+                            <ul class="stat-list" id="home-important-list"></ul>
                         </div>
-                        <ul class="stat-list" id="home-monthly-task-list"></ul>
+                        <div class="stat-card">
+                            <div class="stat-title" style="display:flex; justify-content:space-between; align-items:center;">
+                                <span>🔁 정기 일정</span>
+                                <span id="home-monthly-task-month" style="font-size:0.78rem; color:var(--text-muted); font-weight:normal;"></span>
+                            </div>
+                            <div style="display:flex; gap:8px; margin-bottom:12px;">
+                                <input type="text" id="monthly-task-input" placeholder="정기 일정 입력" style="flex:1;" onkeydown="if(event.key==='Enter') window.addMonthlyTask()">
+                                <button class="primary" style="padding:8px 14px; flex-shrink:0;" onclick="window.addMonthlyTask()">추가</button>
+                            </div>
+                            <ul class="stat-list" id="home-monthly-task-list"></ul>
+                        </div>
                     </div>
-                </div>
-                <div class="card" style="margin-top:24px;">
-                    <div style="display:flex; justify-content:center; align-items:center; gap:16px; margin-bottom:16px;">
-                        <button class="outline" style="padding:4px 12px; font-size:1rem; line-height:1;" onclick="window.calPrevMonth()">‹</button>
-                        <h3 id="cal-month-label" style="margin:0; cursor:pointer;" onclick="window.openMonthPicker()" title="클릭하여 년/월 선택"></h3>
-                        <button class="outline" style="padding:4px 12px; font-size:1rem; line-height:1;" onclick="window.calNextMonth()">›</button>
-                    </div>
-                    <div id="calendar-grid" class="calendar-grid"></div>
-                    <div style="margin-top:10px; font-size:0.78rem; color:var(--text-muted);">날짜를 클릭하면 일정을 추가하거나 확인할 수 있습니다. 상단 월 표시를 클릭하면 년/월을 바로 선택할 수 있습니다.</div>
                 </div>
             </div>
 
