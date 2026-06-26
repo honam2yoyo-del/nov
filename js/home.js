@@ -5,6 +5,7 @@ import { showToast, showConfirm } from './ui.js';
 let _calViewYear = new Date().getFullYear();
 let _calViewMonth = new Date().getMonth();
 let _selectedDate = null;
+let _editingScheduleId = null;
 
 function _todayStr() {
     const d = new Date();
@@ -52,7 +53,10 @@ function renderTodayTasks() {
                 <input type="checkbox" ${e.done ? 'checked' : ''} onclick="window.toggleScheduleDone('${e.id}')" style="width:17px; height:17px; accent-color:var(--primary); flex-shrink:0;">
                 <span style="${e.done ? 'text-decoration:line-through; color:var(--text-muted);' : 'color:var(--text-main); font-weight:500;'} overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${e.important ? '⭐ ' : ''}${e.title}</span>
             </label>
-            <button class="outline" style="padding:3px 9px; font-size:0.75rem; color:var(--danger); border-color:#fca5a5; flex-shrink:0;" onclick="window.deleteSchedule('${e.id}')">삭제</button>
+            <div style="display:flex; gap:6px; flex-shrink:0;">
+                <button class="outline" style="padding:3px 9px; font-size:0.75rem;" onclick="window.editSchedule('${e.id}')">수정</button>
+                <button class="outline" style="padding:3px 9px; font-size:0.75rem; color:var(--danger); border-color:#fca5a5;" onclick="window.deleteSchedule('${e.id}')">삭제</button>
+            </div>
         </li>
     `).join('');
 }
@@ -82,7 +86,10 @@ function renderImportantTasks() {
                 <span style="font-size:0.78rem; font-weight:700; color:${isOverdue ? 'var(--danger)' : 'var(--primary)'}; flex-shrink:0;">${parseInt(mm)}/${parseInt(dd)}</span>
                 <span style="${e.done ? 'text-decoration:line-through; color:var(--text-muted);' : 'color:var(--text-main); font-weight:500;'} overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${e.title}</span>
             </label>
-            <button class="outline" style="padding:3px 9px; font-size:0.75rem; color:var(--danger); border-color:#fca5a5; flex-shrink:0;" onclick="window.deleteSchedule('${e.id}')">삭제</button>
+            <div style="display:flex; gap:6px; flex-shrink:0;">
+                <button class="outline" style="padding:3px 9px; font-size:0.75rem;" onclick="window.editSchedule('${e.id}')">수정</button>
+                <button class="outline" style="padding:3px 9px; font-size:0.75rem; color:var(--danger); border-color:#fca5a5;" onclick="window.deleteSchedule('${e.id}')">삭제</button>
+            </div>
         </li>
     `;
     }).join('');
@@ -307,10 +314,12 @@ export function calNextMonth() {
 
 export function openScheduleModal(dateStr) {
     _selectedDate = dateStr;
+    _editingScheduleId = null;
     document.getElementById('schedule-modal-date').innerText = _fmtDate(dateStr);
     document.getElementById('sch-title').value = '';
     document.getElementById('sch-memo').value = '';
     document.getElementById('sch-important').checked = false;
+    document.getElementById('sch-save-btn').innerText = '추가하기';
     renderScheduleDayList();
     document.getElementById('schedule-modal').classList.add('active');
     setTimeout(() => document.getElementById('sch-title').focus(), 50);
@@ -319,6 +328,22 @@ export function openScheduleModal(dateStr) {
 export function closeScheduleModal() {
     document.getElementById('schedule-modal').classList.remove('active');
     _selectedDate = null;
+    _editingScheduleId = null;
+}
+
+export function editSchedule(id) {
+    const e = state.scheduleEvents.find(x => x.id === id);
+    if (!e) return;
+    _selectedDate = e.date;
+    _editingScheduleId = id;
+    document.getElementById('schedule-modal-date').innerText = _fmtDate(e.date);
+    document.getElementById('sch-title').value = e.title;
+    document.getElementById('sch-memo').value = e.memo || '';
+    document.getElementById('sch-important').checked = !!e.important;
+    document.getElementById('sch-save-btn').innerText = '수정하기';
+    renderScheduleDayList();
+    document.getElementById('schedule-modal').classList.add('active');
+    setTimeout(() => document.getElementById('sch-title').focus(), 50);
 }
 
 function renderScheduleDayList() {
@@ -340,7 +365,10 @@ function renderScheduleDayList() {
                 <div style="font-weight:600; color:var(--text-main); ${e.done ? 'text-decoration:line-through; color:var(--text-muted);' : ''}">${e.important ? '⭐ ' : ''}${e.title}</div>
                 ${e.memo ? `<div style="font-size:0.8rem; color:var(--text-muted); margin-top:2px; white-space:pre-wrap;">${e.memo}</div>` : ''}
             </div>
-            <button class="outline" style="padding:3px 9px; font-size:0.75rem; color:var(--danger); border-color:#fca5a5; flex-shrink:0;" onclick="window.deleteSchedule('${e.id}')">삭제</button>
+            <div style="display:flex; gap:6px; flex-shrink:0;">
+                <button class="outline" style="padding:3px 9px; font-size:0.75rem;" onclick="window.editSchedule('${e.id}')">수정</button>
+                <button class="outline" style="padding:3px 9px; font-size:0.75rem; color:var(--danger); border-color:#fca5a5;" onclick="window.deleteSchedule('${e.id}')">삭제</button>
+            </div>
         </div>
     `).join('');
 }
@@ -352,17 +380,29 @@ export function saveSchedule() {
     if (!title) { showToast('할 일 제목을 입력해주세요.', 'error'); return; }
     if (!_selectedDate) return;
 
-    state.scheduleEvents.push({
-        id: Date.now().toString(),
-        date: _selectedDate,
-        title,
-        memo,
-        important,
-        done: false,
-        createdAt: Date.now(),
-    });
+    if (_editingScheduleId) {
+        const e = state.scheduleEvents.find(x => x.id === _editingScheduleId);
+        if (e) {
+            e.title = title;
+            e.memo = memo;
+            e.important = important;
+        }
+        showToast('일정이 수정되었습니다.');
+        _editingScheduleId = null;
+        document.getElementById('sch-save-btn').innerText = '추가하기';
+    } else {
+        state.scheduleEvents.push({
+            id: Date.now().toString(),
+            date: _selectedDate,
+            title,
+            memo,
+            important,
+            done: false,
+            createdAt: Date.now(),
+        });
+        showToast('일정이 추가되었습니다.');
+    }
     saveToFirestore();
-    showToast('일정이 추가되었습니다.');
 
     document.getElementById('sch-title').value = '';
     document.getElementById('sch-memo').value = '';
@@ -410,6 +450,7 @@ window.closeMonthPicker = closeMonthPicker;
 window.goToMonthPicker = goToMonthPicker;
 window.openScheduleModal = openScheduleModal;
 window.closeScheduleModal = closeScheduleModal;
+window.editSchedule = editSchedule;
 window.saveSchedule = saveSchedule;
 window.toggleScheduleDone = toggleScheduleDone;
 window.deleteSchedule = deleteSchedule;
