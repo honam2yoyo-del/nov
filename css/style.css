@@ -132,8 +132,8 @@ tbody tr:last-child td { border-bottom: none; }
 .stat-list li:last-child { border-bottom: none; }
 
 /* 홈 - 일정 관리 */
-.home-layout { display: grid; grid-template-columns: minmax(320px, 460px) 1fr; gap: 24px; align-items: start; }
-.home-calendar-col { width: 100%; }
+.home-layout { display: grid; grid-template-columns: 55fr 45fr; gap: 24px; align-items: start; }
+.home-calendar-col { width: 100%; min-width: 0; }
 .home-right-col { display: flex; flex-direction: column; gap: 24px; }
 @media (max-width: 900px) {
     .home-layout { grid-template-columns: 1fr; }
