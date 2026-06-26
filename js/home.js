@@ -470,6 +470,7 @@ export function openScheduleModal(dateStr, markImportant = false) {
     _selectedDate = dateStr;
     _editingScheduleId = null;
     document.getElementById('schedule-modal-date').innerText = _fmtDate(dateStr);
+    document.getElementById('sch-date').value = dateStr;
     document.getElementById('sch-title').value = '';
     document.getElementById('sch-memo').value = '';
     document.getElementById('sch-important').checked = markImportant;
@@ -491,6 +492,7 @@ export function editSchedule(id) {
     _selectedDate = e.date;
     _editingScheduleId = id;
     document.getElementById('schedule-modal-date').innerText = _fmtDate(e.date);
+    document.getElementById('sch-date').value = e.date;
     document.getElementById('sch-title').value = e.title;
     document.getElementById('sch-memo').value = e.memo || '';
     document.getElementById('sch-important').checked = !!e.important;
@@ -557,15 +559,17 @@ function renderScheduleDayList() {
 }
 
 export function saveSchedule() {
+    const dateVal = document.getElementById('sch-date').value;
     const title = document.getElementById('sch-title').value.trim();
     const memo = document.getElementById('sch-memo').value.trim();
     const important = document.getElementById('sch-important').checked;
+    if (!dateVal) { showToast('날짜를 선택해주세요.', 'error'); return; }
     if (!title) { showToast('할 일 제목을 입력해주세요.', 'error'); return; }
-    if (!_selectedDate) return;
 
     if (_editingScheduleId) {
         const e = state.scheduleEvents.find(x => x.id === _editingScheduleId);
         if (e) {
+            e.date = dateVal;
             e.title = title;
             e.memo = memo;
             e.important = important;
@@ -576,7 +580,7 @@ export function saveSchedule() {
     } else {
         state.scheduleEvents.push({
             id: Date.now().toString(),
-            date: _selectedDate,
+            date: dateVal,
             title,
             memo,
             important,
@@ -587,6 +591,8 @@ export function saveSchedule() {
     }
     saveToFirestore();
 
+    _selectedDate = dateVal;
+    document.getElementById('schedule-modal-date').innerText = _fmtDate(dateVal);
     document.getElementById('sch-title').value = '';
     document.getElementById('sch-memo').value = '';
     document.getElementById('sch-important').checked = false;
