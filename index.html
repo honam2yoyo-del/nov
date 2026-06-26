@@ -333,11 +333,17 @@
                     </div>
                     <div class="home-right-col home-schedule-col">
                         <div class="stat-card">
-                            <div class="stat-title">📌 오늘 일정</div>
+                            <div class="stat-title" style="display:flex; justify-content:space-between; align-items:center;">
+                                <span>📌 오늘 일정</span>
+                                <button class="outline" style="padding:2px 11px; font-size:0.95rem; line-height:1.4;" onclick="window.openTodayScheduleModal()">+</button>
+                            </div>
                             <ul class="stat-list" id="home-today-list"></ul>
                         </div>
                         <div class="stat-card">
-                            <div class="stat-title">⭐ 주요 일정</div>
+                            <div class="stat-title" style="display:flex; justify-content:space-between; align-items:center;">
+                                <span>⭐ 주요 일정</span>
+                                <button class="outline" style="padding:2px 11px; font-size:0.95rem; line-height:1.4;" onclick="window.openAddScheduleModal(true)">+</button>
+                            </div>
                             <ul class="stat-list" id="home-important-list"></ul>
                         </div>
                         <div class="stat-card">

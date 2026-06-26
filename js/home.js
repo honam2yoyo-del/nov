@@ -316,7 +316,10 @@ export function calNextMonth() {
     renderMonthlyTasks();
 }
 
-export function openAddScheduleModal() {
+let _pendingMarkImportant = false;
+
+export function openAddScheduleModal(markImportant = false) {
+    _pendingMarkImportant = markImportant;
     document.getElementById('add-schedule-date-input').value = _todayStr();
     document.getElementById('add-schedule-date-modal').classList.add('active');
 }
@@ -329,16 +332,21 @@ export function confirmAddScheduleDate() {
     const dateStr = document.getElementById('add-schedule-date-input').value;
     if (!dateStr) { showToast('날짜를 선택해주세요.', 'error'); return; }
     closeAddScheduleDateModal();
-    openScheduleModal(dateStr);
+    openScheduleModal(dateStr, _pendingMarkImportant);
+    _pendingMarkImportant = false;
 }
 
-export function openScheduleModal(dateStr) {
+export function openTodayScheduleModal() {
+    openScheduleModal(_todayStr());
+}
+
+export function openScheduleModal(dateStr, markImportant = false) {
     _selectedDate = dateStr;
     _editingScheduleId = null;
     document.getElementById('schedule-modal-date').innerText = _fmtDate(dateStr);
     document.getElementById('sch-title').value = '';
     document.getElementById('sch-memo').value = '';
-    document.getElementById('sch-important').checked = false;
+    document.getElementById('sch-important').checked = markImportant;
     document.getElementById('sch-save-btn').innerText = '추가하기';
     renderScheduleDayList();
     document.getElementById('schedule-modal').classList.add('active');
@@ -471,6 +479,7 @@ window.openMonthPicker = openMonthPicker;
 window.closeMonthPicker = closeMonthPicker;
 window.goToMonthPicker = goToMonthPicker;
 window.openAddScheduleModal = openAddScheduleModal;
+window.openTodayScheduleModal = openTodayScheduleModal;
 window.closeAddScheduleDateModal = closeAddScheduleDateModal;
 window.confirmAddScheduleDate = confirmAddScheduleDate;
 window.openScheduleModal = openScheduleModal;
