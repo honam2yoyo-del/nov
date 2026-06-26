@@ -103,11 +103,13 @@ function renderMonthlyTasks() {
         const done = (t.completedMonths || []).includes(monthKey);
         return `
         <li>
-            <label style="display:flex; align-items:center; gap:10px; flex:1; cursor:pointer; min-width:0;">
-                <input type="checkbox" ${done ? 'checked' : ''} onclick="window.toggleMonthlyTaskDone('${t.id}')" style="width:17px; height:17px; accent-color:var(--primary); flex-shrink:0;">
+            <div style="display:flex; align-items:center; gap:10px; flex:1; min-width:0;">
                 <span style="${done ? 'text-decoration:line-through; color:var(--text-muted);' : 'color:var(--text-main); font-weight:500;'} overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${t.title}</span>
-            </label>
-            <button class="outline" style="padding:3px 9px; font-size:0.75rem; color:var(--danger); border-color:#fca5a5; flex-shrink:0;" onclick="window.deleteMonthlyTask('${t.id}')">삭제</button>
+            </div>
+            <div style="display:flex; gap:6px; flex-shrink:0;">
+                <button class="${done ? 'outline' : 'primary'}" style="padding:3px 10px; font-size:0.75rem; ${done ? 'color:var(--text-muted);' : ''}" onclick="window.toggleMonthlyTaskDone('${t.id}')">${done ? '완료됨' : '완료'}</button>
+                <button class="outline" style="padding:3px 9px; font-size:0.75rem; color:var(--danger); border-color:#fca5a5;" onclick="window.deleteMonthlyTask('${t.id}')">삭제</button>
+            </div>
         </li>
     `;
     }).join('');
