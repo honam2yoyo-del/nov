@@ -95,7 +95,7 @@ function renderMonthlyTasks() {
     const monthKey = _currentMonthKey();
 
     if (state.monthlyTasks.length === 0) {
-        listEl.innerHTML = '<li style="color:var(--text-muted); padding:20px 0; justify-content:center;">등록된 매달 할 일이 없습니다.</li>';
+        listEl.innerHTML = '<li style="color:var(--text-muted); padding:20px 0; justify-content:center;">등록된 정기 일정이 없습니다.</li>';
         return;
     }
 
@@ -144,7 +144,7 @@ export function toggleMonthlyTaskDone(id) {
 }
 
 export function deleteMonthlyTask(id) {
-    showConfirm('이 매달 할 일을 삭제하시겠습니까?', () => {
+    showConfirm('이 정기 일정을 삭제하시겠습니까?', () => {
         state.monthlyTasks = state.monthlyTasks.filter(x => x.id !== id);
         saveToFirestore();
         renderMonthlyTasks();

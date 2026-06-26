@@ -281,19 +281,19 @@
                 <div class="home-grid">
                     <div class="stat-card">
                         <div class="stat-title" style="display:flex; justify-content:space-between; align-items:center;">
-                            <span>📌 오늘 할일</span>
+                            <span>📌 오늘 일정</span>
                             <span id="home-today-date" style="font-size:0.78rem; color:var(--text-muted); font-weight:normal;"></span>
                         </div>
                         <ul class="stat-list" id="home-today-list"></ul>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-title">⭐ 이번달 꼭 해야 할 일</div>
+                        <div class="stat-title">⭐ 주요 일정</div>
                         <ul class="stat-list" id="home-important-list"></ul>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-title">🔁 매달 해야할 일</div>
+                        <div class="stat-title">🔁 정기 일정</div>
                         <div style="display:flex; gap:8px; margin-bottom:12px;">
-                            <input type="text" id="monthly-task-input" placeholder="매달 해야할 일 입력" style="flex:1;" onkeydown="if(event.key==='Enter') window.addMonthlyTask()">
+                            <input type="text" id="monthly-task-input" placeholder="정기 일정 입력" style="flex:1;" onkeydown="if(event.key==='Enter') window.addMonthlyTask()">
                             <button class="primary" style="padding:8px 14px; flex-shrink:0;" onclick="window.addMonthlyTask()">추가</button>
                         </div>
                         <ul class="stat-list" id="home-monthly-task-list"></ul>
@@ -323,7 +323,7 @@
                         <textarea id="sch-memo" placeholder="메모 (선택)" style="resize:vertical; min-height:60px;"></textarea>
                         <label style="display:flex; align-items:center; gap:8px; font-size:0.9rem; cursor:pointer;">
                             <input type="checkbox" id="sch-important" style="width:16px; height:16px;">
-                            ⭐ 이번달 꼭 해야 할 일로 표시
+                            ⭐ 주요 일정으로 표시
                         </label>
                         <button class="primary" onclick="window.saveSchedule()">추가하기</button>
                     </div>
