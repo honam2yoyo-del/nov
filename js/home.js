@@ -47,7 +47,7 @@ function renderTodayTasks() {
         <li>
             <label style="display:flex; align-items:center; gap:10px; flex:1; cursor:pointer; min-width:0;">
                 <input type="checkbox" ${e.done ? 'checked' : ''} onclick="window.toggleScheduleDone('${e.id}')" style="width:17px; height:17px; accent-color:var(--primary); flex-shrink:0;">
-                <span style="${e.done ? 'text-decoration:line-through; color:var(--text-muted);' : 'color:var(--text-main); font-weight:500;'} overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${e.important ? '⭐ ' : ''}${e.title}</span>
+                <span onclick="event.preventDefault(); window.openScheduleDetail('${e.id}')" style="${e.done ? 'text-decoration:line-through; color:var(--text-muted);' : 'color:var(--text-main); font-weight:500;'} overflow:hidden; text-overflow:ellipsis; white-space:nowrap; cursor:pointer;">${e.important ? '⭐ ' : ''}${e.title}</span>
             </label>
             <div style="display:flex; gap:6px; flex-shrink:0;">
                 <button class="outline" style="padding:3px 9px; font-size:0.75rem;" onclick="window.editSchedule('${e.id}')">수정</button>
@@ -80,7 +80,7 @@ function renderImportantTasks() {
             <label style="display:flex; align-items:center; gap:10px; flex:1; cursor:pointer; min-width:0;">
                 <input type="checkbox" ${e.done ? 'checked' : ''} onclick="window.toggleScheduleDone('${e.id}')" style="width:17px; height:17px; accent-color:var(--primary); flex-shrink:0;">
                 <span style="font-size:0.78rem; font-weight:700; color:${isOverdue ? 'var(--danger)' : 'var(--primary)'}; flex-shrink:0;">${parseInt(mm)}/${parseInt(dd)}</span>
-                <span style="${e.done ? 'text-decoration:line-through; color:var(--text-muted);' : 'color:var(--text-main); font-weight:500;'} overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${e.title}</span>
+                <span onclick="event.preventDefault(); window.openScheduleDetail('${e.id}')" style="${e.done ? 'text-decoration:line-through; color:var(--text-muted);' : 'color:var(--text-main); font-weight:500;'} overflow:hidden; text-overflow:ellipsis; white-space:nowrap; cursor:pointer;">${e.title}</span>
             </label>
             <div style="display:flex; gap:6px; flex-shrink:0;">
                 <button class="outline" style="padding:3px 9px; font-size:0.75rem;" onclick="window.editSchedule('${e.id}')">수정</button>
@@ -500,6 +500,35 @@ export function editSchedule(id) {
     setTimeout(() => document.getElementById('sch-title').focus(), 50);
 }
 
+let _detailScheduleId = null;
+
+export function openScheduleDetail(id) {
+    const e = state.scheduleEvents.find(x => x.id === id);
+    if (!e) return;
+    _detailScheduleId = id;
+    document.getElementById('schedule-detail-date').innerText = _fmtDate(e.date);
+    document.getElementById('schedule-detail-title').innerText = `${e.important ? '⭐ ' : ''}${e.title}`;
+    document.getElementById('schedule-detail-memo').innerText = e.memo || '메모가 없습니다.';
+    document.getElementById('schedule-detail-modal').classList.add('active');
+}
+
+export function closeScheduleDetail() {
+    document.getElementById('schedule-detail-modal').classList.remove('active');
+    _detailScheduleId = null;
+}
+
+export function editScheduleFromDetail() {
+    const id = _detailScheduleId;
+    closeScheduleDetail();
+    editSchedule(id);
+}
+
+export function deleteScheduleFromDetail() {
+    const id = _detailScheduleId;
+    closeScheduleDetail();
+    deleteSchedule(id);
+}
+
 function renderScheduleDayList() {
     const listEl = document.getElementById('schedule-day-list');
     if (!listEl) return;
@@ -619,5 +648,9 @@ window.openScheduleModal = openScheduleModal;
 window.closeScheduleModal = closeScheduleModal;
 window.editSchedule = editSchedule;
 window.saveSchedule = saveSchedule;
+window.openScheduleDetail = openScheduleDetail;
+window.closeScheduleDetail = closeScheduleDetail;
+window.editScheduleFromDetail = editScheduleFromDetail;
+window.deleteScheduleFromDetail = deleteScheduleFromDetail;
 window.toggleScheduleDone = toggleScheduleDone;
 window.deleteSchedule = deleteSchedule;

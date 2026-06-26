@@ -435,6 +435,22 @@
                 </div>
             </div>
 
+            <!-- 일정 상세 보기 모달 -->
+            <div id="schedule-detail-modal" class="modal-overlay">
+                <div class="modal-box" style="max-width:420px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+                        <h3 id="schedule-detail-date" style="margin:0; color:var(--text-muted); font-size:0.9rem;"></h3>
+                        <button class="outline" style="padding:4px 10px; font-size:0.8rem;" onclick="window.closeScheduleDetail()">닫기</button>
+                    </div>
+                    <div id="schedule-detail-title" style="font-size:1.1rem; font-weight:700; color:var(--text-main); margin-bottom:12px;"></div>
+                    <div id="schedule-detail-memo" style="font-size:0.9rem; color:var(--text-muted); white-space:pre-wrap; overflow-wrap:break-word; min-height:40px; margin-bottom:18px;"></div>
+                    <div style="display:flex; gap:8px; justify-content:flex-end;">
+                        <button class="outline" onclick="window.editScheduleFromDetail()">수정</button>
+                        <button class="outline" style="color:var(--danger); border-color:#fca5a5;" onclick="window.deleteScheduleFromDetail()">삭제</button>
+                    </div>
+                </div>
+            </div>
+
             <!-- 일정 추가/확인 모달 -->
             <div id="schedule-modal" class="modal-overlay">
                 <div class="modal-box" style="max-width:480px;">
