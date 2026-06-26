@@ -25,6 +25,7 @@ export function renderHome() {
     renderTodayTasks();
     renderImportantTasks();
     renderMonthlyTasks();
+    renderMemos();
     renderCalendar();
 }
 
@@ -189,6 +190,87 @@ export function deleteMonthlyTask(id) {
         state.monthlyTasks = state.monthlyTasks.filter(x => x.id !== id);
         saveToFirestore();
         renderMonthlyTasks();
+        showToast('삭제되었습니다.');
+    });
+}
+
+function renderMemos() {
+    const listEl = document.getElementById('home-memo-list');
+    if (!listEl) return;
+
+    if (!state.memos || state.memos.length === 0) {
+        listEl.innerHTML = '<li style="color:var(--text-muted); padding:20px 0; justify-content:center;">등록된 메모가 없습니다.</li>';
+        return;
+    }
+
+    listEl.innerHTML = state.memos.map(m => `
+        <li style="align-items:flex-start;">
+            <span style="flex:1; min-width:0; white-space:pre-wrap; overflow-wrap:break-word; color:var(--text-main);">${m.text}</span>
+            <div style="display:flex; gap:6px; flex-shrink:0; margin-left:8px;">
+                <button class="outline" style="padding:3px 9px; font-size:0.75rem;" onclick="window.editMemo('${m.id}')">수정</button>
+                <button class="outline" style="padding:3px 9px; font-size:0.75rem; color:var(--danger); border-color:#fca5a5;" onclick="window.deleteMemo('${m.id}')">삭제</button>
+            </div>
+        </li>
+    `).join('');
+}
+
+let _editingMemoId = null;
+
+export function openMemoModal() {
+    _editingMemoId = null;
+    document.getElementById('memo-modal-title').innerText = '메모 추가';
+    document.getElementById('memo-save-btn').innerText = '추가하기';
+    document.getElementById('memo-input').value = '';
+    document.getElementById('memo-modal').classList.add('active');
+    setTimeout(() => document.getElementById('memo-input').focus(), 50);
+}
+
+export function editMemo(id) {
+    const m = state.memos.find(x => x.id === id);
+    if (!m) return;
+    _editingMemoId = id;
+    document.getElementById('memo-modal-title').innerText = '메모 수정';
+    document.getElementById('memo-save-btn').innerText = '수정하기';
+    document.getElementById('memo-input').value = m.text;
+    document.getElementById('memo-modal').classList.add('active');
+    setTimeout(() => document.getElementById('memo-input').focus(), 50);
+}
+
+export function closeMemoModal() {
+    document.getElementById('memo-modal').classList.remove('active');
+    _editingMemoId = null;
+}
+
+export function saveMemo() {
+    const input = document.getElementById('memo-input');
+    const text = input.value.trim();
+    if (!text) { showToast('메모 내용을 입력해주세요.', 'error'); return; }
+
+    if (_editingMemoId) {
+        const m = state.memos.find(x => x.id === _editingMemoId);
+        if (m) m.text = text;
+        saveToFirestore();
+        renderMemos();
+        closeMemoModal();
+        showToast('메모가 수정되었습니다.');
+    } else {
+        state.memos.push({
+            id: Date.now().toString(),
+            text,
+            createdAt: Date.now(),
+        });
+        saveToFirestore();
+        renderMemos();
+        closeMemoModal();
+        showToast('메모가 추가되었습니다.');
+    }
+}
+
+export function deleteMemo(id) {
+    showConfirm('이 메모를 삭제하시겠습니까?', () => {
+        state.memos = state.memos.filter(x => x.id !== id);
+        saveToFirestore();
+        renderMemos();
         showToast('삭제되었습니다.');
     });
 }
@@ -501,6 +583,11 @@ window.closeMonthlyTaskModal = closeMonthlyTaskModal;
 window.saveMonthlyTask = saveMonthlyTask;
 window.toggleMonthlyTaskDone = toggleMonthlyTaskDone;
 window.deleteMonthlyTask = deleteMonthlyTask;
+window.openMemoModal = openMemoModal;
+window.editMemo = editMemo;
+window.closeMemoModal = closeMemoModal;
+window.saveMemo = saveMemo;
+window.deleteMemo = deleteMemo;
 window.calPrevMonth = calPrevMonth;
 window.calNextMonth = calNextMonth;
 window.searchSchedule = searchSchedule;

@@ -354,6 +354,29 @@
                             <ul class="stat-list" id="home-monthly-task-list"></ul>
                         </div>
                     </div>
+                    <div class="home-memo-col">
+                        <div class="stat-card">
+                            <div class="stat-title" style="display:flex; justify-content:space-between; align-items:center;">
+                                <span>📝 메모</span>
+                                <button class="outline" style="padding:2px 11px; font-size:0.95rem; line-height:1.4;" onclick="window.openMemoModal()">+</button>
+                            </div>
+                            <ul class="stat-list" id="home-memo-list"></ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 메모 추가 모달 -->
+            <div id="memo-modal" class="modal-overlay">
+                <div class="modal-box" style="max-width:420px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+                        <h3 id="memo-modal-title" style="margin:0;">메모 추가</h3>
+                        <button class="outline" style="padding:4px 10px; font-size:0.8rem;" onclick="window.closeMemoModal()">닫기</button>
+                    </div>
+                    <div style="display:flex; flex-direction:column; gap:10px;">
+                        <textarea id="memo-input" placeholder="메모 내용을 입력하세요" rows="5" style="resize:vertical; font-family:inherit; padding:8px 10px;"></textarea>
+                        <button class="primary" id="memo-save-btn" onclick="window.saveMemo()">추가하기</button>
+                    </div>
                 </div>
             </div>
 

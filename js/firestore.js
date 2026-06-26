@@ -18,6 +18,7 @@ export async function saveToFirestore() {
             dmVendorOrder: state.dmVendorOrder,
             scheduleEvents: state.scheduleEvents,
             monthlyTasks: state.monthlyTasks,
+            memos: state.memos,
         });
     } catch (error) {
         showToast("데이터 저장 중 오류가 발생했습니다.", "error");

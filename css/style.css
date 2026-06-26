@@ -132,15 +132,19 @@ tbody tr:last-child td { border-bottom: none; }
 .stat-list li:last-child { border-bottom: none; }
 
 /* 홈 - 일정 관리 */
-.home-layout { display: grid; grid-template-columns: 45fr 55fr; gap: 24px; align-items: stretch; }
-.home-calendar-col { width: 100%; min-width: 0; order: 2; display: flex; flex-direction: column; }
+.home-layout { display: grid; grid-template-columns: 28fr 22fr 50fr; gap: 24px; align-items: stretch; }
+.home-calendar-col { width: 100%; min-width: 0; order: 3; display: flex; flex-direction: column; }
 .home-right-col { display: flex; flex-direction: column; gap: 24px; order: 1; }
+.home-memo-col { display: flex; flex-direction: column; order: 2; }
 .home-schedule-col .stat-card:last-child { flex: 1; display: flex; flex-direction: column; }
 .home-schedule-col .stat-card:last-child .stat-list { flex: 1; max-height: none; }
-@media (max-width: 900px) {
+.home-memo-col .stat-card { flex: 1; display: flex; flex-direction: column; }
+.home-memo-col .stat-list { flex: 1; max-height: none; }
+@media (max-width: 1100px) {
     .home-layout { grid-template-columns: 1fr; }
-    .home-calendar-col { order: 1; }
-    .home-right-col { order: 2; }
+    .home-right-col { order: 1; }
+    .home-memo-col { order: 2; }
+    .home-calendar-col { order: 3; }
 }
 .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; flex: 1; }
 .calendar-weekday { text-align: center; font-size: 0.8rem; font-weight: 600; color: var(--text-muted); padding: 6px 0; }
