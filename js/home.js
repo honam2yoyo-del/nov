@@ -16,9 +16,15 @@ function _fmtDate(dateStr) {
     return `${y}년 ${parseInt(m)}월 ${parseInt(d)}일`;
 }
 
+function _currentMonthKey() {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+}
+
 export function renderHome() {
     renderTodayTasks();
     renderImportantTasks();
+    renderMonthlyTasks();
     renderCalendar();
 }
 
@@ -81,6 +87,69 @@ function renderImportantTasks() {
         </li>
     `;
     }).join('');
+}
+
+function renderMonthlyTasks() {
+    const listEl = document.getElementById('home-monthly-task-list');
+    if (!listEl) return;
+    const monthKey = _currentMonthKey();
+
+    if (state.monthlyTasks.length === 0) {
+        listEl.innerHTML = '<li style="color:var(--text-muted); padding:20px 0; justify-content:center;">등록된 매달 할 일이 없습니다.</li>';
+        return;
+    }
+
+    listEl.innerHTML = state.monthlyTasks.map(t => {
+        const done = (t.completedMonths || []).includes(monthKey);
+        return `
+        <li>
+            <label style="display:flex; align-items:center; gap:10px; flex:1; cursor:pointer; min-width:0;">
+                <input type="checkbox" ${done ? 'checked' : ''} onclick="window.toggleMonthlyTaskDone('${t.id}')" style="width:17px; height:17px; accent-color:var(--primary); flex-shrink:0;">
+                <span style="${done ? 'text-decoration:line-through; color:var(--text-muted);' : 'color:var(--text-main); font-weight:500;'} overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${t.title}</span>
+            </label>
+            <button class="outline" style="padding:3px 9px; font-size:0.75rem; color:var(--danger); border-color:#fca5a5; flex-shrink:0;" onclick="window.deleteMonthlyTask('${t.id}')">삭제</button>
+        </li>
+    `;
+    }).join('');
+}
+
+export function addMonthlyTask() {
+    const input = document.getElementById('monthly-task-input');
+    const title = input.value.trim();
+    if (!title) { showToast('할 일을 입력해주세요.', 'error'); return; }
+    state.monthlyTasks.push({
+        id: Date.now().toString(),
+        title,
+        completedMonths: [],
+        createdAt: Date.now(),
+    });
+    saveToFirestore();
+    input.value = '';
+    renderMonthlyTasks();
+    input.focus();
+}
+
+export function toggleMonthlyTaskDone(id) {
+    const t = state.monthlyTasks.find(x => x.id === id);
+    if (!t) return;
+    const monthKey = _currentMonthKey();
+    t.completedMonths = t.completedMonths || [];
+    if (t.completedMonths.includes(monthKey)) {
+        t.completedMonths = t.completedMonths.filter(m => m !== monthKey);
+    } else {
+        t.completedMonths.push(monthKey);
+    }
+    saveToFirestore();
+    renderMonthlyTasks();
+}
+
+export function deleteMonthlyTask(id) {
+    showConfirm('이 매달 할 일을 삭제하시겠습니까?', () => {
+        state.monthlyTasks = state.monthlyTasks.filter(x => x.id !== id);
+        saveToFirestore();
+        renderMonthlyTasks();
+        showToast('삭제되었습니다.');
+    });
 }
 
 const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토'];
@@ -248,6 +317,9 @@ export function deleteSchedule(id) {
 }
 
 window.renderHome = renderHome;
+window.addMonthlyTask = addMonthlyTask;
+window.toggleMonthlyTaskDone = toggleMonthlyTaskDone;
+window.deleteMonthlyTask = deleteMonthlyTask;
 window.calPrevMonth = calPrevMonth;
 window.calNextMonth = calNextMonth;
 window.openScheduleModal = openScheduleModal;

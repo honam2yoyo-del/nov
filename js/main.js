@@ -44,6 +44,7 @@ function loadDataFromFirestore() {
             }
 
             state.scheduleEvents = data.scheduleEvents || [];
+            state.monthlyTasks   = data.monthlyTasks   || [];
         } else {
             state.products       = [];
             state.inspectList    = [];
@@ -51,6 +52,7 @@ function loadDataFromFirestore() {
             state.vendorSettings = { ...VENDOR_DEFAULT_SETTINGS };
             state.vendorOrder    = Object.keys(state.vendorSettings);
             state.scheduleEvents = [];
+            state.monthlyTasks   = [];
         }
 
         // createdAt 없는 기존 상품에 오늘 날짜 일괄 적용 (최초 1회)

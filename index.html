@@ -290,6 +290,14 @@
                         <div class="stat-title">⭐ 이번달 꼭 해야 할 일</div>
                         <ul class="stat-list" id="home-important-list"></ul>
                     </div>
+                    <div class="stat-card">
+                        <div class="stat-title">🔁 매달 해야할 일</div>
+                        <div style="display:flex; gap:8px; margin-bottom:12px;">
+                            <input type="text" id="monthly-task-input" placeholder="매달 해야할 일 입력" style="flex:1;" onkeydown="if(event.key==='Enter') window.addMonthlyTask()">
+                            <button class="primary" style="padding:8px 14px; flex-shrink:0;" onclick="window.addMonthlyTask()">추가</button>
+                        </div>
+                        <ul class="stat-list" id="home-monthly-task-list"></ul>
+                    </div>
                 </div>
                 <div class="card" style="margin-top:24px;">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
