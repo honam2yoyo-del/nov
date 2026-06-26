@@ -16,9 +16,8 @@ function _fmtDate(dateStr) {
     return `${y}년 ${parseInt(m)}월 ${parseInt(d)}일`;
 }
 
-function _currentMonthKey() {
-    const d = new Date();
-    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+function _viewMonthKey() {
+    return `${_calViewYear}-${String(_calViewMonth + 1).padStart(2, '0')}`;
 }
 
 export function renderHome() {
@@ -92,7 +91,9 @@ function renderImportantTasks() {
 function renderMonthlyTasks() {
     const listEl = document.getElementById('home-monthly-task-list');
     if (!listEl) return;
-    const monthKey = _currentMonthKey();
+    const monthKey = _viewMonthKey();
+    const monthLabelEl = document.getElementById('home-monthly-task-month');
+    if (monthLabelEl) monthLabelEl.innerText = `${_calViewMonth + 1}월 기준`;
 
     if (state.monthlyTasks.length === 0) {
         listEl.innerHTML = '<li style="color:var(--text-muted); padding:20px 0; justify-content:center;">등록된 정기 일정이 없습니다.</li>';
@@ -134,7 +135,7 @@ export function addMonthlyTask() {
 export function toggleMonthlyTaskDone(id) {
     const t = state.monthlyTasks.find(x => x.id === id);
     if (!t) return;
-    const monthKey = _currentMonthKey();
+    const monthKey = _viewMonthKey();
     t.completedMonths = t.completedMonths || [];
     if (t.completedMonths.includes(monthKey)) {
         t.completedMonths = t.completedMonths.filter(m => m !== monthKey);
@@ -237,6 +238,7 @@ export function goToMonthPicker() {
     closeMonthPicker();
     renderCalendar();
     renderImportantTasks();
+    renderMonthlyTasks();
 }
 
 export function calPrevMonth() {
@@ -244,6 +246,7 @@ export function calPrevMonth() {
     if (_calViewMonth < 0) { _calViewMonth = 11; _calViewYear -= 1; }
     renderCalendar();
     renderImportantTasks();
+    renderMonthlyTasks();
 }
 
 export function calNextMonth() {
@@ -251,6 +254,7 @@ export function calNextMonth() {
     if (_calViewMonth > 11) { _calViewMonth = 0; _calViewYear += 1; }
     renderCalendar();
     renderImportantTasks();
+    renderMonthlyTasks();
 }
 
 export function openScheduleModal(dateStr) {
