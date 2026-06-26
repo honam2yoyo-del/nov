@@ -11,6 +11,7 @@ import { renderOrderProductList } from './orders.js';
 import { renderDmOrderProductList } from './dm-orders.js';
 import { renderInspectList } from './inspect.js';
 import { renderStats } from './stats.js';
+import { renderHome } from './home.js';
 
 let _tabRestored = false;
 
@@ -41,12 +42,15 @@ function loadDataFromFirestore() {
             } else {
                 state.dmVendorOrder = Object.keys(state.dmVendorSettings);
             }
+
+            state.scheduleEvents = data.scheduleEvents || [];
         } else {
             state.products       = [];
             state.inspectList    = [];
             state.orderHistory   = [];
             state.vendorSettings = { ...VENDOR_DEFAULT_SETTINGS };
             state.vendorOrder    = Object.keys(state.vendorSettings);
+            state.scheduleEvents = [];
         }
 
         // createdAt 없는 기존 상품에 오늘 날짜 일괄 적용 (최초 1회)
@@ -65,6 +69,7 @@ function loadDataFromFirestore() {
         renderOrderProductList();
         renderInspectList();
         renderStats();
+        renderHome();
         updateVendorDropdowns();
         dmUpdateVendorDropdowns();
         if (document.getElementById('vendor-list-modal').classList.contains('active')) {
@@ -108,6 +113,7 @@ function switchTab(tabId) {
     document.querySelectorAll('.sidebar-btn').forEach(el => el.classList.remove('active'));
     document.getElementById(tabId).classList.add('active');
     document.querySelector(`.sidebar-btn[data-tab="${tabId}"]`)?.classList.add('active');
+    if (tabId === 'tab-home')     renderHome();
     if (tabId === 'tab-order')    renderOrderProductList();
     if (tabId === 'tab-dm-order') renderDmOrderProductList();
     if (tabId === 'tab-stats')    renderStats();

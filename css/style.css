@@ -131,6 +131,21 @@ tbody tr:last-child td { border-bottom: none; }
 .stat-list li { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border-color); }
 .stat-list li:last-child { border-bottom: none; }
 
+/* 홈 - 일정 관리 */
+.home-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px; margin-bottom: 24px; }
+.calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+.calendar-weekday { text-align: center; font-size: 0.8rem; font-weight: 600; color: var(--text-muted); padding: 6px 0; }
+.calendar-day { min-height: 88px; border: 1px solid var(--border-color); border-radius: 8px; padding: 6px; cursor: pointer; transition: var(--transition); background: var(--bg-card); display: flex; flex-direction: column; gap: 3px; overflow: hidden; }
+.calendar-day:hover { border-color: var(--primary); box-shadow: var(--shadow-sm); }
+.calendar-day.is-today { border-color: var(--primary); border-width: 2px; background: #eff6ff; }
+.calendar-day.is-other-month { opacity: 0.4; }
+.calendar-day-num { font-size: 0.8rem; font-weight: 700; color: var(--text-main); }
+.calendar-day.is-today .calendar-day-num { color: var(--primary); }
+.calendar-event-chip { font-size: 0.68rem; padding: 2px 5px; border-radius: 4px; background: #e0e7ff; color: #4338ca; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.calendar-event-chip.important { background: #fef3c7; color: #92400e; font-weight: 700; }
+.calendar-event-chip.done { text-decoration: line-through; opacity: 0.55; }
+.calendar-event-more { font-size: 0.65rem; color: var(--text-muted); }
+
 /* 토스트 & 모달 */
 .toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
 .toast { background: var(--text-main); color: white; padding: 14px 20px; border-radius: var(--radius-sm); font-size: 0.875rem; font-weight: 500; box-shadow: var(--shadow-lg); display: flex; align-items: center; gap: 10px; animation: slideInRight 0.3s cubic-bezier(0.16,1,0.3,1) forwards; }

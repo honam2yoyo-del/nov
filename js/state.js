@@ -35,4 +35,6 @@ export const state = {
     dmCurrentPage: 1,
     dmSelectedIds: new Set(),
     currentDmOrderProductId: null,
+    // 홈 - 일정 관리
+    scheduleEvents: [],
 };
