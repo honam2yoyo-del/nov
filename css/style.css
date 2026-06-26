@@ -132,15 +132,19 @@ tbody tr:last-child td { border-bottom: none; }
 .stat-list li:last-child { border-bottom: none; }
 
 /* 홈 - 일정 관리 */
-.home-layout { display: grid; grid-template-columns: 55fr 45fr; gap: 24px; align-items: start; }
-.home-calendar-col { width: 100%; min-width: 0; }
-.home-right-col { display: flex; flex-direction: column; gap: 24px; }
+.home-layout { display: grid; grid-template-columns: 45fr 55fr; gap: 24px; align-items: stretch; }
+.home-calendar-col { width: 100%; min-width: 0; order: 2; display: flex; flex-direction: column; }
+.home-right-col { display: flex; flex-direction: column; gap: 24px; order: 1; }
+.home-schedule-col .stat-card:last-child { flex: 1; display: flex; flex-direction: column; }
+.home-schedule-col .stat-card:last-child .stat-list { flex: 1; max-height: none; }
 @media (max-width: 900px) {
     .home-layout { grid-template-columns: 1fr; }
+    .home-calendar-col { order: 1; }
+    .home-right-col { order: 2; }
 }
-.calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+.calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; flex: 1; }
 .calendar-weekday { text-align: center; font-size: 0.8rem; font-weight: 600; color: var(--text-muted); padding: 6px 0; }
-.calendar-day { min-height: 88px; border: 1px solid var(--border-color); border-radius: 8px; padding: 6px; cursor: pointer; transition: var(--transition); background: var(--bg-card); display: flex; flex-direction: column; gap: 3px; overflow: hidden; }
+.calendar-day { min-height: 120px; border: 1px solid var(--border-color); border-radius: 8px; padding: 6px; cursor: pointer; transition: var(--transition); background: var(--bg-card); display: flex; flex-direction: column; gap: 3px; overflow: hidden; }
 .calendar-day:hover { border-color: var(--primary); box-shadow: var(--shadow-sm); }
 .calendar-day.is-today { border-color: var(--primary); border-width: 2px; background: #eff6ff; }
 .calendar-day.is-other-month { opacity: 0.4; }
