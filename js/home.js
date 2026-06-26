@@ -212,6 +212,33 @@ export function renderCalendar() {
     }
 }
 
+export function openMonthPicker() {
+    const yearSelect = document.getElementById('month-picker-year');
+    yearSelect.innerHTML = '';
+    const nowYear = new Date().getFullYear();
+    for (let y = nowYear - 5; y <= nowYear + 5; y++) {
+        const opt = document.createElement('option');
+        opt.value = y;
+        opt.innerText = `${y}년`;
+        if (y === _calViewYear) opt.selected = true;
+        yearSelect.appendChild(opt);
+    }
+    document.getElementById('month-picker-month').value = _calViewMonth;
+    document.getElementById('month-picker-modal').classList.add('active');
+}
+
+export function closeMonthPicker() {
+    document.getElementById('month-picker-modal').classList.remove('active');
+}
+
+export function goToMonthPicker() {
+    _calViewYear = parseInt(document.getElementById('month-picker-year').value);
+    _calViewMonth = parseInt(document.getElementById('month-picker-month').value);
+    closeMonthPicker();
+    renderCalendar();
+    renderImportantTasks();
+}
+
 export function calPrevMonth() {
     _calViewMonth -= 1;
     if (_calViewMonth < 0) { _calViewMonth = 11; _calViewYear -= 1; }
@@ -324,6 +351,9 @@ window.toggleMonthlyTaskDone = toggleMonthlyTaskDone;
 window.deleteMonthlyTask = deleteMonthlyTask;
 window.calPrevMonth = calPrevMonth;
 window.calNextMonth = calNextMonth;
+window.openMonthPicker = openMonthPicker;
+window.closeMonthPicker = closeMonthPicker;
+window.goToMonthPicker = goToMonthPicker;
 window.openScheduleModal = openScheduleModal;
 window.closeScheduleModal = closeScheduleModal;
 window.saveSchedule = saveSchedule;
