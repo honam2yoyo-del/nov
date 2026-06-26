@@ -210,7 +210,7 @@ function renderMemos() {
 
     listEl.innerHTML = sorted.map(m => `
         <li style="align-items:flex-start; ${m.important ? 'background:#fffbeb; border-radius:6px; padding:10px 8px; border-bottom:1px solid #fde68a;' : ''}">
-            <button onclick="window.toggleMemoImportant('${m.id}')" title="주요 메모로 표시" style="border:none; background:none; cursor:pointer; font-size:1.05rem; padding:0 6px 0 0; flex-shrink:0; line-height:1.4; color:${m.important ? '#f59e0b' : '#cbd5e1'};">${m.important ? '★' : '☆'}</button>
+            <button onclick="window.toggleMemoImportant('${m.id}')" title="주요 메모로 표시" style="border:none; background:none; cursor:pointer; font-size:1.3rem; padding:0 6px 0 0; flex-shrink:0; line-height:1.4; color:${m.important ? '#f59e0b' : '#94a3b8'};">${m.important ? '★' : '☆'}</button>
             <span style="flex:1; min-width:0; white-space:pre-wrap; overflow-wrap:break-word; ${m.important ? 'font-weight:600; color:#92400e;' : 'color:var(--text-main);'}">${m.text}</span>
             <div style="display:flex; gap:6px; flex-shrink:0; margin-left:8px;">
                 <button class="outline" style="padding:3px 9px; font-size:0.75rem;" onclick="window.editMemo('${m.id}')">수정</button>
