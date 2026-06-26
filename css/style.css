@@ -132,7 +132,7 @@ tbody tr:last-child td { border-bottom: none; }
 .stat-list li:last-child { border-bottom: none; }
 
 /* 홈 - 일정 관리 */
-.home-layout { display: grid; grid-template-columns: 19fr 31fr 50fr; gap: 24px; align-items: stretch; }
+.home-layout { display: grid; grid-template-columns: 23fr 27fr 50fr; gap: 24px; align-items: stretch; }
 .home-calendar-col { width: 100%; min-width: 0; order: 3; display: flex; flex-direction: column; }
 .home-right-col { display: flex; flex-direction: column; gap: 24px; order: 1; }
 .home-memo-col { display: flex; flex-direction: column; order: 2; }
