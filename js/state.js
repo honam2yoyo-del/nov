@@ -38,5 +38,6 @@ export const state = {
     // 홈 - 일정 관리
     scheduleEvents: [],
     monthlyTasks: [],
+    dailyMissions: [],
     memos: [],
 };

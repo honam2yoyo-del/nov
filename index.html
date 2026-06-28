@@ -347,6 +347,13 @@
                         </div>
                         <div class="stat-card">
                             <div class="stat-title" style="display:flex; justify-content:space-between; align-items:center;">
+                                <span>🎯 일일 미션</span>
+                                <button class="outline" style="padding:2px 11px; font-size:0.95rem; line-height:1.4;" onclick="window.openDailyMissionModal()">+</button>
+                            </div>
+                            <ul class="stat-list" id="home-daily-mission-list"></ul>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-title" style="display:flex; justify-content:space-between; align-items:center;">
                                 <span>🔁 정기 일정</span>
                                 <button class="outline" style="padding:2px 11px; font-size:0.95rem; line-height:1.4;" onclick="window.openMonthlyTaskModal()">+</button>
                             </div>
@@ -375,6 +382,20 @@
                     <div style="display:flex; flex-direction:column; gap:10px;">
                         <textarea id="memo-input" placeholder="메모 내용을 입력하세요" rows="5" style="resize:vertical; font-family:inherit; padding:8px 10px;"></textarea>
                         <button class="primary" id="memo-save-btn" onclick="window.saveMemo()">추가하기</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 일일 미션 추가 모달 -->
+            <div id="daily-mission-modal" class="modal-overlay">
+                <div class="modal-box" style="max-width:380px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+                        <h3 id="daily-mission-modal-title" style="margin:0;">일일 미션 추가</h3>
+                        <button class="outline" style="padding:4px 10px; font-size:0.8rem;" onclick="window.closeDailyMissionModal()">닫기</button>
+                    </div>
+                    <div style="display:flex; flex-direction:column; gap:10px;">
+                        <input type="text" id="daily-mission-input" placeholder="매일 해야할 미션 입력" onkeydown="if(event.key==='Enter') window.saveDailyMission()">
+                        <button class="primary" id="daily-mission-save-btn" onclick="window.saveDailyMission()">추가하기</button>
                     </div>
                 </div>
             </div>

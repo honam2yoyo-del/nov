@@ -45,6 +45,7 @@ function loadDataFromFirestore() {
 
             state.scheduleEvents = data.scheduleEvents || [];
             state.monthlyTasks   = data.monthlyTasks   || [];
+            state.dailyMissions  = data.dailyMissions  || [];
             state.memos          = data.memos          || [];
         } else {
             state.products       = [];
@@ -54,6 +55,7 @@ function loadDataFromFirestore() {
             state.vendorOrder    = Object.keys(state.vendorSettings);
             state.scheduleEvents = [];
             state.monthlyTasks   = [];
+            state.dailyMissions  = [];
             state.memos          = [];
         }
 

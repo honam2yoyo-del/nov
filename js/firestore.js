@@ -18,6 +18,7 @@ export async function saveToFirestore() {
             dmVendorOrder: state.dmVendorOrder,
             scheduleEvents: state.scheduleEvents,
             monthlyTasks: state.monthlyTasks,
+            dailyMissions: state.dailyMissions,
             memos: state.memos,
         });
     } catch (error) {

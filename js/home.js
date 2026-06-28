@@ -24,6 +24,7 @@ function _viewMonthKey() {
 export function renderHome() {
     renderTodayTasks();
     renderImportantTasks();
+    renderDailyMissions();
     renderMonthlyTasks();
     renderMemos();
     renderCalendar();
@@ -89,6 +90,109 @@ function renderImportantTasks() {
         </li>
     `;
     }).join('');
+}
+
+function renderDailyMissions() {
+    const listEl = document.getElementById('home-daily-mission-list');
+    if (!listEl) return;
+    const todayKey = _todayStr();
+
+    if (!state.dailyMissions || state.dailyMissions.length === 0) {
+        listEl.innerHTML = '<li style="color:var(--text-muted); padding:20px 0; justify-content:center;">등록된 일일 미션이 없습니다.</li>';
+        return;
+    }
+
+    listEl.innerHTML = state.dailyMissions.map(t => {
+        const done = (t.completedDates || []).includes(todayKey);
+        return `
+        <li>
+            <label style="display:flex; align-items:center; gap:10px; flex:1; cursor:pointer; min-width:0;">
+                <input type="checkbox" ${done ? 'checked' : ''} onclick="window.toggleDailyMissionDone('${t.id}')" style="width:17px; height:17px; accent-color:var(--primary); flex-shrink:0;">
+                <span style="${done ? 'text-decoration:line-through; color:var(--text-muted);' : 'color:var(--text-main); font-weight:500;'} overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${t.title}</span>
+            </label>
+            <button class="outline" style="padding:3px 9px; font-size:0.75rem; flex-shrink:0;" onclick="window.editDailyMission('${t.id}')">수정</button>
+            <button class="outline" style="padding:3px 9px; font-size:0.75rem; color:var(--danger); border-color:#fca5a5; flex-shrink:0;" onclick="window.deleteDailyMission('${t.id}')">삭제</button>
+        </li>
+    `;
+    }).join('');
+}
+
+let _editingDailyMissionId = null;
+
+export function openDailyMissionModal() {
+    _editingDailyMissionId = null;
+    document.getElementById('daily-mission-modal-title').innerText = '일일 미션 추가';
+    document.getElementById('daily-mission-save-btn').innerText = '추가하기';
+    document.getElementById('daily-mission-input').value = '';
+    document.getElementById('daily-mission-modal').classList.add('active');
+    setTimeout(() => document.getElementById('daily-mission-input').focus(), 50);
+}
+
+export function editDailyMission(id) {
+    const t = state.dailyMissions.find(x => x.id === id);
+    if (!t) return;
+    _editingDailyMissionId = id;
+    document.getElementById('daily-mission-modal-title').innerText = '일일 미션 수정';
+    document.getElementById('daily-mission-save-btn').innerText = '수정하기';
+    document.getElementById('daily-mission-input').value = t.title;
+    document.getElementById('daily-mission-modal').classList.add('active');
+    setTimeout(() => document.getElementById('daily-mission-input').focus(), 50);
+}
+
+export function closeDailyMissionModal() {
+    document.getElementById('daily-mission-modal').classList.remove('active');
+    _editingDailyMissionId = null;
+}
+
+export function saveDailyMission() {
+    const input = document.getElementById('daily-mission-input');
+    const title = input.value.trim();
+    if (!title) { showToast('미션 내용을 입력해주세요.', 'error'); return; }
+
+    if (_editingDailyMissionId) {
+        const t = state.dailyMissions.find(x => x.id === _editingDailyMissionId);
+        if (t) t.title = title;
+        saveToFirestore();
+        input.value = '';
+        renderDailyMissions();
+        closeDailyMissionModal();
+        showToast('일일 미션이 수정되었습니다.');
+    } else {
+        state.dailyMissions.push({
+            id: Date.now().toString(),
+            title,
+            completedDates: [],
+            createdAt: Date.now(),
+        });
+        saveToFirestore();
+        input.value = '';
+        renderDailyMissions();
+        closeDailyMissionModal();
+        showToast('일일 미션이 추가되었습니다.');
+    }
+}
+
+export function toggleDailyMissionDone(id) {
+    const t = state.dailyMissions.find(x => x.id === id);
+    if (!t) return;
+    const todayKey = _todayStr();
+    t.completedDates = t.completedDates || [];
+    if (t.completedDates.includes(todayKey)) {
+        t.completedDates = t.completedDates.filter(d => d !== todayKey);
+    } else {
+        t.completedDates.push(todayKey);
+    }
+    saveToFirestore();
+    renderDailyMissions();
+}
+
+export function deleteDailyMission(id) {
+    showConfirm('이 일일 미션을 삭제하시겠습니까?', () => {
+        state.dailyMissions = state.dailyMissions.filter(x => x.id !== id);
+        saveToFirestore();
+        renderDailyMissions();
+        showToast('삭제되었습니다.');
+    });
 }
 
 function renderMonthlyTasks() {
@@ -627,6 +731,12 @@ export function deleteSchedule(id) {
 }
 
 window.renderHome = renderHome;
+window.openDailyMissionModal = openDailyMissionModal;
+window.editDailyMission = editDailyMission;
+window.closeDailyMissionModal = closeDailyMissionModal;
+window.saveDailyMission = saveDailyMission;
+window.toggleDailyMissionDone = toggleDailyMissionDone;
+window.deleteDailyMission = deleteDailyMission;
 window.openMonthlyTaskModal = openMonthlyTaskModal;
 window.editMonthlyTask = editMonthlyTask;
 window.closeMonthlyTaskModal = closeMonthlyTaskModal;
