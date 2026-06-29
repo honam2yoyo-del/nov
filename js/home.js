@@ -21,6 +21,10 @@ function _viewMonthKey() {
     return `${_calViewYear}-${String(_calViewMonth + 1).padStart(2, '0')}`;
 }
 
+function _monthKeyOf(dateStr) {
+    return dateStr.slice(0, 7);
+}
+
 export function renderHome() {
     renderTodayTasks();
     renderImportantTasks();
@@ -172,18 +176,45 @@ export function saveDailyMission() {
     }
 }
 
-export function toggleDailyMissionDone(id) {
+export function toggleDailyMissionDone(id, dateKey = null) {
     const t = state.dailyMissions.find(x => x.id === id);
     if (!t) return;
-    const todayKey = _todayStr();
+    const key = dateKey || _todayStr();
     t.completedDates = t.completedDates || [];
-    if (t.completedDates.includes(todayKey)) {
-        t.completedDates = t.completedDates.filter(d => d !== todayKey);
+    if (t.completedDates.includes(key)) {
+        t.completedDates = t.completedDates.filter(d => d !== key);
     } else {
-        t.completedDates.push(todayKey);
+        t.completedDates.push(key);
     }
     saveToFirestore();
     renderDailyMissions();
+    renderDayMissionStatus();
+}
+
+export function toggleDailyMissionDoneForDay(id) {
+    if (!_selectedDate) return;
+    toggleDailyMissionDone(id, _selectedDate);
+}
+
+function renderDayMissionStatus() {
+    const listEl = document.getElementById('day-mission-status-list');
+    if (!listEl) return;
+    if (!_selectedDate) { listEl.innerHTML = ''; return; }
+
+    if (!state.dailyMissions || state.dailyMissions.length === 0) {
+        listEl.innerHTML = '<div style="font-size:0.82rem; color:var(--text-muted);">등록된 일일 미션이 없습니다.</div>';
+        return;
+    }
+
+    listEl.innerHTML = state.dailyMissions.map(t => {
+        const done = (t.completedDates || []).includes(_selectedDate);
+        return `
+        <label style="display:flex; align-items:center; gap:8px; cursor:pointer; font-size:0.85rem;">
+            <input type="checkbox" ${done ? 'checked' : ''} onclick="window.toggleDailyMissionDoneForDay('${t.id}')" style="width:15px; height:15px; accent-color:var(--primary); flex-shrink:0;">
+            <span style="${done ? 'text-decoration:line-through; color:var(--text-muted);' : 'color:var(--text-main);'}">${t.title}</span>
+        </label>
+    `;
+    }).join('');
 }
 
 export function deleteDailyMission(id) {
@@ -275,10 +306,10 @@ export function saveMonthlyTask() {
     }
 }
 
-export function toggleMonthlyTaskDone(id) {
+export function toggleMonthlyTaskDone(id, monthKeyArg = null) {
     const t = state.monthlyTasks.find(x => x.id === id);
     if (!t) return;
-    const monthKey = _viewMonthKey();
+    const monthKey = monthKeyArg || _viewMonthKey();
     t.completedMonths = t.completedMonths || [];
     if (t.completedMonths.includes(monthKey)) {
         t.completedMonths = t.completedMonths.filter(m => m !== monthKey);
@@ -287,6 +318,34 @@ export function toggleMonthlyTaskDone(id) {
     }
     saveToFirestore();
     renderMonthlyTasks();
+    renderDayMonthlyStatus();
+}
+
+export function toggleMonthlyTaskDoneForDay(id) {
+    if (!_selectedDate) return;
+    toggleMonthlyTaskDone(id, _monthKeyOf(_selectedDate));
+}
+
+function renderDayMonthlyStatus() {
+    const listEl = document.getElementById('day-monthly-status-list');
+    if (!listEl) return;
+    if (!_selectedDate) { listEl.innerHTML = ''; return; }
+    const monthKey = _monthKeyOf(_selectedDate);
+
+    if (!state.monthlyTasks || state.monthlyTasks.length === 0) {
+        listEl.innerHTML = '<div style="font-size:0.82rem; color:var(--text-muted);">등록된 정기 일정이 없습니다.</div>';
+        return;
+    }
+
+    listEl.innerHTML = state.monthlyTasks.map(t => {
+        const done = (t.completedMonths || []).includes(monthKey);
+        return `
+        <label style="display:flex; align-items:center; gap:8px; cursor:pointer; font-size:0.85rem;">
+            <input type="checkbox" ${done ? 'checked' : ''} onclick="window.toggleMonthlyTaskDoneForDay('${t.id}')" style="width:15px; height:15px; accent-color:var(--primary); flex-shrink:0;">
+            <span style="${done ? 'text-decoration:line-through; color:var(--text-muted);' : 'color:var(--text-main);'}">${t.title}</span>
+        </label>
+    `;
+    }).join('');
 }
 
 export function deleteMonthlyTask(id) {
@@ -579,6 +638,8 @@ export function openScheduleModal(dateStr, markImportant = false) {
     document.getElementById('sch-memo').value = '';
     document.getElementById('sch-important').checked = markImportant;
     document.getElementById('sch-save-btn').innerText = '추가하기';
+    renderDayMissionStatus();
+    renderDayMonthlyStatus();
     renderScheduleDayList();
     document.getElementById('schedule-modal').classList.add('active');
     setTimeout(() => document.getElementById('sch-title').focus(), 50);
@@ -601,6 +662,8 @@ export function editSchedule(id) {
     document.getElementById('sch-memo').value = e.memo || '';
     document.getElementById('sch-important').checked = !!e.important;
     document.getElementById('sch-save-btn').innerText = '수정하기';
+    renderDayMissionStatus();
+    renderDayMonthlyStatus();
     renderScheduleDayList();
     document.getElementById('schedule-modal').classList.add('active');
     setTimeout(() => document.getElementById('sch-title').focus(), 50);
@@ -700,6 +763,8 @@ export function saveSchedule() {
     document.getElementById('sch-title').value = '';
     document.getElementById('sch-memo').value = '';
     document.getElementById('sch-important').checked = false;
+    renderDayMissionStatus();
+    renderDayMonthlyStatus();
     renderScheduleDayList();
     renderCalendar();
     renderTodayTasks();
@@ -736,12 +801,14 @@ window.editDailyMission = editDailyMission;
 window.closeDailyMissionModal = closeDailyMissionModal;
 window.saveDailyMission = saveDailyMission;
 window.toggleDailyMissionDone = toggleDailyMissionDone;
+window.toggleDailyMissionDoneForDay = toggleDailyMissionDoneForDay;
 window.deleteDailyMission = deleteDailyMission;
 window.openMonthlyTaskModal = openMonthlyTaskModal;
 window.editMonthlyTask = editMonthlyTask;
 window.closeMonthlyTaskModal = closeMonthlyTaskModal;
 window.saveMonthlyTask = saveMonthlyTask;
 window.toggleMonthlyTaskDone = toggleMonthlyTaskDone;
+window.toggleMonthlyTaskDoneForDay = toggleMonthlyTaskDoneForDay;
 window.deleteMonthlyTask = deleteMonthlyTask;
 window.openMemoModal = openMemoModal;
 window.editMemo = editMemo;

@@ -479,6 +479,14 @@
                         <h3 id="schedule-modal-date" style="margin:0;"></h3>
                         <button class="outline" style="padding:4px 10px; font-size:0.8rem;" onclick="window.closeScheduleModal()">닫기</button>
                     </div>
+                    <div style="margin-bottom:14px;">
+                        <div style="font-size:0.8rem; font-weight:600; color:var(--text-muted); margin-bottom:6px;">🎯 일일 미션 현황</div>
+                        <div id="day-mission-status-list" style="display:flex; flex-direction:column; gap:6px;"></div>
+                    </div>
+                    <div style="margin-bottom:16px;">
+                        <div style="font-size:0.8rem; font-weight:600; color:var(--text-muted); margin-bottom:6px;">🔁 정기 일정 현황 (해당 월)</div>
+                        <div id="day-monthly-status-list" style="display:flex; flex-direction:column; gap:6px;"></div>
+                    </div>
                     <div id="schedule-day-list" style="display:flex; flex-direction:column; gap:8px; margin-bottom:16px; max-height:240px; overflow-y:auto;"></div>
                     <div style="border-top:1px solid var(--border-color); padding-top:14px; display:flex; flex-direction:column; gap:10px;">
                         <input type="date" id="sch-date">
