@@ -217,3 +217,23 @@ input[type="checkbox"].real-checkbox { width: 18px; height: 18px; accent-color: 
 .idf-btn.idf-active { background: var(--primary); border-color: var(--primary); color: white; }
 .idf-btn em { font-style: normal; font-size: 0.75rem; opacity: 0.85; margin-left: 4px; }
 
+/* iOS PWA 홈 화면 앱 모드 Safe Area */
+@supports (padding: env(safe-area-inset-top)) {
+    #app-header {
+        padding-top: env(safe-area-inset-top);
+        height: calc(var(--header-h) + env(safe-area-inset-top));
+    }
+    .app-body {
+        min-height: calc(100vh - var(--header-h) - env(safe-area-inset-top));
+        padding-bottom: env(safe-area-inset-bottom);
+    }
+    #sidebar {
+        top: calc(var(--header-h) + env(safe-area-inset-top));
+        height: calc(100vh - var(--header-h) - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+        padding-bottom: env(safe-area-inset-bottom);
+    }
+    .toast-container {
+        bottom: calc(24px + env(safe-area-inset-bottom));
+        right: calc(24px + env(safe-area-inset-right));
+    }
+}

@@ -129,3 +129,7 @@ function switchTab(tabId) {
 window.switchTab = switchTab;
 
 initAuth(loadDataFromFirestore, onLogout);
+
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js');
+}
