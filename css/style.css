@@ -417,6 +417,18 @@ input[type="checkbox"].real-checkbox { width: 18px; height: 18px; accent-color: 
         max-height: 90dvh;
         overflow-y: auto;
     }
+
+    /* 날짜 피커 모달: 바텀시트 아닌 중앙 팝업으로 예외 처리 */
+    #pwa-date-picker-modal { align-items: center; padding: 0 20px; }
+    #pwa-date-picker-modal .modal-box {
+        border-radius: var(--radius-lg);
+        max-width: 320px;
+        width: 100%;
+        padding: 24px;
+        padding-bottom: 24px;
+        margin: 0 auto;
+        max-height: none;
+    }
 }
 
 /* ── SECONDARY: html.pwa-mode (구형 iOS 폴백) ── */
@@ -471,4 +483,15 @@ html.pwa-mode .modal-box {
     padding: 24px 20px;
     padding-bottom: calc(20px + env(safe-area-inset-bottom));
     margin: 0; max-height: 90dvh; overflow-y: auto;
+}
+/* 날짜 피커 모달: 중앙 팝업 예외 */
+html.pwa-mode #pwa-date-picker-modal { align-items: center !important; padding: 0 20px; }
+html.pwa-mode #pwa-date-picker-modal .modal-box {
+    border-radius: var(--radius-lg) !important;
+    max-width: 320px !important;
+    width: 100% !important;
+    padding: 24px !important;
+    padding-bottom: 24px !important;
+    margin: 0 auto !important;
+    max-height: none !important;
 }
