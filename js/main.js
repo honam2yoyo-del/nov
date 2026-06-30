@@ -132,6 +132,10 @@ initAuth(loadDataFromFirestore, onLogout);
 
 if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/sw.js');
+    // 새 서비스 워커가 활성화되면 자동 새로고침 → 항상 최신 파일 서빙
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+        window.location.reload();
+    });
 }
 
 // PWA 모드: 오늘 날짜 헤더에 표시

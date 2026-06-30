@@ -1,4 +1,4 @@
-const CACHE_NAME = 'jago-v1';
+const CACHE_NAME = 'jago-v2';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
