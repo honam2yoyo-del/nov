@@ -496,8 +496,10 @@ export function renderCalendar() {
         const isToday = dateStr === today;
         const dayEvents = state.scheduleEvents.filter(e => e.date === dateStr);
 
+        const isPWA = document.documentElement.classList.contains('pwa-mode');
         const cell = document.createElement('div');
-        cell.className = `calendar-day${isToday ? ' is-today' : ''}${otherMonth ? ' is-other-month' : ''}`;
+        const hasEvents = dayEvents.length > 0;
+        cell.className = `calendar-day${isToday ? ' is-today' : ''}${otherMonth ? ' is-other-month' : ''}${isPWA && hasEvents ? ' has-pwa-events' : ''}`;
         cell.onclick = () => openScheduleModal(dateStr);
 
         const maxShow = 3;
@@ -505,8 +507,9 @@ export function renderCalendar() {
             <div class="calendar-event-chip${e.important ? ' important' : ''}${e.done ? ' done' : ''}">${e.important ? '⭐' : ''}${e.title}</div>
         `).join('');
         const moreText = dayEvents.length > maxShow ? `<div class="calendar-event-more">+${dayEvents.length - maxShow}개 더보기</div>` : '';
+        const dotIndicator = '<div class="pwa-dot-indicator"></div>';
 
-        cell.innerHTML = `<div class="calendar-day-num">${cellDay}</div>${chips}${moreText}`;
+        cell.innerHTML = `<div class="calendar-day-num">${cellDay}</div>${isPWA ? dotIndicator : chips + moreText}`;
         grid.appendChild(cell);
     }
 }

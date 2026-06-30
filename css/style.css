@@ -217,7 +217,7 @@ input[type="checkbox"].real-checkbox { width: 18px; height: 18px; accent-color: 
 .idf-btn.idf-active { background: var(--primary); border-color: var(--primary); color: white; }
 .idf-btn em { font-style: normal; font-size: 0.75rem; opacity: 0.85; margin-left: 4px; }
 
-/* iOS PWA 홈 화면 앱 모드 Safe Area */
+/* iOS 웹 브라우저 Safe Area (사이드바 있는 데스크톱 레이아웃) */
 @supports (padding: env(safe-area-inset-top)) {
     #app-header {
         padding-top: env(safe-area-inset-top);
@@ -236,4 +236,163 @@ input[type="checkbox"].real-checkbox { width: 18px; height: 18px; accent-color: 
         bottom: calc(24px + env(safe-area-inset-bottom));
         right: calc(24px + env(safe-area-inset-right));
     }
+}
+
+/* ================================================
+   PWA 홈 화면 앱 모드 (html.pwa-mode)
+   iPhone 홈 화면에서 실행될 때만 적용
+   ================================================ */
+
+/* 기본: pwa-header 숨김 */
+#pwa-header { display: none; }
+
+/* PWA 전용 헤더 스타일 */
+#pwa-header {
+    background: var(--primary);
+    color: #fff;
+    position: sticky;
+    top: 0;
+    z-index: 200;
+    padding-top: env(safe-area-inset-top);
+}
+#pwa-header-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 18px;
+    height: 54px;
+}
+.pwa-title { font-size: 0.95rem; font-weight: 700; letter-spacing: -0.01em; }
+.pwa-date  { font-size: 0.78rem; opacity: 0.85; font-weight: 500; }
+#pwa-logout-btn {
+    background: rgba(255,255,255,0.18);
+    border: none;
+    color: #fff;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+#pwa-logout-btn:active { background: rgba(255,255,255,0.32); }
+
+/* PWA 모드 진입 시 데스크톱 chrome 제거 */
+html.pwa-mode #app-header { display: none !important; }
+html.pwa-mode #sidebar     { display: none !important; }
+html.pwa-mode #pwa-header  { display: block; }
+
+/* 레이아웃 초기화 */
+html.pwa-mode .app-body {
+    display: block;
+    min-height: calc(100dvh - 54px - env(safe-area-inset-top));
+    padding-bottom: calc(env(safe-area-inset-bottom) + 16px);
+}
+html.pwa-mode .main-content { width: 100%; padding: 0; }
+html.pwa-mode .container    { margin: 0; padding: 0; max-width: 100%; }
+
+/* 홈 탭만 표시, 나머지 탭 숨김 */
+html.pwa-mode #tab-products,
+html.pwa-mode #tab-order,
+html.pwa-mode #tab-dm-order,
+html.pwa-mode #tab-domaemae,
+html.pwa-mode #tab-inspect,
+html.pwa-mode #tab-stats { display: none !important; }
+html.pwa-mode #tab-home   { display: block !important; }
+
+/* 홈 레이아웃: 세로 스크롤 카드 스택 */
+html.pwa-mode #tab-home .home-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+html.pwa-mode #tab-home .home-right-col    { order: 1; gap: 0; display: flex; flex-direction: column; }
+html.pwa-mode #tab-home .home-memo-col     { order: 2; display: flex; flex-direction: column; }
+html.pwa-mode #tab-home .home-calendar-col { order: 3; }
+
+/* 섹션 카드 (stat-card) */
+html.pwa-mode .stat-card {
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+    border-top: none;
+    border-bottom: 8px solid var(--bg-body);
+    box-shadow: none;
+    padding: 20px 18px;
+    margin-bottom: 0;
+}
+html.pwa-mode .stat-card:last-child { border-bottom: none; }
+html.pwa-mode .stat-list { max-height: none; overflow-y: visible; }
+html.pwa-mode .stat-list li {
+    min-height: 52px;
+    padding: 12px 0;
+    gap: 10px;
+}
+html.pwa-mode .stat-title {
+    font-size: 0.9rem;
+    margin-bottom: 6px;
+}
+
+/* 달력 카드 */
+html.pwa-mode .home-calendar-col.card {
+    border-radius: 0;
+    border: none;
+    border-bottom: 8px solid var(--bg-body);
+    box-shadow: none;
+    padding: 16px 12px;
+}
+
+/* 달력: 컴팩트 + 이벤트 점 인디케이터 */
+html.pwa-mode .calendar-grid { gap: 3px; }
+html.pwa-mode .calendar-day {
+    min-height: 44px;
+    padding: 4px 2px;
+    gap: 2px;
+    flex-direction: column;
+    align-items: center;
+}
+html.pwa-mode .calendar-day-num { font-size: 0.72rem; font-weight: 700; }
+html.pwa-mode .calendar-event-chip,
+html.pwa-mode .calendar-event-more { display: none; }
+html.pwa-mode .calendar-day.has-pwa-events .pwa-dot-indicator {
+    display: block;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--primary);
+    margin: 1px auto 0;
+}
+html.pwa-mode .pwa-dot-indicator { display: none; }
+
+/* 달력 헤더: 모바일에서 검색창 간소화 */
+html.pwa-mode .home-calendar-col #home-search-input {
+    font-size: 0.78rem;
+    padding: 5px 8px;
+}
+
+/* 메모 칼럼 */
+html.pwa-mode .home-memo-col .stat-card { flex: none; }
+html.pwa-mode .home-memo-col .stat-list { max-height: none; }
+
+/* 토스트 위치 */
+html.pwa-mode .toast-container {
+    bottom: calc(16px + env(safe-area-inset-bottom));
+    right: 16px;
+    left: 16px;
+}
+html.pwa-mode .toast { border-radius: 12px; font-size: 0.82rem; }
+
+/* 모달 내부 안전 여백 */
+html.pwa-mode .modal-overlay { align-items: flex-end; }
+html.pwa-mode .modal-box {
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    max-width: 100%;
+    width: 100%;
+    padding: 24px 20px;
+    padding-bottom: calc(20px + env(safe-area-inset-bottom));
+    margin: 0;
+    max-height: 90dvh;
+    overflow-y: auto;
 }
