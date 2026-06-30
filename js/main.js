@@ -138,12 +138,3 @@ if ('serviceWorker' in navigator) {
     });
 }
 
-// PWA 모드: 오늘 날짜 헤더에 표시
-if (document.documentElement.classList.contains('pwa-mode')) {
-    const now = new Date();
-    const days = ['일', '월', '화', '수', '목', '금', '토'];
-    const dateEl = document.getElementById('pwa-today-date');
-    if (dateEl) {
-        dateEl.textContent = `${now.getMonth() + 1}월 ${now.getDate()}일 (${days[now.getDay()]})`;
-    }
-}

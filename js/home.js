@@ -6,9 +6,20 @@ let _calViewYear = new Date().getFullYear();
 let _calViewMonth = new Date().getMonth();
 let _selectedDate = null;
 let _editingScheduleId = null;
+let _pwaViewDate = null; // null = 실제 오늘, 문자열 = PWA 날짜 이동 시
 
 function _todayStr() {
     const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+// PWA 날짜 이동 시 그 날짜, 아니면 실제 오늘
+function _pwaDateStr() {
+    return _pwaViewDate || _todayStr();
+}
+
+// Date 객체 → YYYY-MM-DD
+function _isoStr(d) {
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
 
@@ -25,7 +36,58 @@ function _monthKeyOf(dateStr) {
     return dateStr.slice(0, 7);
 }
 
+function _updatePwaDateDisplay() {
+    const el = document.getElementById('pwa-today-date');
+    if (!el) return;
+    const ds = _pwaDateStr();
+    const [y, m, d] = ds.split('-').map(Number);
+    const weekday = ['일', '월', '화', '수', '목', '금', '토'][new Date(y, m - 1, d).getDay()];
+    el.textContent = `${m}월 ${d}일 (${weekday})`;
+}
+
+function _syncCalToViewDate() {
+    const ds = _pwaDateStr();
+    const [y, m] = ds.split('-').map(Number);
+    _calViewYear = y;
+    _calViewMonth = m - 1;
+}
+
+export function pwaPrevDay() {
+    const d = new Date(_pwaDateStr() + 'T00:00:00');
+    d.setDate(d.getDate() - 1);
+    _pwaViewDate = _isoStr(d);
+    _syncCalToViewDate();
+    renderHome();
+}
+
+export function pwaNextDay() {
+    const d = new Date(_pwaDateStr() + 'T00:00:00');
+    d.setDate(d.getDate() + 1);
+    _pwaViewDate = _isoStr(d);
+    _syncCalToViewDate();
+    renderHome();
+}
+
+export function openPwaDatePicker() {
+    document.getElementById('pwa-date-picker-input').value = _pwaDateStr();
+    document.getElementById('pwa-date-picker-modal').classList.add('active');
+}
+
+export function closePwaDatePicker() {
+    document.getElementById('pwa-date-picker-modal').classList.remove('active');
+}
+
+export function confirmPwaDate() {
+    const val = document.getElementById('pwa-date-picker-input').value;
+    if (!val) return;
+    _pwaViewDate = val;
+    _syncCalToViewDate();
+    closePwaDatePicker();
+    renderHome();
+}
+
 export function renderHome() {
+    _updatePwaDateDisplay();
     renderTodayTasks();
     renderImportantTasks();
     renderDailyMissions();
@@ -37,21 +99,33 @@ export function renderHome() {
 function renderTodayTasks() {
     const listEl = document.getElementById('home-today-list');
     if (!listEl) return;
-    const today = _todayStr();
+    const viewDate = _pwaDateStr();
 
+    // 해당 날짜 일정 + 이전 날짜 중 미완료(이월) 항목
     const items = state.scheduleEvents
-        .filter(e => e.date === today)
-        .sort((a, b) => (a.done ? 1 : 0) - (b.done ? 1 : 0));
+        .filter(e => e.date === viewDate || (e.date < viewDate && !e.done))
+        .sort((a, b) => {
+            const doneDiff = (a.done ? 1 : 0) - (b.done ? 1 : 0);
+            if (doneDiff !== 0) return doneDiff;
+            return a.date.localeCompare(b.date);
+        });
 
     if (items.length === 0) {
-        listEl.innerHTML = '<li style="color:var(--text-muted); padding:20px 0; justify-content:center;">오늘 등록된 일정이 없습니다.</li>';
+        listEl.innerHTML = '<li style="color:var(--text-muted); padding:20px 0; justify-content:center;">등록된 일정이 없습니다.</li>';
         return;
     }
 
-    listEl.innerHTML = items.map(e => `
+    listEl.innerHTML = items.map(e => {
+        const isCarryOver = e.date < viewDate;
+        const [, mm, dd] = e.date.split('-');
+        const carryTag = isCarryOver
+            ? `<span style="font-size:0.68rem; background:#fee2e2; color:var(--danger); padding:1px 6px; border-radius:4px; font-weight:700; flex-shrink:0; white-space:nowrap;">${parseInt(mm)}/${parseInt(dd)}</span>`
+            : '';
+        return `
         <li>
-            <label style="display:flex; align-items:center; gap:10px; flex:1; cursor:pointer; min-width:0;">
+            <label style="display:flex; align-items:center; gap:8px; flex:1; cursor:pointer; min-width:0;">
                 <input type="checkbox" ${e.done ? 'checked' : ''} onclick="window.toggleScheduleDone('${e.id}')" style="width:17px; height:17px; accent-color:var(--primary); flex-shrink:0;">
+                ${carryTag}
                 <span onclick="event.preventDefault(); window.openScheduleDetail('${e.id}')" style="${e.done ? 'text-decoration:line-through; color:var(--text-muted);' : 'color:var(--text-main); font-weight:500;'} overflow:hidden; text-overflow:ellipsis; white-space:nowrap; cursor:pointer;">${e.important ? '⭐ ' : ''}${e.title}</span>
             </label>
             <div style="display:flex; gap:6px; flex-shrink:0;">
@@ -59,7 +133,8 @@ function renderTodayTasks() {
                 <button class="outline" style="padding:3px 9px; font-size:0.75rem; color:var(--danger); border-color:#fca5a5;" onclick="window.deleteSchedule('${e.id}')">삭제</button>
             </div>
         </li>
-    `).join('');
+    `;
+    }).join('');
 }
 
 function renderImportantTasks() {
@@ -99,7 +174,7 @@ function renderImportantTasks() {
 function renderDailyMissions() {
     const listEl = document.getElementById('home-daily-mission-list');
     if (!listEl) return;
-    const todayKey = _todayStr();
+    const todayKey = _pwaDateStr();
 
     if (!state.dailyMissions || state.dailyMissions.length === 0) {
         listEl.innerHTML = '<li style="color:var(--text-muted); padding:20px 0; justify-content:center;">등록된 일일 미션이 없습니다.</li>';
@@ -840,3 +915,8 @@ window.editScheduleFromDetail = editScheduleFromDetail;
 window.deleteScheduleFromDetail = deleteScheduleFromDetail;
 window.toggleScheduleDone = toggleScheduleDone;
 window.deleteSchedule = deleteSchedule;
+window.pwaPrevDay = pwaPrevDay;
+window.pwaNextDay = pwaNextDay;
+window.openPwaDatePicker = openPwaDatePicker;
+window.closePwaDatePicker = closePwaDatePicker;
+window.confirmPwaDate = confirmPwaDate;
