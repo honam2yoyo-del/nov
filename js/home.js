@@ -69,8 +69,53 @@ export function pwaNextDay() {
 }
 
 export function openPwaDatePicker() {
-    document.getElementById('pwa-date-picker-input').value = _pwaDateStr();
+    const ds = _pwaDateStr();
+    const [y, m, d] = ds.split('-').map(Number);
+
+    // 년도 옵션 생성 (현재 ±3년)
+    const yearSel = document.getElementById('pwa-date-year');
+    yearSel.innerHTML = '';
+    const nowY = new Date().getFullYear();
+    for (let yr = nowY - 3; yr <= nowY + 3; yr++) {
+        const opt = document.createElement('option');
+        opt.value = yr;
+        opt.textContent = yr + '년';
+        if (yr === y) opt.selected = true;
+        yearSel.appendChild(opt);
+    }
+
+    // 월 선택
+    document.getElementById('pwa-date-month').value = m;
+
+    // 일 옵션 생성
+    _fillDayOptions(y, m, d);
+
+    // 월 바뀌면 일 목록 갱신
+    document.getElementById('pwa-date-month').onchange = () => {
+        const curY = parseInt(document.getElementById('pwa-date-year').value);
+        const curM = parseInt(document.getElementById('pwa-date-month').value);
+        _fillDayOptions(curY, curM, 1);
+    };
+    document.getElementById('pwa-date-year').onchange = () => {
+        const curY = parseInt(document.getElementById('pwa-date-year').value);
+        const curM = parseInt(document.getElementById('pwa-date-month').value);
+        _fillDayOptions(curY, curM, 1);
+    };
+
     document.getElementById('pwa-date-picker-modal').classList.add('active');
+}
+
+function _fillDayOptions(y, m, selectedDay) {
+    const daySel = document.getElementById('pwa-date-day');
+    const maxDay = new Date(y, m, 0).getDate(); // 해당 월의 마지막 날
+    daySel.innerHTML = '';
+    for (let dd = 1; dd <= maxDay; dd++) {
+        const opt = document.createElement('option');
+        opt.value = dd;
+        opt.textContent = dd + '일';
+        if (dd === selectedDay) opt.selected = true;
+        daySel.appendChild(opt);
+    }
 }
 
 export function closePwaDatePicker() {
@@ -78,9 +123,10 @@ export function closePwaDatePicker() {
 }
 
 export function confirmPwaDate() {
-    const val = document.getElementById('pwa-date-picker-input').value;
-    if (!val) return;
-    _pwaViewDate = val;
+    const y = document.getElementById('pwa-date-year').value;
+    const m = String(document.getElementById('pwa-date-month').value).padStart(2, '0');
+    const d = String(document.getElementById('pwa-date-day').value).padStart(2, '0');
+    _pwaViewDate = `${y}-${m}-${d}`;
     _syncCalToViewDate();
     closePwaDatePicker();
     renderHome();

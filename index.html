@@ -267,11 +267,20 @@
         <!-- PWA 날짜 이동 모달 -->
         <div id="pwa-date-picker-modal" class="modal-overlay">
             <div class="modal-box" style="max-width:320px;">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
                     <h3 style="margin:0;">날짜 이동</h3>
                     <button class="outline" style="padding:4px 10px; font-size:0.8rem;" onclick="window.closePwaDatePicker()">닫기</button>
                 </div>
-                <input type="date" id="pwa-date-picker-input" style="width:100%; margin-bottom:14px;">
+                <div style="display:flex; gap:8px; margin-bottom:16px;">
+                    <select id="pwa-date-year" style="flex:3; min-width:0;"></select>
+                    <select id="pwa-date-month" style="flex:2; min-width:0;">
+                        <option value="1">1월</option><option value="2">2월</option><option value="3">3월</option>
+                        <option value="4">4월</option><option value="5">5월</option><option value="6">6월</option>
+                        <option value="7">7월</option><option value="8">8월</option><option value="9">9월</option>
+                        <option value="10">10월</option><option value="11">11월</option><option value="12">12월</option>
+                    </select>
+                    <select id="pwa-date-day" style="flex:2; min-width:0;"></select>
+                </div>
                 <button class="primary" style="width:100%;" onclick="window.confirmPwaDate()">이동</button>
             </div>
         </div>
