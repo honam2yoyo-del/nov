@@ -232,7 +232,7 @@ function renderDailyMissions() {
         return `
         <li>
             <label style="display:flex; align-items:center; gap:10px; flex:1; cursor:pointer; min-width:0;">
-                <input type="checkbox" ${done ? 'checked' : ''} onclick="window.toggleDailyMissionDone('${t.id}')" style="width:17px; height:17px; accent-color:var(--primary); flex-shrink:0;">
+                <input type="checkbox" ${done ? 'checked' : ''} onclick="window.toggleDailyMissionDone('${t.id}', '${todayKey}')" style="width:17px; height:17px; accent-color:var(--primary); flex-shrink:0;">
                 <span style="${done ? 'text-decoration:line-through; color:var(--text-muted);' : 'color:var(--text-main); font-weight:500;'} overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${t.title}</span>
             </label>
             <button class="outline" style="padding:3px 9px; font-size:0.75rem; flex-shrink:0;" onclick="window.editDailyMission('${t.id}')">수정</button>
@@ -318,7 +318,7 @@ export function toggleDailyMissionDoneForDay(id) {
 }
 
 function renderDayMissionStatus() {
-    const listEl = document.getElementById('day-mission-status-list');
+    const listEl = document.getElementById('dv-mission-list');
     if (!listEl) return;
     if (!_selectedDate) { listEl.innerHTML = ''; return; }
 
@@ -330,9 +330,9 @@ function renderDayMissionStatus() {
     listEl.innerHTML = state.dailyMissions.map(t => {
         const done = (t.completedDates || []).includes(_selectedDate);
         return `
-        <label style="display:flex; align-items:center; gap:8px; cursor:pointer; font-size:0.85rem;">
-            <input type="checkbox" ${done ? 'checked' : ''} onclick="window.toggleDailyMissionDoneForDay('${t.id}')" style="width:15px; height:15px; accent-color:var(--primary); flex-shrink:0;">
-            <span style="${done ? 'text-decoration:line-through; color:var(--text-muted);' : 'color:var(--text-main);'}">${t.title}</span>
+        <label style="display:flex; align-items:center; gap:8px; cursor:pointer; font-size:0.85rem; padding:6px 0; border-bottom:1px solid var(--border-color);">
+            <input type="checkbox" ${done ? 'checked' : ''} onclick="window.toggleDailyMissionDoneForDay('${t.id}')" style="width:17px; height:17px; accent-color:var(--primary); flex-shrink:0;">
+            <span style="${done ? 'text-decoration:line-through; color:var(--text-muted);' : 'color:var(--text-main); font-weight:500;'}">${t.title}</span>
         </label>
     `;
     }).join('');
@@ -448,7 +448,7 @@ export function toggleMonthlyTaskDoneForDay(id) {
 }
 
 function renderDayMonthlyStatus() {
-    const listEl = document.getElementById('day-monthly-status-list');
+    const listEl = document.getElementById('dv-monthly-list');
     if (!listEl) return;
     if (!_selectedDate) { listEl.innerHTML = ''; return; }
     const monthKey = _monthKeyOf(_selectedDate);
@@ -461,9 +461,9 @@ function renderDayMonthlyStatus() {
     listEl.innerHTML = state.monthlyTasks.map(t => {
         const done = (t.completedMonths || []).includes(monthKey);
         return `
-        <label style="display:flex; align-items:center; gap:8px; cursor:pointer; font-size:0.85rem;">
-            <input type="checkbox" ${done ? 'checked' : ''} onclick="window.toggleMonthlyTaskDoneForDay('${t.id}')" style="width:15px; height:15px; accent-color:var(--primary); flex-shrink:0;">
-            <span style="${done ? 'text-decoration:line-through; color:var(--text-muted);' : 'color:var(--text-main);'}">${t.title}</span>
+        <label style="display:flex; align-items:center; gap:8px; cursor:pointer; font-size:0.85rem; padding:6px 0; border-bottom:1px solid var(--border-color);">
+            <input type="checkbox" ${done ? 'checked' : ''} onclick="window.toggleMonthlyTaskDoneForDay('${t.id}')" style="width:17px; height:17px; accent-color:var(--primary); flex-shrink:0;">
+            <span style="${done ? 'text-decoration:line-through; color:var(--text-muted);' : 'color:var(--text-main); font-weight:500;'}">${t.title}</span>
         </label>
     `;
     }).join('');
@@ -621,7 +621,7 @@ export function renderCalendar() {
         const cell = document.createElement('div');
         const hasEvents = dayEvents.length > 0;
         cell.className = `calendar-day${isToday ? ' is-today' : ''}${otherMonth ? ' is-other-month' : ''}${isPWA && hasEvents ? ' has-pwa-events' : ''}`;
-        cell.onclick = () => openScheduleModal(dateStr);
+        cell.onclick = () => openDayViewModal(dateStr);
 
         const maxShow = 3;
         const chips = dayEvents.slice(0, maxShow).map(e => `
@@ -682,7 +682,7 @@ export function goToSearchResult(dateStr) {
     if (resultsEl) resultsEl.style.display = 'none';
     if (input) input.value = '';
 
-    openScheduleModal(dateStr);
+    openDayViewModal(dateStr);
 }
 
 export function openMonthPicker() {
@@ -745,51 +745,75 @@ export function confirmAddScheduleDate() {
     const dateStr = document.getElementById('add-schedule-date-input').value;
     if (!dateStr) { showToast('날짜를 선택해주세요.', 'error'); return; }
     closeAddScheduleDateModal();
-    openScheduleModal(dateStr, _pendingMarkImportant);
+    openScheduleFormModal(dateStr, _pendingMarkImportant);
     _pendingMarkImportant = false;
 }
 
 export function openTodayScheduleModal() {
-    openScheduleModal(_todayStr());
+    openScheduleFormModal(_pwaDateStr());
 }
 
-export function openScheduleModal(dateStr, markImportant = false) {
+// ── 閲覧専用モーダル ─────────────────────────
+export function openDayViewModal(dateStr) {
     _selectedDate = dateStr;
+    const [, m, d] = dateStr.split('-').map(Number);
+    const weekday = ['일', '월', '화', '수', '목', '금', '토'][new Date(dateStr + 'T00:00:00').getDay()];
+    document.getElementById('day-view-date').innerText = `${m}월 ${d}일 (${weekday})`;
+    renderDayMissionStatus();
+    renderDayMonthlyStatus();
+    renderScheduleDayList();
+    document.getElementById('day-view-modal').classList.add('active');
+}
+
+export function closeDayViewModal() {
+    document.getElementById('day-view-modal').classList.remove('active');
+    _selectedDate = null;
+}
+
+// 閲覧モーダル内の「+ 추가」ボタン用
+export function openAddFromDayView() {
+    const date = _selectedDate;
+    closeDayViewModal();
+    openScheduleFormModal(date);
+}
+
+// backward compat alias
+export function openScheduleModal(dateStr, markImportant = false) {
+    openDayViewModal(dateStr);
+}
+export function closeScheduleModal() {
+    closeDayViewModal();
+}
+
+// ── 登録/編集専用モーダル ─────────────────────
+export function openScheduleFormModal(dateStr, markImportant = false) {
     _editingScheduleId = null;
-    document.getElementById('schedule-modal-date').innerText = _fmtDate(dateStr);
-    document.getElementById('sch-date').value = dateStr;
+    document.getElementById('schedule-form-title').innerText = '일정 추가';
+    document.getElementById('sch-date').value = dateStr || _pwaDateStr();
     document.getElementById('sch-title').value = '';
     document.getElementById('sch-memo').value = '';
     document.getElementById('sch-important').checked = markImportant;
     document.getElementById('sch-save-btn').innerText = '추가하기';
-    renderDayMissionStatus();
-    renderDayMonthlyStatus();
-    renderScheduleDayList();
-    document.getElementById('schedule-modal').classList.add('active');
+    document.getElementById('schedule-form-modal').classList.add('active');
     setTimeout(() => document.getElementById('sch-title').focus(), 50);
 }
 
-export function closeScheduleModal() {
-    document.getElementById('schedule-modal').classList.remove('active');
-    _selectedDate = null;
+export function closeScheduleFormModal() {
+    document.getElementById('schedule-form-modal').classList.remove('active');
     _editingScheduleId = null;
 }
 
 export function editSchedule(id) {
     const e = state.scheduleEvents.find(x => x.id === id);
     if (!e) return;
-    _selectedDate = e.date;
     _editingScheduleId = id;
-    document.getElementById('schedule-modal-date').innerText = _fmtDate(e.date);
+    document.getElementById('schedule-form-title').innerText = '일정 수정';
     document.getElementById('sch-date').value = e.date;
     document.getElementById('sch-title').value = e.title;
     document.getElementById('sch-memo').value = e.memo || '';
     document.getElementById('sch-important').checked = !!e.important;
     document.getElementById('sch-save-btn').innerText = '수정하기';
-    renderDayMissionStatus();
-    renderDayMonthlyStatus();
-    renderScheduleDayList();
-    document.getElementById('schedule-modal').classList.add('active');
+    document.getElementById('schedule-form-modal').classList.add('active');
     setTimeout(() => document.getElementById('sch-title').focus(), 50);
 }
 
@@ -823,23 +847,23 @@ export function deleteScheduleFromDetail() {
 }
 
 function renderScheduleDayList() {
-    const listEl = document.getElementById('schedule-day-list');
+    const listEl = document.getElementById('dv-schedule-list');
     if (!listEl) return;
     const items = state.scheduleEvents
         .filter(e => e.date === _selectedDate)
         .sort((a, b) => (a.done ? 1 : 0) - (b.done ? 1 : 0));
 
     if (items.length === 0) {
-        listEl.innerHTML = '<div style="color:var(--text-muted); font-size:0.85rem; text-align:center; padding:10px 0;">등록된 일정이 없습니다.</div>';
+        listEl.innerHTML = '<div style="color:var(--text-muted); font-size:0.85rem; text-align:center; padding:16px 0;">등록된 일정이 없습니다.</div>';
         return;
     }
 
     listEl.innerHTML = items.map(e => `
-        <div style="display:flex; align-items:flex-start; gap:10px; padding:8px 10px; border:1px solid var(--border-color); border-radius:8px;">
-            <input type="checkbox" ${e.done ? 'checked' : ''} onclick="window.toggleScheduleDone('${e.id}')" style="width:17px; height:17px; accent-color:var(--primary); margin-top:2px; flex-shrink:0;">
-            <div style="flex:1; min-width:0;">
-                <div style="font-weight:600; color:var(--text-main); ${e.done ? 'text-decoration:line-through; color:var(--text-muted);' : ''}">${e.important ? '⭐ ' : ''}${e.title}</div>
-                ${e.memo ? `<div style="font-size:0.8rem; color:var(--text-muted); margin-top:2px; white-space:pre-wrap;">${e.memo}</div>` : ''}
+        <div style="display:flex; align-items:center; gap:10px; padding:12px 10px; border:1px solid var(--border-color); border-radius:8px;">
+            <input type="checkbox" ${e.done ? 'checked' : ''} onclick="window.toggleScheduleDone('${e.id}')" style="width:18px; height:18px; accent-color:var(--primary); flex-shrink:0;">
+            <div style="flex:1; min-width:0; cursor:pointer;" onclick="window.openScheduleDetail('${e.id}')">
+                <div style="font-weight:600; ${e.done ? 'text-decoration:line-through; color:var(--text-muted);' : 'color:var(--text-main);'} overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${e.important ? '⭐ ' : ''}${e.title}</div>
+                ${e.memo ? `<div style="font-size:0.78rem; color:var(--text-muted); margin-top:2px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${e.memo}</div>` : ''}
             </div>
             <div style="display:flex; gap:6px; flex-shrink:0;">
                 <button class="outline" style="padding:3px 9px; font-size:0.75rem;" onclick="window.editSchedule('${e.id}')">수정</button>
@@ -857,43 +881,36 @@ export function saveSchedule() {
     if (!dateVal) { showToast('날짜를 선택해주세요.', 'error'); return; }
     if (!title) { showToast('할 일 제목을 입력해주세요.', 'error'); return; }
 
-    if (_editingScheduleId) {
+    const isEditing = !!_editingScheduleId;
+    if (isEditing) {
         const e = state.scheduleEvents.find(x => x.id === _editingScheduleId);
-        if (e) {
-            e.date = dateVal;
-            e.title = title;
-            e.memo = memo;
-            e.important = important;
-        }
+        if (e) { e.date = dateVal; e.title = title; e.memo = memo; e.important = important; }
         showToast('일정이 수정되었습니다.');
-        _editingScheduleId = null;
-        document.getElementById('sch-save-btn').innerText = '추가하기';
     } else {
         state.scheduleEvents.push({
             id: Date.now().toString(),
-            date: dateVal,
-            title,
-            memo,
-            important,
-            done: false,
-            createdAt: Date.now(),
+            date: dateVal, title, memo, important,
+            done: false, createdAt: Date.now(),
         });
         showToast('일정이 추가되었습니다.');
     }
     saveToFirestore();
-
-    _selectedDate = dateVal;
-    document.getElementById('schedule-modal-date').innerText = _fmtDate(dateVal);
-    document.getElementById('sch-title').value = '';
-    document.getElementById('sch-memo').value = '';
-    document.getElementById('sch-important').checked = false;
-    renderDayMissionStatus();
-    renderDayMonthlyStatus();
-    renderScheduleDayList();
     renderCalendar();
     renderTodayTasks();
     renderImportantTasks();
-    document.getElementById('sch-title').focus();
+
+    if (isEditing) {
+        // 수정 완료: 폼 닫고 해당 날짜 閲覧モーダルで確認
+        closeScheduleFormModal();
+        openDayViewModal(dateVal);
+    } else {
+        // 추가 후: 폼은 유지(연속 입력), 제목만 지움
+        _editingScheduleId = null;
+        document.getElementById('sch-title').value = '';
+        document.getElementById('sch-memo').value = '';
+        document.getElementById('sch-important').checked = false;
+        document.getElementById('sch-title').focus();
+    }
 }
 
 export function toggleScheduleDone(id) {
@@ -902,7 +919,7 @@ export function toggleScheduleDone(id) {
     e.done = !e.done;
     saveToFirestore();
     renderHome();
-    if (document.getElementById('schedule-modal').classList.contains('active')) {
+    if (document.getElementById('day-view-modal').classList.contains('active')) {
         renderScheduleDayList();
     }
 }
@@ -912,7 +929,7 @@ export function deleteSchedule(id) {
         state.scheduleEvents = state.scheduleEvents.filter(x => x.id !== id);
         saveToFirestore();
         renderHome();
-        if (document.getElementById('schedule-modal').classList.contains('active')) {
+        if (document.getElementById('day-view-modal').classList.contains('active')) {
             renderScheduleDayList();
         }
         showToast('삭제되었습니다.');
@@ -951,6 +968,11 @@ window.openAddScheduleModal = openAddScheduleModal;
 window.openTodayScheduleModal = openTodayScheduleModal;
 window.closeAddScheduleDateModal = closeAddScheduleDateModal;
 window.confirmAddScheduleDate = confirmAddScheduleDate;
+window.openDayViewModal = openDayViewModal;
+window.closeDayViewModal = closeDayViewModal;
+window.openAddFromDayView = openAddFromDayView;
+window.openScheduleFormModal = openScheduleFormModal;
+window.closeScheduleFormModal = closeScheduleFormModal;
 window.openScheduleModal = openScheduleModal;
 window.closeScheduleModal = closeScheduleModal;
 window.editSchedule = editSchedule;

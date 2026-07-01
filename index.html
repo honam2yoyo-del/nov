@@ -529,31 +529,45 @@
                 </div>
             </div>
 
-            <!-- 일정 추가/확인 모달 -->
-            <div id="schedule-modal" class="modal-overlay">
+            <!-- 날짜 閲覧専用 모달 -->
+            <div id="day-view-modal" class="modal-overlay">
                 <div class="modal-box" style="max-width:480px;">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-                        <h3 id="schedule-modal-date" style="margin:0;"></h3>
-                        <button class="outline" style="padding:4px 10px; font-size:0.8rem;" onclick="window.closeScheduleModal()">닫기</button>
-                    </div>
-                    <div style="margin-bottom:14px;">
-                        <div style="font-size:0.8rem; font-weight:600; color:var(--text-muted); margin-bottom:6px;">🎯 일일 미션 현황</div>
-                        <div id="day-mission-status-list" style="display:flex; flex-direction:column; gap:6px;"></div>
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;">
+                        <h3 id="day-view-date" style="margin:0; font-size:1rem;"></h3>
+                        <div style="display:flex; gap:8px;">
+                            <button class="primary" style="padding:5px 14px; font-size:0.85rem;" onclick="window.openAddFromDayView()">+ 추가</button>
+                            <button class="outline" style="padding:4px 10px; font-size:0.8rem;" onclick="window.closeDayViewModal()">닫기</button>
+                        </div>
                     </div>
                     <div style="margin-bottom:16px;">
-                        <div style="font-size:0.8rem; font-weight:600; color:var(--text-muted); margin-bottom:6px;">🔁 정기 일정 현황 (해당 월)</div>
-                        <div id="day-monthly-status-list" style="display:flex; flex-direction:column; gap:6px;"></div>
+                        <div style="font-size:0.78rem; font-weight:700; color:var(--text-muted); margin-bottom:6px; text-transform:uppercase; letter-spacing:0.04em;">🎯 일일 미션</div>
+                        <div id="dv-mission-list" style="display:flex; flex-direction:column;"></div>
                     </div>
-                    <div id="schedule-day-list" style="display:flex; flex-direction:column; gap:8px; margin-bottom:16px; max-height:240px; overflow-y:auto;"></div>
-                    <div style="border-top:1px solid var(--border-color); padding-top:14px; display:flex; flex-direction:column; gap:10px;">
+                    <div style="margin-bottom:16px;">
+                        <div style="font-size:0.78rem; font-weight:700; color:var(--text-muted); margin-bottom:6px; text-transform:uppercase; letter-spacing:0.04em;">🔁 정기 일정 (이번 달)</div>
+                        <div id="dv-monthly-list" style="display:flex; flex-direction:column;"></div>
+                    </div>
+                    <div style="font-size:0.78rem; font-weight:700; color:var(--text-muted); margin-bottom:8px; text-transform:uppercase; letter-spacing:0.04em;">📌 일정</div>
+                    <div id="dv-schedule-list" style="display:flex; flex-direction:column; gap:8px; max-height:300px; overflow-y:auto;"></div>
+                </div>
+            </div>
+
+            <!-- 일정 추가/수정 전용 모달 (리스트 없음) -->
+            <div id="schedule-form-modal" class="modal-overlay">
+                <div class="modal-box" style="max-width:420px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;">
+                        <h3 id="schedule-form-title" style="margin:0;">일정 추가</h3>
+                        <button class="outline" style="padding:4px 10px; font-size:0.8rem;" onclick="window.closeScheduleFormModal()">닫기</button>
+                    </div>
+                    <div style="display:flex; flex-direction:column; gap:12px;">
                         <input type="date" id="sch-date">
                         <input type="text" id="sch-title" placeholder="할 일 / 일정 제목">
-                        <textarea id="sch-memo" placeholder="메모 (선택)" style="resize:vertical; min-height:60px;"></textarea>
+                        <textarea id="sch-memo" placeholder="메모 (선택)" style="resize:vertical; min-height:70px;"></textarea>
                         <label style="display:flex; align-items:center; gap:8px; font-size:0.9rem; cursor:pointer;">
                             <input type="checkbox" id="sch-important" style="width:16px; height:16px;">
                             ⭐ 주요 일정으로 표시
                         </label>
-                        <button class="primary" id="sch-save-btn" onclick="window.saveSchedule()">추가하기</button>
+                        <button class="primary" id="sch-save-btn" style="margin-top:4px;" onclick="window.saveSchedule()">추가하기</button>
                     </div>
                 </div>
             </div>
