@@ -132,9 +132,15 @@ initAuth(loadDataFromFirestore, onLogout);
 
 if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/sw.js');
-    // 새 서비스 워커가 활성화되면 자동 새로고침 → 항상 최신 파일 서빙
+    // SW controllerchange: 새 SW가 컨트롤을 가져가면 즉시 새로고침
     navigator.serviceWorker.addEventListener('controllerchange', () => {
         window.location.reload();
+    });
+    // SW postMessage: activate 단계에서 직접 새로고침 요청
+    navigator.serviceWorker.addEventListener('message', (e) => {
+        if (e.data && e.data.type === 'SW_UPDATED') {
+            window.location.reload();
+        }
     });
 }
 

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'jago-v5';
+const CACHE_NAME = 'jago-2026-07-02-a';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -32,11 +32,16 @@ self.addEventListener('install', (e) => {
 
 self.addEventListener('activate', (e) => {
   e.waitUntil(
-    caches.keys().then((keys) =>
-      Promise.all(keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k)))
-    )
+    caches.keys()
+      .then((keys) => Promise.all(keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k))))
+      .then(() => self.clients.claim())
+      .then(() => {
+        // 모든 열린 클라이언트에 새로고침 메시지 전송
+        return self.clients.matchAll({ type: 'window' }).then((clients) => {
+          clients.forEach((client) => client.postMessage({ type: 'SW_UPDATED' }));
+        });
+      })
   );
-  self.clients.claim();
 });
 
 // Network-first: Firebase/외부 요청은 항상 네트워크 우선, 실패 시 캐시
